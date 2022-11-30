@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class PassengerController {
     @CrossOrigin
-    @PostMapping("/putnik")
+    @PostMapping("/api/passenger")
     public ResponseEntity<Passenger> create(@RequestBody Passenger passenger){
         return new ResponseEntity<>(passenger, HttpStatusCode.valueOf(200));
     }
