@@ -2,21 +2,21 @@ package com.shuttle.passenger;
 
 public class Passenger {
     private int id;
-    private String ime;
+    private String name;
 
     public int getId() {
         return id;
     }
 
-    public String getIme() {
-        return ime;
+    public String getName() {
+        return name;
     }
 
     public void setId(int id) {
         this.id = id;
     }
 
-    public void setIme(String ime) {
-        this.ime = ime;
+    public void setName(String name) {
+        this.name = name;
     }
 }

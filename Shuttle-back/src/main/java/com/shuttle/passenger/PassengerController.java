@@ -1,5 +1,6 @@
 package com.shuttle.passenger;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.StreamingHttpOutputMessage;
@@ -13,6 +14,6 @@ public class PassengerController {
     @CrossOrigin
     @PostMapping("/api/passenger")
     public ResponseEntity<Passenger> create(@RequestBody Passenger passenger){
-        return new ResponseEntity<>(passenger, HttpStatusCode.valueOf(200));
+        return new ResponseEntity<>(passenger, HttpStatus.OK);
     }
 }
