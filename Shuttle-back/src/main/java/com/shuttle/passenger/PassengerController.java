@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class PassengerController {
     @CrossOrigin
     @PostMapping("/api/passenger")
-    public ResponseEntity<Passenger> create(@RequestBody Passenger passenger){
+    public ResponseEntity<Passenger> create(@RequestBody Passenger passenger) {
+    	passenger.setId(Long.valueOf(123));
         return new ResponseEntity<>(passenger, HttpStatus.OK);
     }
 }

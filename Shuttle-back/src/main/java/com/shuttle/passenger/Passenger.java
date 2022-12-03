@@ -1,22 +1,28 @@
 package com.shuttle.passenger;
 
-public class Passenger {
-    private int id;
-    private String name;
+import java.util.Set;
 
-    public int getId() {
-        return id;
-    }
+import com.shuttle.ride.Ride;
+import com.shuttle.user.User;
+import com.shuttle.vehicle.Route;
 
-    public String getName() {
-        return name;
-    }
+public class Passenger extends User {
+	private Set<Ride> rides;
+	private Set<Route> favoriteRoutes;
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public Set<Ride> getRides() {
+		return rides;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setRides(Set<Ride> rides) {
+		this.rides = rides;
+	}
+
+	public Set<Route> getFavoriteRoutes() {
+		return favoriteRoutes;
+	}
+
+	public void setFavoriteRoutes(Set<Route> favoriteRoutes) {
+		this.favoriteRoutes = favoriteRoutes;
+	}
 }
