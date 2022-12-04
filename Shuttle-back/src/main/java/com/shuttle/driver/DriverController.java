@@ -1,11 +1,12 @@
 package com.shuttle.driver;
 
 import com.shuttle.passenger.Passenger;
+import com.shuttle.vehicle.Vehicle;
 import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+@CrossOrigin
 @RestController
 public class DriverController {
 
@@ -28,14 +29,24 @@ public class DriverController {
     }
 
     @PutMapping("/api/driver/{id}")
-    public ResponseEntity<Driver> updateDriver(@PathVariable(value="id") Long id,@RequestBody Driver driver) {
-        //doesnt work
+    public ResponseEntity<DriverDTO> updateDriver(@RequestBody DriverDTO driver,@PathVariable(value="id") Long id) {
         return new ResponseEntity<>(driver, HttpStatus.OK);
     }
     @GetMapping("/api/driver/{id}/documents")
     public ResponseEntity<DriverDocumentDTO> getDriverDocs(@PathVariable(value="id") Long id) {
         DriverControllerMockProvider driverControllerMockProvider= new DriverControllerMockProvider();
         return new ResponseEntity<>(driverControllerMockProvider.gedDriverDocument(), HttpStatus.OK);
+    }
+    @DeleteMapping("/api/driver/{id}/documents")
+    public ResponseEntity<Void> deleteDocsById(@PathVariable(value="id") Long id) {
+        return new ResponseEntity<Void>(HttpStatus.valueOf(204));
+    }
+
+    @PutMapping("/api/driver/{id}/vehicle")
+    public ResponseEntity<Vehicle> changeVehicle(@RequestBody Vehicle vehicle,@PathVariable(value="id") Long id){
+        vehicle.setId(id);
+        System.out.println(id);
+        return new  ResponseEntity<>(vehicle, HttpStatus.OK);
     }
 
 
