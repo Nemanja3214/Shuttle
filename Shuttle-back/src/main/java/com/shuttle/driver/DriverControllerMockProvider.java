@@ -11,4 +11,12 @@ public class DriverControllerMockProvider {
         return new DriverDTO(Long.parseLong("123"), "Pera", "Peric", "U3dhZ2dlciByb2Nrcw==",
                 "+381123123", "pera.peric@email.com", "Bulevar Oslobodjenja 74");
     }
+    public DriverDocumentDTO gedDriverDocument(){
+        DriverDocumentDTO driverDocument = new DriverDocumentDTO();
+        driverDocument.setDriverId(Long.parseLong("10"));
+        driverDocument.setName("Vozačka dozvola");
+        driverDocument.setDocImage("U3dhZ2dlciByb2Nrcw=");
+        driverDocument.setId(Long.parseLong("123"));
+        return driverDocument;
+    }
 }

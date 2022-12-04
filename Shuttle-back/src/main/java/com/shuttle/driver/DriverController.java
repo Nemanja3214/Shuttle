@@ -23,12 +23,21 @@ public class DriverController {
     @GetMapping("/api/driver/{id}")
     public ResponseEntity<DriverDTO> getDriverDetails(@PathVariable(value="id") Long id) {
         DriverControllerMockProvider driverControllerMockProvider= new DriverControllerMockProvider();
+        System.out.println(id);
         return new ResponseEntity<>(driverControllerMockProvider.getDriverData(), HttpStatus.OK);
     }
 
     @PutMapping("/api/driver/{id}")
-    public ResponseEntity<DriverDTO> updateDriver(@PathVariable(value="id") Long id,@RequestBody DriverDTO driver) {
+    public ResponseEntity<Driver> updateDriver(@PathVariable(value="id") Long id,@RequestBody Driver driver) {
+        //doesnt work
         return new ResponseEntity<>(driver, HttpStatus.OK);
     }
+    @GetMapping("/api/driver/{id}/documents")
+    public ResponseEntity<DriverDocumentDTO> getDriverDocs(@PathVariable(value="id") Long id) {
+        DriverControllerMockProvider driverControllerMockProvider= new DriverControllerMockProvider();
+        return new ResponseEntity<>(driverControllerMockProvider.gedDriverDocument(), HttpStatus.OK);
+    }
+
+
 }
 
