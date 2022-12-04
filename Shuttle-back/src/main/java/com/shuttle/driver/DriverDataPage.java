@@ -6,19 +6,19 @@ import java.util.List;
 
 public class DriverDataPage {
     public int totalCount;
-    public ArrayList<Driver> results;
+    public ArrayList<DriverDTO> results;
 
     public DriverDataPage(int totalCount) {
         this.totalCount = totalCount;
         results = new ArrayList<>();
     }
 
-    public DriverDataPage(int totalCount, ArrayList<Driver> results) {
+    public DriverDataPage(int totalCount, ArrayList<DriverDTO> results) {
         this.totalCount = totalCount;
         this.results = results;
     }
 
-    public void addResult(Driver driver) {
+    public void addResult(DriverDTO driver) {
         this.results.add(driver);
     }
 

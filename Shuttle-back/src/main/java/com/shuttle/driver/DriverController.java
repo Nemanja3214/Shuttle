@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.*;
 public class DriverController {
 
     @PostMapping("/api/driver")
-    public ResponseEntity<Driver> createDriver(@RequestBody Driver driver) {
+    public ResponseEntity<DriverDTO> createDriver(@RequestBody Driver driver) {
         driver.setId(Long.valueOf(123));
-        return new ResponseEntity<>(driver, HttpStatus.OK);
+        return new ResponseEntity<>(driver.parse2DTO(), HttpStatus.OK);
     }
     @GetMapping("/api/driver")
     public ResponseEntity<DriverDataPage> getPaginatedDrivers(@PathParam("page") int page, @PathParam("size") int size) {
@@ -21,7 +21,7 @@ public class DriverController {
     }
 
     @GetMapping("/api/driver/{id}")
-    public ResponseEntity<Driver> getDriverDetails(@PathVariable(value="id") Long id) {
+    public ResponseEntity<DriverDTO> getDriverDetails(@PathVariable(value="id") Long id) {
         DriverControllerMockProvider driverControllerMockProvider= new DriverControllerMockProvider();
         return new ResponseEntity<>(driverControllerMockProvider.getDriverData(), HttpStatus.OK);
     }
