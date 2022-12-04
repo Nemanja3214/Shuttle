@@ -11,6 +11,27 @@ public class User extends Entity {
 	private String address;
 	private String password;
 
+	public User(Long id,String name, String surname, String profilePicture, String telephoneNumber, String email, String address) {
+		this.name = name;
+		this.surname = surname;
+		this.profilePicture = profilePicture;
+		this.telephoneNumber = telephoneNumber;
+		this.email = email;
+		this.address = address;
+		this.setId(id);
+	}
+
+	public User(Long id, String name, String surname, String profilePicture, String telephoneNumber, String email, String address, String password) {
+		this.name = name;
+		this.surname = surname;
+		this.profilePicture = profilePicture;
+		this.telephoneNumber = telephoneNumber;
+		this.email = email;
+		this.address = address;
+		this.password = password;
+		this.setId(id);
+	}
+
 	public String getName() {
 		return name;
 	}

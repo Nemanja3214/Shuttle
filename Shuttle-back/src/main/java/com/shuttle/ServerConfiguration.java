@@ -8,9 +8,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebMvc
-public class ServerConfiguration implements WebMvcConfigurer  {
-	@Override
+public class ServerConfiguration implements WebMvcConfigurer {
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/resources/**")
+                .addResourceLocations("/resources/");
+    }
+
+    @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**");
     }
+
 }
