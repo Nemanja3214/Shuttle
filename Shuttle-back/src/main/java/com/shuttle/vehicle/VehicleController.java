@@ -1,4 +1,4 @@
-package com.shuttle.controllers;
+package com.shuttle.vehicle;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;

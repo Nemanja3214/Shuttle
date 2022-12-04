@@ -1,4 +1,4 @@
-package com.shuttle.controllers;
+package com.shuttle.user;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

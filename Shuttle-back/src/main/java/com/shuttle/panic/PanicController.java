@@ -1,4 +1,4 @@
-package com.shuttle.controllers;
+package com.shuttle.panic;
 
 import java.util.ArrayList;
 import java.util.Collection;
