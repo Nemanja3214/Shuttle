@@ -11,7 +11,10 @@ public class User extends Entity {
 	private String address;
 	private String password;
 
-	public User(Long id,String name, String surname, String profilePicture, String telephoneNumber, String email, String address) {
+	public User() {
+	}
+
+	public User(Long id, String name, String surname, String profilePicture, String telephoneNumber, String email, String address) {
 		this.name = name;
 		this.surname = surname;
 		this.profilePicture = profilePicture;

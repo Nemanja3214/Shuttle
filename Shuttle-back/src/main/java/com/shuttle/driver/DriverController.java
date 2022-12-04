@@ -25,5 +25,10 @@ public class DriverController {
         DriverControllerMockProvider driverControllerMockProvider= new DriverControllerMockProvider();
         return new ResponseEntity<>(driverControllerMockProvider.getDriverData(), HttpStatus.OK);
     }
+
+    @PutMapping("/api/driver/{id}")
+    public ResponseEntity<DriverDTO> updateDriver(@PathVariable(value="id") Long id,@RequestBody DriverDTO driver) {
+        return new ResponseEntity<>(driver, HttpStatus.OK);
+    }
 }
 
