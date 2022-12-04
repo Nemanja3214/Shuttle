@@ -40,4 +40,9 @@ public class PassengerController {
     	
     	return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
     }
+    
+    @PostMapping("/api/passenger/{activationId}")
+    public ResponseEntity<String> activate(@PathVariable("activationId") Long activationId) {
+    	return new ResponseEntity<String>("", HttpStatus.OK);
+    }
 }
