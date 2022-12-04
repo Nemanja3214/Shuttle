@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shuttle.ride.Ride;
+
 import jakarta.websocket.server.PathParam;
 
 @RestController
@@ -30,4 +32,12 @@ public class ReviewController {
 	}
 	
 	// TODO: GET /api/review/{driverId} ambiguity.
+	
+	@GetMapping("/api/reviews/{rideId}")
+	public ResponseEntity<ReviewRideDTO> getRideReview(@PathParam("rideId") Long rideId) {
+		Ride r = new Ride();
+		Review vehicleReview = new Review();
+		Review driverReview = new Review();
+		return new ResponseEntity<ReviewRideDTO>(new ReviewRideDTO(vehicleReview, driverReview), HttpStatus.OK);
+	}
 }
