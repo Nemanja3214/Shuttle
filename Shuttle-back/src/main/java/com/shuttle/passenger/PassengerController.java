@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,5 +45,35 @@ public class PassengerController {
     @PostMapping("/api/passenger/{activationId}")
     public ResponseEntity<String> activate(@PathVariable("activationId") Long activationId) {
     	return new ResponseEntity<String>("", HttpStatus.OK);
+    }
+    
+    @PutMapping("/api/passenger/{id}")
+    public ResponseEntity<PassengerDTO> update(@RequestBody Passenger newData, @PathVariable("id") Long id) {
+    	Passenger passengerFromDb = new Passenger();
+    	passengerFromDb.setId(id);
+    	
+    	if (newData.getName() != null) {
+    		passengerFromDb.setName(newData.getName());
+    	}
+    	if (newData.getSurname() != null) {
+    		passengerFromDb.setSurname(newData.getSurname());
+    	}
+    	if (newData.getEmail() != null) {
+    		passengerFromDb.setEmail(newData.getEmail());
+    	}
+    	if (newData.getPassword() != null) {
+    		passengerFromDb.setPassword(newData.getPassword());
+    	}
+    	if (newData.getAddress() != null) {
+    		passengerFromDb.setAddress(newData.getAddress());
+    	}
+    	if (newData.getTelephoneNumber() != null) {
+    		passengerFromDb.setTelephoneNumber(newData.getTelephoneNumber());
+    	}
+    	if (newData.getProfilePicture() != null) {
+    		passengerFromDb.setProfilePicture(newData.getProfilePicture());
+    	}
+    	
+    	return new ResponseEntity<PassengerDTO>(new PassengerDTO(passengerFromDb), HttpStatus.OK);
     }
 }
