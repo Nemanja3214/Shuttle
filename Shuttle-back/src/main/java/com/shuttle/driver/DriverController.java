@@ -1,8 +1,10 @@
 package com.shuttle.driver;
 
+import com.shuttle.common.CollectionDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleDTO;
+import com.shuttle.workhours.WorkHours;
 import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,12 +52,12 @@ public class DriverController {
     @PostMapping("/api/driver/{id}/documents")
     public ResponseEntity<DriverDocumentDTO> addDocsById(@PathVariable(value = "id") Long id, @RequestBody DriverDocumentDTO driverDocumentDTO) {
         driverDocumentDTO.setId(id);
-        return new ResponseEntity<DriverDocumentDTO>(driverDocumentDTO,HttpStatus.valueOf(200));
+        return new ResponseEntity<DriverDocumentDTO>(driverDocumentDTO, HttpStatus.valueOf(200));
     }
 
 
     @GetMapping("/api/driver/{id}/vehicle")
-    public ResponseEntity<VehicleDTO> getVehicle( @PathVariable(value = "id") Long id) {
+    public ResponseEntity<VehicleDTO> getVehicle(@PathVariable(value = "id") Long id) {
         VehicleDTO vehicleDTO = new VehicleDTO();
         vehicleDTO.setId(id);
         return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
@@ -66,12 +68,47 @@ public class DriverController {
         vehicleDTO.setId(id);
         return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
     }
+
     @PutMapping("/api/driver/{id}/vehicle")
     public ResponseEntity<VehicleDTO> changeVehicle(@RequestBody VehicleDTO vehicleDTO, @PathVariable(value = "id") Long id) {
         vehicleDTO.setId(id);
         return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
     }
 
+    @GetMapping("/api/driver/{id}/working-hours")
+    public ResponseEntity<CollectionDTO<WorkHours>> getWorkHoursHistory(@PathVariable(value = "id") Long id,
+                                                                 @PathParam("page") int page, @PathParam("size") int size,
+                                                                 @PathParam("from") String from, @PathParam("to") String to) {
+        CollectionDTO<WorkHours> workHoursCollectionDTO = new CollectionDTO<>();
+        workHoursCollectionDTO.setTotalCount(page);
+        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+
+    }
+
+
+    @PostMapping("/api/driver/{id}/working-hours")
+    public ResponseEntity<WorkHours> createWorkHours(@PathVariable(value = "id") Long id) {
+        WorkHours workHoursCollectionDTO = new WorkHours();
+        workHoursCollectionDTO.setId(id);
+        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+
+    }
+
+    @GetMapping("/api/driver/working-hour/{working-hour-id}")
+    public ResponseEntity<WorkHours> getWorkHours(@PathVariable(value = "working-hour-id") Long id) {
+        WorkHours workHoursCollectionDTO = new WorkHours();
+        workHoursCollectionDTO.setId(id);
+        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+
+    }
+
+    @PutMapping("/api/driver/working-hour/{working-hour-id}")
+    public ResponseEntity<WorkHours> changeWorkHours(@PathVariable(value = "working-hour-id") Long id) {
+        WorkHours workHoursCollectionDTO = new WorkHours();
+        workHoursCollectionDTO.setId(id);
+        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+
+    }
 
 }
 
