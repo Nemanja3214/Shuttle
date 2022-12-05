@@ -24,6 +24,4 @@ public class LocationDTO {
 		this.longitude = longitude;
 	}
 	
-	
-
 }

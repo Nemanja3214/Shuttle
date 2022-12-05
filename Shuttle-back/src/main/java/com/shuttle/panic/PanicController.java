@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shuttle.notification.dto.PanicNotificationsDTO;
+import com.shuttle.common.CollectionDTO;
+import com.shuttle.notification.dto.PanicNotificationDTO;
 
 
 @RestController
@@ -14,7 +15,7 @@ import com.shuttle.notification.dto.PanicNotificationsDTO;
 public class PanicController {
 
 	@GetMapping
-	public ResponseEntity<PanicNotificationsDTO> getNotifications() {
-		return new ResponseEntity<PanicNotificationsDTO>(new PanicNotificationsDTO(), HttpStatus.OK);
+	public ResponseEntity<CollectionDTO<PanicNotificationDTO>> getNotifications() {
+		return new ResponseEntity<CollectionDTO<PanicNotificationDTO>>(new CollectionDTO<PanicNotificationDTO>(), HttpStatus.OK);
 	}
 }

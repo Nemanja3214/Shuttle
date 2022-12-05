@@ -2,22 +2,23 @@ package com.shuttle.ride.dto;
 
 import java.util.Collection;
 
-import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.location.dto.LocationPairDTO;
 
 public class CreateRideDTO {
 	
 //	List<PassengerCreationDTO> missing
 	
-	private Collection<LocationDTO> locations;
+//	TODO change locations
+	private Collection<LocationPairDTO> locations;
 	private String vehicleType;
 	private boolean babyTransport;
 	private boolean petTransport;
 	
 	
-	public Collection<LocationDTO> getLocations() {
+	public Collection<LocationPairDTO> getLocations() {
 		return locations;
 	}
-	public void setLocations(Collection<LocationDTO> locations) {
+	public void setLocations(Collection<LocationPairDTO> locations) {
 		this.locations = locations;
 	}
 	public String getVehicleType() {

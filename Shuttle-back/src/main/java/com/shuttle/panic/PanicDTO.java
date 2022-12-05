@@ -2,11 +2,13 @@ package com.shuttle.panic;
 
 import java.time.ZonedDateTime;
 
+import com.shuttle.ride.dto.RideDTO;
+
 public class PanicDTO {
 	
 	private long id;
-	private long userId;
-	private long rideId;
+//	UserDTO
+	private RideDTO ride;
 	private ZonedDateTime time;
 	private String reason;
 	
@@ -16,17 +18,11 @@ public class PanicDTO {
 	public void setId(long id) {
 		this.id = id;
 	}
-	public long getUserId() {
-		return userId;
+	public RideDTO getRide() {
+		return ride;
 	}
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
-	public long getRideId() {
-		return rideId;
-	}
-	public void setRideId(long rideId) {
-		this.rideId = rideId;
+	public void setRide(RideDTO ride) {
+		this.ride = ride;
 	}
 	public ZonedDateTime getTime() {
 		return time;

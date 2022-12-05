@@ -1,24 +1,22 @@
-package com.shuttle.message.dto;
+package com.shuttle.common;
 
 import java.util.Collection;
 
-public class MessagesDTO {
+public class CollectionDTO<T> {
 	private long totalCount;
-	private Collection<MessageDTO> results;
-	
+	private Collection<T> results;
 	public long getTotalCount() {
 		return totalCount;
 	}
 	public void setTotalCount(long totalCount) {
 		this.totalCount = totalCount;
 	}
-	public Collection<MessageDTO> getResults() {
+	public Collection<T> getResults() {
 		return results;
 	}
-	public void setResults(Collection<MessageDTO> results) {
+	public void setResults(Collection<T> results) {
 		this.results = results;
 	}
 	
 	
-
 }

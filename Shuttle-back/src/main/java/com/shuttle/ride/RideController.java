@@ -18,10 +18,21 @@ import com.shuttle.ride.dto.RideDTO;
 @RestController
 @RequestMapping("/api/ride")
 public class RideController {
+//	TODO: review especially
 	
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO rideDTO){
 		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+	}
+	
+	@GetMapping("/active/{driverId}")
+	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
+		return new ResponseEntity<>(new RideDTO(), HttpStatus.OK);
+	}
+	
+	@GetMapping("/active/{passengerId}")
+	public ResponseEntity<RideDTO> getActiveRideByPassenger(@PathVariable long passengerId){
+		return new ResponseEntity<>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")
@@ -29,7 +40,6 @@ public class RideController {
 		return new ResponseEntity<ReadRideDTO>(new ReadRideDTO(), HttpStatus.OK);
 	}
 	
-//	shouldn't here also be as reason?
 	@PutMapping("/{id}")
 	public ResponseEntity<Boolean> cancelRide(@PathVariable long id) {
 		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
