@@ -2,6 +2,9 @@ package com.shuttle.driver;
 
 import com.shuttle.common.CollectionDTO;
 import com.shuttle.passenger.Passenger;
+import com.shuttle.ride.Ride;
+import com.shuttle.ride.dto.ReadRideDTO;
+import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.WorkHours;
@@ -9,6 +12,9 @@ import jakarta.websocket.server.PathParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -77,11 +83,11 @@ public class DriverController {
 
     @GetMapping("/api/driver/{id}/working-hours")
     public ResponseEntity<CollectionDTO<WorkHours>> getWorkHoursHistory(@PathVariable(value = "id") Long id,
-                                                                 @PathParam("page") int page, @PathParam("size") int size,
-                                                                 @PathParam("from") String from, @PathParam("to") String to) {
+                                                                        @PathParam("page") int page, @PathParam("size") int size,
+                                                                        @PathParam("from") String from, @PathParam("to") String to) {
         CollectionDTO<WorkHours> workHoursCollectionDTO = new CollectionDTO<>();
         workHoursCollectionDTO.setTotalCount(page);
-        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+        return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);
 
     }
 
@@ -90,7 +96,7 @@ public class DriverController {
     public ResponseEntity<WorkHours> createWorkHours(@PathVariable(value = "id") Long id) {
         WorkHours workHoursCollectionDTO = new WorkHours();
         workHoursCollectionDTO.setId(id);
-        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+        return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);
 
     }
 
@@ -98,7 +104,7 @@ public class DriverController {
     public ResponseEntity<WorkHours> getWorkHours(@PathVariable(value = "working-hour-id") Long id) {
         WorkHours workHoursCollectionDTO = new WorkHours();
         workHoursCollectionDTO.setId(id);
-        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+        return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);
 
     }
 
@@ -106,7 +112,21 @@ public class DriverController {
     public ResponseEntity<WorkHours> changeWorkHours(@PathVariable(value = "working-hour-id") Long id) {
         WorkHours workHoursCollectionDTO = new WorkHours();
         workHoursCollectionDTO.setId(id);
-        return new ResponseEntity<>(workHoursCollectionDTO,HttpStatus.OK);
+        return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);
+
+    }
+
+    @GetMapping("/api/driver/{id}/ride")
+    public ResponseEntity<CollectionDTO<ReadRideDTO>> getRideHistory(@PathVariable(value = "id") Long id,
+                                                                     @PathParam("page") int page, @PathParam("size") int size,
+                                                                     @PathParam("from") String from, @PathParam("to") String to,
+                                                                     @PathParam("to") String sort) {
+        CollectionDTO<ReadRideDTO> rideDTOCollectionDTO = new CollectionDTO<>();
+        rideDTOCollectionDTO.setTotalCount(page);
+        List<ReadRideDTO> rideDTOList = new ArrayList<>();
+        rideDTOList.add(new ReadRideDTO());
+        rideDTOCollectionDTO.setResults(rideDTOList);
+        return new ResponseEntity<>(rideDTOCollectionDTO, HttpStatus.OK);
 
     }
 

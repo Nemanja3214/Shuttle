@@ -1,17 +1,23 @@
 package com.shuttle.ride.dto;
 
-public class ReadRideDTO extends BaseRideDTO{
+import lombok.Getter;
+import lombok.Setter;
 
-	private String status;
-	private RejectionDTO rejection;
+public class ReadRideDTO extends BaseRideDTO {
 
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
-	
-	
+    private String status;
+
+    @Getter
+    @Setter
+    private RejectionDTO rejection;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 
 }
