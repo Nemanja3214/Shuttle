@@ -28,20 +28,25 @@ public class ReviewController {
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
-//	@GetMapping("/api/review/{vehicleId}")
-//	public ResponseEntity<ReviewListDTO> getVehicleRatings(@PathParam("vehicleId") Long vehicleId) {
-//		List<Review> reviewsMock = new ArrayList<>();
-//		reviewsMock.add(new Review());
-//		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
-//	}
-//	
-//	// TODO: GET /api/review/{driverId} ambiguity.
-//	
-//	@GetMapping("/api/reviews/{rideId}")
-//	public ResponseEntity<ReviewRideDTO> getRideReview(@PathParam("rideId") Long rideId) {
-//		Ride r = new Ride();
-//		Review vehicleReview = new Review();
-//		Review driverReview = new Review();
-//		return new ResponseEntity<ReviewRideDTO>(new ReviewRideDTO(vehicleReview, driverReview), HttpStatus.OK);
-//	}
+	@GetMapping("/api/review/vehicle/{id}")
+	public ResponseEntity<ReviewListDTO> getVehicleRatings(@PathParam("id") Long vehicleId) {
+		List<Review> reviewsMock = new ArrayList<>();
+		reviewsMock.add(new Review());
+		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
+	}
+	
+	@GetMapping("/api/review/driver/{id}")
+	public ResponseEntity<ReviewListDTO> getDriverRatings(@PathParam("id") Long vehicleId) {
+		List<Review> reviewsMock = new ArrayList<>();
+		reviewsMock.add(new Review());
+		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
+	}
+
+	@GetMapping("/api/review/{rideId}")
+	public ResponseEntity<ReviewRideDTO> getRideReview(@PathParam("rideId") Long rideId) {
+		Ride r = new Ride();
+		Review vehicleReview = new Review();
+		Review driverReview = new Review();
+		return new ResponseEntity<ReviewRideDTO>(new ReviewRideDTO(vehicleReview, driverReview), HttpStatus.OK);
+	}
 }
