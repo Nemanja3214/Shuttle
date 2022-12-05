@@ -10,12 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shuttle.ride.dto.AcceptRideDTO;
-import com.shuttle.ride.dto.CancelRideDTO;
+import com.shuttle.panic.PanicDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
-import com.shuttle.ride.dto.EndRideDTO;
 import com.shuttle.ride.dto.ReadRideDTO;
-import com.shuttle.ride.dto.RejectionDTO;
 import com.shuttle.ride.dto.RideDTO;
 
 @RestController
@@ -23,8 +20,8 @@ import com.shuttle.ride.dto.RideDTO;
 public class RideController {
 	
 	@PostMapping
-	public ResponseEntity<CreateRideDTO> createRide(@RequestBody RideDTO rideDTO){
-		return new ResponseEntity<CreateRideDTO>(new CreateRideDTO(), HttpStatus.OK);
+	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO rideDTO){
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")
@@ -35,27 +32,27 @@ public class RideController {
 //	shouldn't here also be as reason?
 	@PutMapping("/{id}")
 	public ResponseEntity<Boolean> cancelRide(@PathVariable long id) {
-		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
 	}
 	
 	@PutMapping("/{id}/panic")
-	public ResponseEntity<RejectionDTO> panicRide(@RequestBody String reason) {
-		return new ResponseEntity<RejectionDTO>(new RejectionDTO(), HttpStatus.OK);
+	public ResponseEntity<PanicDTO> panicRide(@RequestBody String reason) {
+		return new ResponseEntity<PanicDTO>(new PanicDTO(), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/accept")
-	public ResponseEntity<AcceptRideDTO> acceptRide(@PathVariable long id) {
-		return new ResponseEntity<AcceptRideDTO>(new AcceptRideDTO(), HttpStatus.OK);
+	public ResponseEntity<RideDTO> acceptRide(@PathVariable long id) {
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/end")
-	public ResponseEntity<EndRideDTO> endRide(@PathVariable long id) {
-		return new ResponseEntity<EndRideDTO>(new EndRideDTO(), HttpStatus.OK);
+	public ResponseEntity<RideDTO> endRide(@PathVariable long id) {
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/cancel")
-	public ResponseEntity<CancelRideDTO> reasonCancelRide(@PathVariable long id, @RequestBody String reason) {
-		return new ResponseEntity<CancelRideDTO>(new CancelRideDTO(), HttpStatus.OK);
+	public ResponseEntity<RideDTO> reasonCancelRide(@PathVariable long id, @RequestBody String reason) {
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 }

@@ -18,11 +18,11 @@ import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
-import com.shuttle.message.dto.SentMessageDTO;
+import com.shuttle.message.dto.MessagesDTO;
 import com.shuttle.note.dto.NoteDTO;
-import com.shuttle.note.dto.ReadNoteDTO;
-import com.shuttle.ride.dto.ReadRideDTO;
-import com.shuttle.user.dto.ReadUserDTO;
+import com.shuttle.note.dto.ReadNotesDTO;
+import com.shuttle.ride.dto.BaseRideDTO;
+import com.shuttle.user.dto.UserDTO;
 
 @RestController
 @RequestMapping("/api/user")
@@ -30,14 +30,14 @@ public class UserController {
 
 	@GetMapping
 	@RequestMapping("/{id}/ride")
-	public ResponseEntity<ReadRideDTO> getUserRides(@PathVariable long id, @PathVariable long page,
+	public ResponseEntity<BaseRideDTO> getUserRides(@PathVariable long id, @PathVariable long page,
 			@PathVariable long size, @PathVariable String sort, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
-		return new ResponseEntity<ReadRideDTO>(new ReadRideDTO(), HttpStatus.OK);
+		return new ResponseEntity<BaseRideDTO>(new BaseRideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping
-	public ResponseEntity<ReadUserDTO> getUser(@PathVariable long page, @PathVariable long size) {
-		return new ResponseEntity<ReadUserDTO>(new ReadUserDTO(), HttpStatus.OK);
+	public ResponseEntity<UserDTO> getUser(@PathVariable long page, @PathVariable long size) {
+		return new ResponseEntity<UserDTO>(new UserDTO(), HttpStatus.OK);
 	}
 	
 	@PostMapping("/login")
@@ -46,23 +46,23 @@ public class UserController {
 	}
 	
 	@GetMapping("/{id}/message")
-	public ResponseEntity<Collection<MessageDTO>> getMessages(@PathVariable long userId){
-		return new ResponseEntity<Collection<MessageDTO>>(new ArrayList<MessageDTO>(), HttpStatus.OK);
+	public ResponseEntity<Collection<MessagesDTO>> getMessages(@PathVariable long userId){
+		return new ResponseEntity<Collection<MessagesDTO>>(new ArrayList<MessagesDTO>(), HttpStatus.OK);
 	}
 	
 	@PostMapping("/{id}/message")
-	public ResponseEntity<SentMessageDTO> sendMessage(@RequestBody CreateMessageDTO messageDTO) {
-		return new ResponseEntity<SentMessageDTO>(new SentMessageDTO(), HttpStatus.OK);
+	public ResponseEntity<MessageDTO> sendMessage(@RequestBody CreateMessageDTO messageDTO) {
+		return new ResponseEntity<MessageDTO>(new MessageDTO(), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/block")
 	public ResponseEntity<Boolean> block(@PathVariable long userId){
-		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
 	}
 	
 	@PutMapping("/{id}/unblock")
 	public ResponseEntity<Boolean> unblock(@PathVariable long userId) {
-		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
 	}
 	
 	@PostMapping("/{id}/note")
@@ -71,7 +71,7 @@ public class UserController {
 	}
 	
 	@GetMapping("/{id}/note")
-	public ResponseEntity<Collection<ReadNoteDTO>> getUserNotes(@PathVariable long id, @PathVariable long page, @PathVariable long size){
-		return new ResponseEntity<Collection<ReadNoteDTO>>(new ArrayList<ReadNoteDTO>(), HttpStatus.OK);
+	public ResponseEntity<ReadNotesDTO> getUserNotes(@PathVariable long id, @PathVariable long page, @PathVariable long size){
+		return new ResponseEntity<ReadNotesDTO>(new ReadNotesDTO(), HttpStatus.OK);
 	}
 }
