@@ -1,15 +1,15 @@
 package com.shuttle.location.dto;
 
 public class LocationDTO {
-	private String adress;
+	private String address;
 	private long latitude;
 	private long longitude;
 	
-	public String getAdress() {
-		return adress;
+	public String getAddress() {
+		return address;
 	}
-	public void setAdress(String adress) {
-		this.adress = adress;
+	public void setAddress(String adress) {
+		this.address = adress;
 	}
 	public long getLatitude() {
 		return latitude;
