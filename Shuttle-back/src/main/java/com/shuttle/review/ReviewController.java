@@ -16,28 +16,32 @@ import jakarta.websocket.server.PathParam;
 
 @RestController
 public class ReviewController {
-	@PostMapping("/api/review/{vehicleId}")
-	public ResponseEntity<ReviewDTO> leaveVehicleRating(@PathParam("vehicleId") Long vehicleId, @RequestBody Review review) {
+	@PostMapping("/api/review/vehicle/{id}")
+	public ResponseEntity<ReviewDTO> leaveVehicleRating(@PathParam("id") Long vehicleId, @RequestBody Review review) {
 		review.setId(Long.valueOf(123));
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
-	// TODO: POST /api/review/{driverId} ambiguity.
-	
-	@GetMapping("/api/review/{vehicleId}")
-	public ResponseEntity<ReviewListDTO> getVehicleRatings(@PathParam("vehicleId") Long vehicleId) {
-		List<Review> reviewsMock = new ArrayList<>();
-		reviewsMock.add(new Review());
-		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
+	@PostMapping("/api/review/driver/{id}")
+	public ResponseEntity<ReviewDTO> leaveDriverRating(@PathParam("id") Long driverId, @RequestBody Review review) {
+		review.setId(Long.valueOf(123));
+		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
-	// TODO: GET /api/review/{driverId} ambiguity.
-	
-	@GetMapping("/api/reviews/{rideId}")
-	public ResponseEntity<ReviewRideDTO> getRideReview(@PathParam("rideId") Long rideId) {
-		Ride r = new Ride();
-		Review vehicleReview = new Review();
-		Review driverReview = new Review();
-		return new ResponseEntity<ReviewRideDTO>(new ReviewRideDTO(vehicleReview, driverReview), HttpStatus.OK);
-	}
+//	@GetMapping("/api/review/{vehicleId}")
+//	public ResponseEntity<ReviewListDTO> getVehicleRatings(@PathParam("vehicleId") Long vehicleId) {
+//		List<Review> reviewsMock = new ArrayList<>();
+//		reviewsMock.add(new Review());
+//		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
+//	}
+//	
+//	// TODO: GET /api/review/{driverId} ambiguity.
+//	
+//	@GetMapping("/api/reviews/{rideId}")
+//	public ResponseEntity<ReviewRideDTO> getRideReview(@PathParam("rideId") Long rideId) {
+//		Ride r = new Ride();
+//		Review vehicleReview = new Review();
+//		Review driverReview = new Review();
+//		return new ResponseEntity<ReviewRideDTO>(new ReviewRideDTO(vehicleReview, driverReview), HttpStatus.OK);
+//	}
 }
