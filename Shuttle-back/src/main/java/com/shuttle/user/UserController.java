@@ -18,7 +18,6 @@ import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
-import com.shuttle.ride.dto.BaseRideDTO;
 import com.shuttle.user.dto.UserDTO;
 
 @RestController
@@ -28,9 +27,9 @@ public class UserController {
 	@GetMapping
 	@RequestMapping("/{id}/ride")
 //	TODO: 	and add id to ride DTO
-	public ResponseEntity<CollectionDTO<BaseRideDTO>> getUserRides(@PathVariable long id, @PathVariable long page,
+	public ResponseEntity<CollectionDTO<String>> getUserRides(@PathVariable long id, @PathVariable long page,
 			@PathVariable long size, @PathVariable String sort, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
-		return new ResponseEntity<CollectionDTO<BaseRideDTO>>(new CollectionDTO<BaseRideDTO>(), HttpStatus.OK);
+		return new ResponseEntity<CollectionDTO<String>>(new CollectionDTO<String>(), HttpStatus.OK);
 	}
 	
 	@GetMapping
@@ -43,7 +42,6 @@ public class UserController {
 		return new ResponseEntity<TokenDTO>(new TokenDTO(), HttpStatus.OK);
 	}
 	
-//	new Message DTO
 	@GetMapping("/{id}/message")
 	public ResponseEntity<CollectionDTO<MessageDTO>> getMessages(@PathVariable long userId){
 		return new ResponseEntity<CollectionDTO<MessageDTO>>(new CollectionDTO<MessageDTO>(), HttpStatus.OK);
@@ -65,7 +63,7 @@ public class UserController {
 	}
 	
 	@PostMapping("/{id}/note")
-	public ResponseEntity<NoteDTO> createNote(@RequestBody String message) {
+	public ResponseEntity<NoteDTO> createNote(@PathVariable long userId, @RequestBody String message) {
 		return new ResponseEntity<NoteDTO>(new NoteDTO(), HttpStatus.OK);
 	}
 	

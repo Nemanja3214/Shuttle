@@ -7,8 +7,6 @@ import com.shuttle.location.dto.LocationPairDTO;
 public class CreateRideDTO {
 	
 //	List<PassengerCreationDTO> missing
-	
-//	TODO change locations
 	private Collection<LocationPairDTO> locations;
 	private String vehicleType;
 	private boolean babyTransport;
