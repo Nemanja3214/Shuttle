@@ -1,7 +1,9 @@
-package com.shuttle.review;
+package com.shuttle.review.dto;
 
 import java.util.Collection;
 import java.util.List;
+
+import com.shuttle.review.Review;
 
 public class ReviewListDTO {
 	public Integer totalCount;

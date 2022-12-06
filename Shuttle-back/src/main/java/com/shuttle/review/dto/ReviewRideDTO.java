@@ -1,4 +1,6 @@
-package com.shuttle.review;
+package com.shuttle.review.dto;
+
+import com.shuttle.review.Review;
 
 public class ReviewRideDTO {
 	public ReviewDTO vehicleReview;
