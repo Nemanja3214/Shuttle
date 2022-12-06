@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.driver.Driver;
+import com.shuttle.location.Location;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
 
@@ -51,8 +52,8 @@ public class PassengerController {
 	}
 
 	@PostMapping("/api/passenger/{activationId}")
-	public ResponseEntity<String> activate(@PathVariable("activationId") Long activationId) {
-		return new ResponseEntity<String>("", HttpStatus.OK);
+	public ResponseEntity<Void> activate(@PathVariable("activationId") Long activationId) {
+		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
 	@PutMapping("/api/passenger/{id}")
@@ -94,6 +95,8 @@ public class PassengerController {
 		r.setDriver(new Driver());
 		r.setPassengers(new HashSet<>());
 		r.setLocations(new HashSet<>());
+		r.getLocations().add(new Location());
+		r.getPassengers().add(new Passenger());
 		ridesMock.add(r);
 
 		return new ResponseEntity<RidePageDTO>(new RidePageDTO(ridesMock), HttpStatus.OK);

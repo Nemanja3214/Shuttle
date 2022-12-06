@@ -1,14 +1,19 @@
 package com.shuttle.ride.dto;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.shuttle.location.Location;
 import com.shuttle.location.LocationDTO;
+import com.shuttle.location.RouteDTO;
+import com.shuttle.ride.Rejection;
 import com.shuttle.ride.Ride;
 import com.shuttle.vehicle.Vehicle;
 
 public class RideDTO {
 	public Long id;
-	public List<LocationDTO> locations;
+	public List<RouteDTO> locations;
 	public LocalDateTime startTime;
 	public LocalDateTime endTime;
 	public Integer totalCost;
@@ -18,10 +23,12 @@ public class RideDTO {
 	public Boolean babyTransport;
 	public Boolean petTransport;
 	public Vehicle.Type vehicleType;
+	public RejectionDTO rejection;
 	
 	public RideDTO(Ride ride) {
 		this.id = ride.getId();
-		this.locations = ride.getLocations().stream().map(l -> new LocationDTO(l)).toList();
+		this.locations = new ArrayList<RouteDTO>();
+		this.locations.add(new RouteDTO(new LocationDTO(new Location()), new LocationDTO(new Location())));// ride.getLocations().stream().map(l -> new LocationDTO(l)).toList();
 		this.startTime = ride.getStartTime();
 		this.endTime = ride.getEndTime();
 		this.totalCost = ride.getTotalCost();
@@ -31,5 +38,6 @@ public class RideDTO {
 		this.babyTransport = ride.getBabyTransport();
 		this.petTransport = ride.getPetTransport();
 		this.vehicleType = ride.getVehicleType();
+		this.rejection = new RejectionDTO(new Rejection());
 	}
 }
