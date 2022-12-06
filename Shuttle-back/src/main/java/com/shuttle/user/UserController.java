@@ -27,7 +27,7 @@ public class UserController {
 	@GetMapping
 	@RequestMapping("/{id}/ride")
 	public ResponseEntity<ListDTO<String>> getUserRides(@PathVariable long id, @PathVariable long page,
-			@PathVariable long size, @PathVariable String sort, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
+														@PathVariable long size, @PathVariable String sort, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
 		return new ResponseEntity<ListDTO<String>>(new ListDTO<String>(), HttpStatus.OK);
 	}
 	
