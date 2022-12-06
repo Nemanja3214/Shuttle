@@ -12,13 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shuttle.common.CollectionDTO;
+import com.shuttle.common.ListDTO;
 import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
-import com.shuttle.ride.dto.BaseRideDTO;
 import com.shuttle.user.dto.UserDTO;
 
 @RestController
@@ -27,15 +26,14 @@ public class UserController {
 
 	@GetMapping
 	@RequestMapping("/{id}/ride")
-//	TODO: 	and add id to ride DTO
-	public ResponseEntity<CollectionDTO<BaseRideDTO>> getUserRides(@PathVariable long id, @PathVariable long page,
+	public ResponseEntity<ListDTO<String>> getUserRides(@PathVariable long id, @PathVariable long page,
 			@PathVariable long size, @PathVariable String sort, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
-		return new ResponseEntity<CollectionDTO<BaseRideDTO>>(new CollectionDTO<BaseRideDTO>(), HttpStatus.OK);
+		return new ResponseEntity<ListDTO<String>>(new ListDTO<String>(), HttpStatus.OK);
 	}
 	
 	@GetMapping
-	public ResponseEntity<CollectionDTO<UserDTO>> getUser(@PathVariable long page, @PathVariable long size) {
-		return new ResponseEntity<CollectionDTO<UserDTO>>(new CollectionDTO<UserDTO>(), HttpStatus.OK);
+	public ResponseEntity<ListDTO<UserDTO>> getUser(@PathVariable long page, @PathVariable long size) {
+		return new ResponseEntity<ListDTO<UserDTO>>(new ListDTO<UserDTO>(), HttpStatus.OK);
 	}
 	
 	@PostMapping("/login")
@@ -43,10 +41,9 @@ public class UserController {
 		return new ResponseEntity<TokenDTO>(new TokenDTO(), HttpStatus.OK);
 	}
 	
-//	new Message DTO
 	@GetMapping("/{id}/message")
-	public ResponseEntity<CollectionDTO<MessageDTO>> getMessages(@PathVariable long userId){
-		return new ResponseEntity<CollectionDTO<MessageDTO>>(new CollectionDTO<MessageDTO>(), HttpStatus.OK);
+	public ResponseEntity<ListDTO<MessageDTO>> getMessages(@PathVariable long userId){
+		return new ResponseEntity<ListDTO<MessageDTO>>(new ListDTO<MessageDTO>(), HttpStatus.OK);
 	}
 	
 	@PostMapping("/{id}/message")
@@ -65,12 +62,12 @@ public class UserController {
 	}
 	
 	@PostMapping("/{id}/note")
-	public ResponseEntity<NoteDTO> createNote(@RequestBody String message) {
+	public ResponseEntity<NoteDTO> createNote(@PathVariable long userId, @RequestBody String message) {
 		return new ResponseEntity<NoteDTO>(new NoteDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}/note")
-	public ResponseEntity<CollectionDTO<NoteDTO>> getUserNotes(@PathVariable long id, @PathVariable long page, @PathVariable long size){
-		return new ResponseEntity<CollectionDTO<NoteDTO>>(new CollectionDTO<NoteDTO>(), HttpStatus.OK);
+	public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(@PathVariable long id, @PathVariable long page, @PathVariable long size){
+		return new ResponseEntity<ListDTO<NoteDTO>>(new ListDTO<NoteDTO>(), HttpStatus.OK);
 	}
 }

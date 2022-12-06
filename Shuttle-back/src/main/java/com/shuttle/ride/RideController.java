@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.panic.PanicDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
-import com.shuttle.ride.dto.ReadRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 
 @RestController
@@ -25,24 +24,24 @@ public class RideController {
 		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
-	@GetMapping("/active/{driverId}")
+	@GetMapping("/driver/{driverId}/active")
 	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
 		return new ResponseEntity<>(new RideDTO(), HttpStatus.OK);
 	}
 	
-	@GetMapping("/active/{passengerId}")
+	@GetMapping("/passenger/{passengerId}/active")
 	public ResponseEntity<RideDTO> getActiveRideByPassenger(@PathVariable long passengerId){
 		return new ResponseEntity<>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ReadRideDTO> getRide(@PathVariable long id) {
-		return new ResponseEntity<ReadRideDTO>(new ReadRideDTO(), HttpStatus.OK);
+	public ResponseEntity<RideDTO> getRide(@PathVariable long id) {
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
-	@PutMapping("/{id}")
-	public ResponseEntity<Boolean> cancelRide(@PathVariable long id) {
-		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+	@PutMapping("/{id}/withdraw")
+	public ResponseEntity<RideDTO> withdrawRide(@PathVariable long rideId){
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/panic")

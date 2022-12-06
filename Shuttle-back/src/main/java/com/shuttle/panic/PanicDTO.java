@@ -3,11 +3,12 @@ package com.shuttle.panic;
 import java.time.ZonedDateTime;
 
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.user.dto.UserDTO;
 
 public class PanicDTO {
 	
 	private long id;
-//	UserDTO
+	private UserDTO user;
 	private RideDTO ride;
 	private ZonedDateTime time;
 	private String reason;
@@ -35,6 +36,12 @@ public class PanicDTO {
 	}
 	public void setReason(String reason) {
 		this.reason = reason;
+	}
+	public UserDTO getUser() {
+		return user;
+	}
+	public void setUser(UserDTO user) {
+		this.user = user;
 	}
 	
 	

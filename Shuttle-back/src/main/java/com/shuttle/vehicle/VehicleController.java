@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shuttle.location.dto.LocationDTO;
 
 @RestController
-@RequestMapping("/api//vehicle")
+@RequestMapping("/api/vehicle")
 public class VehicleController {
 
 	@PutMapping
