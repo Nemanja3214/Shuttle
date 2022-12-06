@@ -51,7 +51,7 @@ public class PassengerController {
 		return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
 	}
 
-	@PostMapping("/api/passenger/{activationId}")
+	@GetMapping("/api/passenger/activate/{activationId}")
 	public ResponseEntity<Void> activate(@PathVariable("activationId") Long activationId) {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
