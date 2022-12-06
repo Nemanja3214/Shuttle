@@ -11,7 +11,5 @@ public class Driver extends User {
         super(id, name, surname, profilePicture, telephoneNumber, email, address, password);
     }
 
-    public DriverDTO parse2DTO() {
-        return new DriverDTO(getId(), getName(), getSurname(), getProfilePicture(), getTelephoneNumber(), getEmail(), getAddress());
-    }
+
 }

@@ -23,7 +23,7 @@ public class DriverController {
     @PostMapping("/api/driver")
     public ResponseEntity<DriverDTO> createDriver(@RequestBody Driver driver) {
         driver.setId(Long.valueOf(123));
-        return new ResponseEntity<>(driver.parse2DTO(), HttpStatus.OK);
+        return new ResponseEntity<>(DriverDTO.parse2DTO(driver), HttpStatus.OK);
     }
 
     @GetMapping("/api/driver")
@@ -41,6 +41,7 @@ public class DriverController {
 
     @PutMapping("/api/driver/{id}")
     public ResponseEntity<DriverDTO> updateDriver(@RequestBody DriverDTO driver, @PathVariable(value = "id") Long id) {
+        driver.setId(id);
         return new ResponseEntity<>(driver, HttpStatus.OK);
     }
 
@@ -52,7 +53,7 @@ public class DriverController {
 
     @DeleteMapping("/api/driver/{id}/documents")
     public ResponseEntity<Void> deleteDocsById(@PathVariable(value = "id") Long id) {
-        return new ResponseEntity<Void>(HttpStatus.valueOf(204));
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/api/driver/{id}/documents")
