@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.shuttle.location.dto.LocationPairDTO;
+import com.shuttle.user.dto.BasicUserInfoDTO;
 
 public class CreateRideDTO {
 	
-//	List<PassengerCreationDTO> missing
+	private List<BasicUserInfoDTO> passengers;
 	private List<LocationPairDTO> locations;
 	private String vehicleType;
 	private boolean babyTransport;
@@ -37,6 +38,12 @@ public class CreateRideDTO {
 	}
 	public void setPetTransport(boolean petTransport) {
 		this.petTransport = petTransport;
+	}
+	public List<BasicUserInfoDTO> getPassengers() {
+		return passengers;
+	}
+	public void setPassengers(List<BasicUserInfoDTO> passengers) {
+		this.passengers = passengers;
 	}
 	
 	

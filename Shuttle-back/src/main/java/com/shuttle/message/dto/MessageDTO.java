@@ -1,10 +1,11 @@
 package com.shuttle.message.dto;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public class MessageDTO {
 	private long id;
-	private ZonedDateTime timeOfSending;
+	private LocalDateTime timeOfSending;
 	private long senderId;
 	private long receiverId;
 	private String message;
@@ -17,7 +18,7 @@ public class MessageDTO {
 		super();
 	}
 
-	public MessageDTO(long id, ZonedDateTime timeOfSending, long senderId, long receiverId, String message, String type,
+	public MessageDTO(long id, LocalDateTime timeOfSending, long senderId, long receiverId, String message, String type,
 			long rideId) {
 		super();
 		this.id = id;
@@ -30,7 +31,7 @@ public class MessageDTO {
 	}
 	
 	public static MessageDTO getMock() {
-		return new MessageDTO(123, ZonedDateTime.now(), 123, 123, "The driver is going on a longer route on purpose", "RIDE", 123);
+		return new MessageDTO(123, LocalDateTime.now(), 123, 123, "The driver is going on a longer route on purpose", "RIDE", 123);
 	}
 	
 	public long getId() {
@@ -39,12 +40,15 @@ public class MessageDTO {
 	public void setId(long id) {
 		this.id = id;
 	}
-	public ZonedDateTime getTimeOfSending() {
+	
+	public LocalDateTime getTimeOfSending() {
 		return timeOfSending;
 	}
-	public void setTimeOfSending(ZonedDateTime timeOfSending) {
+
+	public void setTimeOfSending(LocalDateTime timeOfSending) {
 		this.timeOfSending = timeOfSending;
 	}
+
 	public long getSenderId() {
 		return senderId;
 	}

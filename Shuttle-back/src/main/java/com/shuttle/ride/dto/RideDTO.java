@@ -1,19 +1,21 @@
 package com.shuttle.ride.dto;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.shuttle.location.dto.LocationPairDTO;
+import com.shuttle.user.dto.BasicUserInfoDTO;
 
 public class RideDTO{
 
 	private long id;
-	private ZonedDateTime startTime;
-	private ZonedDateTime endTime;
+	private LocalDateTime startTime;
+	private LocalDateTime endTime;
 	private double totalCost;
-//	DriverDTO
-//	List<PassengerDTO>
+	private BasicUserInfoDTO driver;
+	private List<BasicUserInfoDTO> passengers;
 	private int estimatedTimeInMinutes;
 	private String vehicleType;
 	private boolean babyTransport;
@@ -28,14 +30,17 @@ public class RideDTO{
 	public RideDTO() {
 		super();
 	}
-	public RideDTO(long id, ZonedDateTime startTime, ZonedDateTime endTime, double totalCost,
-			int estimatedTimeInMinutes, String vehicleType, boolean babyTransport, boolean petTransport,
-			RejectionDTO rejection, List<LocationPairDTO> locations, String status) {
+	
+	public RideDTO(long id, LocalDateTime startTime, LocalDateTime endTime, double totalCost, BasicUserInfoDTO driver,
+			List<BasicUserInfoDTO> passengers, int estimatedTimeInMinutes, String vehicleType, boolean babyTransport,
+			boolean petTransport, RejectionDTO rejection, List<LocationPairDTO> locations, String status) {
 		super();
 		this.id = id;
 		this.startTime = startTime;
 		this.endTime = endTime;
 		this.totalCost = totalCost;
+		this.driver = driver;
+		this.passengers = passengers;
 		this.estimatedTimeInMinutes = estimatedTimeInMinutes;
 		this.vehicleType = vehicleType;
 		this.babyTransport = babyTransport;
@@ -44,10 +49,14 @@ public class RideDTO{
 		this.locations = locations;
 		this.status = status;
 	}
+
 	public static RideDTO getMock() {
 		List<LocationPairDTO> locations = new ArrayList<>();
 		locations.add(LocationPairDTO.getMock());
-		return new RideDTO(123, ZonedDateTime.now(), ZonedDateTime.now(), 1260, 5, "STANDARDNO",
+		
+		List<BasicUserInfoDTO> passengers = new ArrayList<>();
+		passengers.add(BasicUserInfoDTO.getMock());
+		return new RideDTO(123, LocalDateTime.now(), LocalDateTime.now(), 1260, BasicUserInfoDTO.getMock(), passengers, 5, "STANDARDNO",
 				true, true, RejectionDTO.getMock(), locations, "PENDING");
 	}
 	public long getId() {
@@ -56,16 +65,17 @@ public class RideDTO{
 	public void setId(long id) {
 		this.id = id;
 	}
-	public ZonedDateTime getStartTime() {
+	
+	public LocalDateTime getStartTime() {
 		return startTime;
 	}
-	public void setStartTime(ZonedDateTime startTime) {
+	public void setStartTime(LocalDateTime startTime) {
 		this.startTime = startTime;
 	}
-	public ZonedDateTime getEndTime() {
+	public LocalDateTime getEndTime() {
 		return endTime;
 	}
-	public void setEndTime(ZonedDateTime endTime) {
+	public void setEndTime(LocalDateTime endTime) {
 		this.endTime = endTime;
 	}
 	public double getTotalCost() {
@@ -116,6 +126,22 @@ public class RideDTO{
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public BasicUserInfoDTO getDriver() {
+		return driver;
+	}
+
+	public void setDriver(BasicUserInfoDTO driver) {
+		this.driver = driver;
+	}
+
+	public List<BasicUserInfoDTO> getPassengers() {
+		return passengers;
+	}
+
+	public void setPassengers(List<BasicUserInfoDTO> passengers) {
+		this.passengers = passengers;
 	}
 
 	

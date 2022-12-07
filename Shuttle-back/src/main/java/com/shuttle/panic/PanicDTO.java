@@ -1,5 +1,6 @@
 package com.shuttle.panic;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 import com.shuttle.ride.dto.RideDTO;
@@ -10,7 +11,7 @@ public class PanicDTO {
 	private long id;
 	private UserDTO user;
 	private RideDTO ride;
-	private ZonedDateTime time;
+	private LocalDateTime time;
 	private String reason;
 	
 	
@@ -18,7 +19,7 @@ public class PanicDTO {
 	public PanicDTO() {
 		super();
 	}
-	public PanicDTO(long id, UserDTO user, RideDTO ride, ZonedDateTime time, String reason) {
+	public PanicDTO(long id, UserDTO user, RideDTO ride, LocalDateTime time, String reason) {
 		super();
 		this.id = id;
 		this.user = user;
@@ -27,7 +28,7 @@ public class PanicDTO {
 		this.reason = reason;
 	}
 	public static PanicDTO getMock() {
-		return new PanicDTO(10, UserDTO.getMock(), RideDTO.getMock(), ZonedDateTime.now(), "Driver is drinking while driving");
+		return new PanicDTO(10, UserDTO.getMock(), RideDTO.getMock(), LocalDateTime.now(), "Driver is drinking while driving");
 	}
 	public long getId() {
 		return id;
@@ -41,10 +42,11 @@ public class PanicDTO {
 	public void setRide(RideDTO ride) {
 		this.ride = ride;
 	}
-	public ZonedDateTime getTime() {
+	
+	public LocalDateTime getTime() {
 		return time;
 	}
-	public void setTime(ZonedDateTime time) {
+	public void setTime(LocalDateTime time) {
 		this.time = time;
 	}
 	public String getReason() {

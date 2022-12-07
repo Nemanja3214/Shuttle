@@ -1,11 +1,12 @@
 package com.shuttle.note.dto;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 public class NoteDTO {
 
 	private long id;
-	private ZonedDateTime date;
+	private LocalDateTime date;
 	private String message;
 	
 	
@@ -14,7 +15,7 @@ public class NoteDTO {
 		super();
 	}
 
-	public NoteDTO(long id, ZonedDateTime date, String message) {
+	public NoteDTO(long id, LocalDateTime date, String message) {
 		super();
 		this.id = id;
 		this.date = date;
@@ -22,7 +23,7 @@ public class NoteDTO {
 	}
 	
 	public static NoteDTO getMock() {
-		return new NoteDTO(123, ZonedDateTime.now(), "The passenger has requested and after that aborted the ride");
+		return new NoteDTO(123, LocalDateTime.now(), "The passenger has requested and after that aborted the ride");
 	}
 	
 	public long getId() {
@@ -38,12 +39,15 @@ public class NoteDTO {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public ZonedDateTime getDate() {
+
+	public LocalDateTime getDate() {
 		return date;
 	}
-	public void setDate(ZonedDateTime date) {
+
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
+	
 	
 	
 	
