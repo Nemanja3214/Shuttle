@@ -1,4 +1,4 @@
-package com.shuttle.user;
+package com.shuttle.user.dto;
 
 public class BasicUserInfoDTO {
 	private long id;
