@@ -17,7 +17,6 @@ import com.shuttle.ride.dto.RideDTO;
 @RestController
 @RequestMapping("/api/ride")
 public class RideController {
-//	TODO: review especially
 	
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO rideDTO){

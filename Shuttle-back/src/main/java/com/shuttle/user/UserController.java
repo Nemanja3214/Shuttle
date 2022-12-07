@@ -24,8 +24,7 @@ import com.shuttle.user.dto.UserDTO;
 @RequestMapping("/api/user")
 public class UserController {
 
-	@GetMapping
-	@RequestMapping("/{id}/ride")
+	@GetMapping("/{id}/ride")
 	public ResponseEntity<ListDTO<String>> getUserRides(@PathVariable long id, @PathVariable long page,
 														@PathVariable long size, @PathVariable String sort, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
 		return new ResponseEntity<ListDTO<String>>(new ListDTO<String>(), HttpStatus.OK);
