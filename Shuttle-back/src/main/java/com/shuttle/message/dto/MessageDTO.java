@@ -10,6 +10,29 @@ public class MessageDTO {
 	private String message;
 	private String type;
 	private long rideId;
+	
+	
+	
+	public MessageDTO() {
+		super();
+	}
+
+	public MessageDTO(long id, ZonedDateTime timeOfSending, long senderId, long receiverId, String message, String type,
+			long rideId) {
+		super();
+		this.id = id;
+		this.timeOfSending = timeOfSending;
+		this.senderId = senderId;
+		this.receiverId = receiverId;
+		this.message = message;
+		this.type = type;
+		this.rideId = rideId;
+	}
+	
+	public static MessageDTO getMock() {
+		return new MessageDTO(123, ZonedDateTime.now(), 123, 123, "The driver is going on a longer route on purpose", "RIDE", 123);
+	}
+	
 	public long getId() {
 		return id;
 	}
@@ -52,6 +75,7 @@ public class MessageDTO {
 	public void setRideId(long rideId) {
 		this.rideId = rideId;
 	}
+	
 	
 	
 	

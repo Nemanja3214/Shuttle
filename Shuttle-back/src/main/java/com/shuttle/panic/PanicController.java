@@ -15,6 +15,11 @@ public class PanicController {
 
 	@GetMapping
 	public ResponseEntity<ListDTO<PanicDTO>> getNotifications() {
-		return new ResponseEntity<ListDTO<PanicDTO>>(new ListDTO<PanicDTO>(), HttpStatus.OK);
+		
+		ListDTO<PanicDTO> panics = new ListDTO<>();
+		panics.setTotalCount(243);
+		panics.getResults().add(PanicDTO.getMock());
+		
+		return new ResponseEntity<>(panics, HttpStatus.OK);
 	}
 }

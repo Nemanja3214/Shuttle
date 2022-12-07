@@ -7,6 +7,24 @@ public class NoteDTO {
 	private long id;
 	private ZonedDateTime date;
 	private String message;
+	
+	
+	
+	public NoteDTO() {
+		super();
+	}
+
+	public NoteDTO(long id, ZonedDateTime date, String message) {
+		super();
+		this.id = id;
+		this.date = date;
+		this.message = message;
+	}
+	
+	public static NoteDTO getMock() {
+		return new NoteDTO(123, ZonedDateTime.now(), "The passenger has requested and after that aborted the ride");
+	}
+	
 	public long getId() {
 		return id;
 	}
@@ -26,6 +44,7 @@ public class NoteDTO {
 	public void setDate(ZonedDateTime date) {
 		this.date = date;
 	}
+	
 	
 	
 }

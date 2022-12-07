@@ -1,5 +1,6 @@
 package com.shuttle.ride.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.shuttle.location.dto.LocationPairDTO;
@@ -12,6 +13,7 @@ public class CreateRideDTO {
 	private boolean babyTransport;
 	private boolean petTransport;
 		
+	
 	public List<LocationPairDTO> getLocations() {
 		return locations;
 	}

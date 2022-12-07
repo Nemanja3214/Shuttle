@@ -13,6 +13,22 @@ public class PanicDTO {
 	private ZonedDateTime time;
 	private String reason;
 	
+	
+	
+	public PanicDTO() {
+		super();
+	}
+	public PanicDTO(long id, UserDTO user, RideDTO ride, ZonedDateTime time, String reason) {
+		super();
+		this.id = id;
+		this.user = user;
+		this.ride = ride;
+		this.time = time;
+		this.reason = reason;
+	}
+	public static PanicDTO getMock() {
+		return new PanicDTO(10, UserDTO.getMock(), RideDTO.getMock(), ZonedDateTime.now(), "Driver is drinking while driving");
+	}
 	public long getId() {
 		return id;
 	}

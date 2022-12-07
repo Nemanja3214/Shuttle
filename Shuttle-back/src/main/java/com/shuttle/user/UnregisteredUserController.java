@@ -13,6 +13,6 @@ import com.shuttle.ride.dto.EstimationDTO;
 @RequestMapping("/api/unregisteredUser")
 public class UnregisteredUserController {
 	public ResponseEntity<EstimationDTO> getEstimatedRide(@RequestBody CreateRideEstimationDTO rideDTO) {
-		return new ResponseEntity<EstimationDTO>( new EstimationDTO(), HttpStatus.OK);
+		return new ResponseEntity<EstimationDTO>(EstimationDTO.getMock(), HttpStatus.OK);
 	}
 }

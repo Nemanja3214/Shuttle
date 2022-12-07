@@ -8,6 +8,28 @@ public class UserDTO {
 	private String telephoneNumber;
 	private String email;
 	private String address;
+	
+	
+	
+	public UserDTO() {
+		super();
+	}
+
+	public UserDTO(long id, String name, String surname, String profilePicture, String telephoneNumber, String email,
+			String address) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.profilePicture = profilePicture;
+		this.telephoneNumber = telephoneNumber;
+		this.email = email;
+		this.address = address;
+	}
+
+	public static UserDTO getMock() {
+		return new UserDTO(10, "Pera", "Perić", "U3dhZ2dlciByb2Nrcw==", "+381123123", "pera.peric@email.com", "Bulevar Oslobodjenja 74");
+	}
 
 	public String getSurname() {
 		return surname;
@@ -51,6 +73,7 @@ public class UserDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
 	
 	
 

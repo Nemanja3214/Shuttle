@@ -1,7 +1,7 @@
 package com.shuttle.ride.dto;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.shuttle.location.dto.LocationPairDTO;
@@ -21,6 +21,35 @@ public class RideDTO{
 	private RejectionDTO rejection;
 	private List<LocationPairDTO> locations;
 	private String status;
+	
+	
+	
+	
+	public RideDTO() {
+		super();
+	}
+	public RideDTO(long id, ZonedDateTime startTime, ZonedDateTime endTime, double totalCost,
+			int estimatedTimeInMinutes, String vehicleType, boolean babyTransport, boolean petTransport,
+			RejectionDTO rejection, List<LocationPairDTO> locations, String status) {
+		super();
+		this.id = id;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.totalCost = totalCost;
+		this.estimatedTimeInMinutes = estimatedTimeInMinutes;
+		this.vehicleType = vehicleType;
+		this.babyTransport = babyTransport;
+		this.petTransport = petTransport;
+		this.rejection = rejection;
+		this.locations = locations;
+		this.status = status;
+	}
+	public static RideDTO getMock() {
+		List<LocationPairDTO> locations = new ArrayList<>();
+		locations.add(LocationPairDTO.getMock());
+		return new RideDTO(123, ZonedDateTime.now(), ZonedDateTime.now(), 1260, 5, "STANDARDNO",
+				true, true, RejectionDTO.getMock(), locations, "PENDING");
+	}
 	public long getId() {
 		return id;
 	}

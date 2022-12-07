@@ -37,29 +37,44 @@ public class UserController {
 			@PathParam("sort") Optional<String> sort,
 			@RequestParam @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  Optional<LocalDateTime> from,
 			@PathVariable @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  Optional<LocalDateTime> to) {
-		return new ResponseEntity<ListDTO<String>>(new ListDTO<String>(), HttpStatus.OK);
+		
+		ListDTO<String> rides = new ListDTO<>();
+		rides.setTotalCount(243);
+		rides.getResults().add("string");
+		
+		return new ResponseEntity<>(rides, HttpStatus.OK);
 	}
 	
 	@GetMapping
-	public ResponseEntity<ListDTO<UserDTO>> getUser(
+	public ResponseEntity<ListDTO<UserDTO>> getUsers(
 			@RequestParam Optional<Long>page,
 			@RequestParam Optional<Long> size) {
-		return new ResponseEntity<ListDTO<UserDTO>>(new ListDTO<UserDTO>(), HttpStatus.OK);
+		
+		ListDTO<UserDTO> users = new ListDTO<>();
+		users.setTotalCount(243);
+		users.getResults().add(UserDTO.getMock());
+		
+		return new ResponseEntity<>(users, HttpStatus.OK);
 	}
 	
 	@PostMapping("/login")
 	public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
-		return new ResponseEntity<TokenDTO>(new TokenDTO(), HttpStatus.OK);
+		return new ResponseEntity<TokenDTO>(TokenDTO.getMock(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}/message")
 	public ResponseEntity<ListDTO<MessageDTO>> getMessages(@PathVariable long userId){
-		return new ResponseEntity<ListDTO<MessageDTO>>(new ListDTO<MessageDTO>(), HttpStatus.OK);
+		
+		ListDTO<MessageDTO> messages = new ListDTO<>();
+		messages.setTotalCount(243);
+		messages.getResults().add(MessageDTO.getMock());
+		
+		return new ResponseEntity<>(messages, HttpStatus.OK);
 	}
 	
 	@PostMapping("/{id}/message")
 	public ResponseEntity<MessageDTO> sendMessage(@RequestBody CreateMessageDTO messageDTO) {
-		return new ResponseEntity<MessageDTO>(new MessageDTO(), HttpStatus.OK);
+		return new ResponseEntity<MessageDTO>(MessageDTO.getMock(), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/block")
@@ -74,7 +89,7 @@ public class UserController {
 	
 	@PostMapping("/{id}/note")
 	public ResponseEntity<NoteDTO> createNote(@PathVariable long id, @RequestBody String message) {
-		return new ResponseEntity<NoteDTO>(new NoteDTO(), HttpStatus.OK);
+		return new ResponseEntity<NoteDTO>(NoteDTO.getMock(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}/note")
@@ -82,6 +97,11 @@ public class UserController {
 			@PathVariable long id,
 			@RequestParam Optional<Long> page,
 			@RequestParam Optional<Long> size){
-		return new ResponseEntity<ListDTO<NoteDTO>>(new ListDTO<NoteDTO>(), HttpStatus.OK);
+		
+		ListDTO<NoteDTO> notes = new ListDTO<>();
+		notes.setTotalCount(243);
+		notes.getResults().add(NoteDTO.getMock());
+		
+		return new ResponseEntity<>(notes, HttpStatus.OK);
 	}
 }

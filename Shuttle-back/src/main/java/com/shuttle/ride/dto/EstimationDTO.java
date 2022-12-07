@@ -4,6 +4,16 @@ public class EstimationDTO {
 	private long estimatedTimeInMinutes;
 	private double estimatedCost;
 	
+	
+	
+	public EstimationDTO() {
+		super();
+	}
+	public EstimationDTO(long estimatedTimeInMinutes, double estimatedCost) {
+		super();
+		this.estimatedTimeInMinutes = estimatedTimeInMinutes;
+		this.estimatedCost = estimatedCost;
+	}
 	public long getEstimatedTimeInMinutes() {
 		return estimatedTimeInMinutes;
 	}
@@ -15,6 +25,9 @@ public class EstimationDTO {
 	}
 	public void setEstimatedCost(double estimatedCost) {
 		this.estimatedCost = estimatedCost;
+	}
+	public static EstimationDTO getMock() {
+		return new EstimationDTO(10, 450);
 	}
 	
 	

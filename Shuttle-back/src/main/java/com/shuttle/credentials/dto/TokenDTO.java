@@ -3,6 +3,21 @@ package com.shuttle.credentials.dto;
 public class TokenDTO {
 	private String accessToken;
 	private String refreshToken;
+	
+	
+	
+	public TokenDTO() {
+		super();
+	}
+	
+	public TokenDTO(String accessToken, String refreshToken) {
+		super();
+		this.accessToken = accessToken;
+		this.refreshToken = refreshToken;
+	}
+	public static TokenDTO getMock() {
+		return new TokenDTO("asd", "asd");
+	}
 	public String getAccessToken() {
 		return accessToken;
 	}
