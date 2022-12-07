@@ -63,7 +63,7 @@ public class UserController {
 	}
 	
 	@GetMapping("/{id}/message")
-	public ResponseEntity<ListDTO<MessageDTO>> getMessages(@PathVariable long userId){
+	public ResponseEntity<ListDTO<MessageDTO>> getMessages(@PathVariable long id){
 		
 		ListDTO<MessageDTO> messages = new ListDTO<>();
 		messages.setTotalCount(243);

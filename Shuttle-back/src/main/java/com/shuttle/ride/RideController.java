@@ -39,7 +39,7 @@ public class RideController {
 	}
 	
 	@PutMapping("/{id}/withdraw")
-	public ResponseEntity<RideDTO> withdrawRide(@PathVariable long rideId){
+	public ResponseEntity<RideDTO> withdrawRide(@PathVariable long id){
 		return new ResponseEntity<RideDTO>(RideDTO.getMock(), HttpStatus.OK);
 	}
 	
