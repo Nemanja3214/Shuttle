@@ -24,6 +24,8 @@ public class ReviewController {
 	public ResponseEntity<ReviewDTO> leaveVehicleRating(@PathParam("id") Long vehicleId, @PathParam("rideId") Long rideId, @RequestBody Review review) {
 		review.setId(Long.valueOf(123));
 		review.setPassenger(new Passenger());
+		review.getPassenger().setId(Long.valueOf(213));
+		review.getPassenger().setEmail("dhskjdsh@hskjdhskj");
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
@@ -31,6 +33,8 @@ public class ReviewController {
 	public ResponseEntity<ReviewDTO> leaveDriverRating(@PathParam("id") Long driverId, @PathParam("rideId") Long rideId, @RequestBody Review review) {
 		review.setId(Long.valueOf(123));
 		review.setPassenger(new Passenger());
+		review.getPassenger().setId(Long.valueOf(213));
+		review.getPassenger().setEmail("dhskjdsh@hskjdhskj");
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
@@ -39,6 +43,12 @@ public class ReviewController {
 		List<Review> reviewsMock = new ArrayList<>();
 		Review r = new Review();
 		r.setPassenger(new Passenger());
+		r.setId(Long.valueOf(123));
+		r.setPassenger(new Passenger());
+		r.getPassenger().setId(Long.valueOf(213));
+		r.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		r.setRating(9);
+		r.setComment("fhekjfhewkjrhewjkr32hf");
 		reviewsMock.add(r);
 		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
 	}
@@ -48,6 +58,12 @@ public class ReviewController {
 		List<Review> reviewsMock = new ArrayList<>();
 		Review r = new Review();
 		r.setPassenger(new Passenger());
+		r.setId(Long.valueOf(123));
+		r.setPassenger(new Passenger());
+		r.getPassenger().setId(Long.valueOf(213));
+		r.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		r.setRating(9);
+		r.setComment("fhekjfhewkjrhewjkr32hf");
 		reviewsMock.add(r);
 		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
 	}
@@ -57,8 +73,13 @@ public class ReviewController {
 		Ride r = new Ride();
 		Review vehicleReview = new Review();
 		vehicleReview.setPassenger(new Passenger());
-		Review driverReview = new Review();
-		driverReview.setPassenger(new Passenger());
+		vehicleReview.setId(Long.valueOf(123));
+		vehicleReview.setPassenger(new Passenger());
+		vehicleReview.getPassenger().setId(Long.valueOf(213));
+		vehicleReview.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		vehicleReview.setRating(9);
+		vehicleReview.setComment("fhekjfhewkjrhewjkr32hf");
+		Review driverReview = vehicleReview;
 		return new ResponseEntity<ReviewRideDTO>(new ReviewRideDTO(vehicleReview, driverReview), HttpStatus.OK);
 	}
 }
