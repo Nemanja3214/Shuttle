@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class SwaggerController {
-//    @RequestMapping(value = "/", method = RequestMethod.GET)
-//    public String index() {
-//        return "index";
-//    }
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String index() {
+        return "index";
+    }
 
 }

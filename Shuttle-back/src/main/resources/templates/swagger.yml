@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
   title: Inženjerstvo serverskog sloja - projekat 2022
-  version: 1.0.0
+  version: 1.1.7
 servers:
- - url: http://localhost:4200
+  - url: http://localhost:8080
 tags:
   - name: passenger
     description: Passenger functionalities
@@ -89,8 +89,8 @@ paths:
                                   format: integer
                                   example: 10
                             - $ref: "#/components/schemas/User"
-  /api/passenger/{activationId}:
-    post:
+  /api/passenger/activate/{activationId}:
+    get:
       tags:
         - passenger
       summary: Activate passenger account
@@ -350,7 +350,7 @@ paths:
           schema:
             type: integer
       requestBody:
-        $ref: "#/components/requestBodies/UserDetails"
+        $ref: "#/components/requestBodies/CreateUser"
         required: true
       responses:
         "200":
@@ -410,7 +410,7 @@ paths:
       parameters:
         - name: id
           in: path
-          description: Id of the driver
+          description: Id of the document
           required: true
           schema:
             type: integer
@@ -439,7 +439,22 @@ paths:
           schema:
             type: integer
       requestBody:
-        $ref: "#/components/requestBodies/DriverDocument"
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - documentImage
+              properties:
+                name:
+                  type: string
+                  example: Vozačka dozvola
+                  maxLength: 100
+                documentImage:
+                  type: string
+                  format: byte
+                  example: U3dhZ2dlciByb2Nrcw=
       responses:
         "200":
           description: ""
@@ -771,7 +786,7 @@ paths:
         "404":
           description: Driver does not exist
 
-  /api/driver/{driver-id}/working-hour/{working-hour-id}:
+  /api/driver/working-hour/{working-hour-id}:
     get:
       tags:
         - driver
@@ -779,12 +794,6 @@ paths:
       description: Returns details about the individual working hours of the driver
       operationId: workingHourDetails
       parameters:
-        - name: driver-id
-          in: path
-          description: Id of the driver
-          required: true
-          schema:
-            type: integer
         - name: working-hour-id
           in: path
           description: Id of the working hour
@@ -813,12 +822,6 @@ paths:
       description: Changing individual working hours of the driver
       operationId: changingWorkingHours
       parameters:
-        - name: driver-id
-          in: path
-          description: Id of the driver
-          required: true
-          schema:
-            type: integer
         - name: working-hour-id
           in: path
           description: Id of the working hour
@@ -864,13 +867,73 @@ paths:
                       status:
                         type: string
                         format: string
-                        example: Pending
+                        example: PENDING
         "400":
           description: Invalid data. For example the date is in the wrong format.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/ride/driver/{driverId}/active:
+    get:
+      tags:
+        - ride
+      summary: Active ride for driver
+      description: Return active ride details for the driver
+      operationId: activeRideDriverDetails
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Which driver
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Ride"
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        format: string
+                        example: PENDING
+        "404":
+          description: Active ride does not exist
+  /api/ride/passenger/{passengerId}/active:
+    get:
+      tags:
+        - ride
+      summary: Active ride for passenger
+      description: Return active ride details for the passenger
+      operationId: activeRidePassengerDetails
+      parameters:
+        - name: passengerId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Which driver
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Ride"
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        format: string
+                        example: PENDING
+        "404":
+          description: Active ride does not exist
   /api/ride/{id}:
     get:
       tags:
@@ -898,18 +961,7 @@ paths:
                       status:
                         type: string
                         format: string
-                        example: Pending
-                      rejection:
-                        type: object
-                        properties:
-                          reason:
-                            type: string
-                            format: string
-                            example: Ride is canceled due to previous problems with the passenger
-                          timeOfRejection:
-                            type: string
-                            format: date-time
-                            example: 2022-11-25T17:32:28Z
+                        example: PENDING
         "400":
           description: Invalid data. For example bad Id format.
           content:
@@ -918,6 +970,7 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: Ride does not exist
+  /api/ride/{id}/withdraw:
     put:
       tags:
         - ride
@@ -932,8 +985,19 @@ paths:
           schema:
             type: integer
       responses:
-        "204":
-          description: Ride successfully canceled
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Ride"
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        format: string
+                        example: CANCELED
         "400":
           description: Invalid data. For example bad Id format.
           content:
@@ -1003,7 +1067,7 @@ paths:
                       status:
                         type: string
                         format: string
-                        example: Prihvaceno
+                        example: ACCEPTED
         "400":
           description: Invalid data. For example bad Id format.
           content:
@@ -1040,7 +1104,7 @@ paths:
                       status:
                         type: string
                         format: string
-                        example: Zavrseno
+                        example: FINISHED
         "400":
           description: Invalid data. For example bad Id format.
           content:
@@ -1090,7 +1154,7 @@ paths:
                       status:
                         type: string
                         format: string
-                        example: Odbijeno
+                        example: REJECTED
         "400":
           description: Invalid data. For example bad Id format.
           content:
@@ -1582,7 +1646,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /api/review/{vehicleId}:
+  /api/review/{rideId}/vehicle/{id}:
     post:
       tags:
         - review
@@ -1590,9 +1654,15 @@ paths:
       description: Creating a review about the vehicle
       operationId: reviewCreationForVehicle
       parameters:
-        - name: vehicleId
+        - name: id
           in: path
           description: Id of the vehicle
+          required: true
+          schema:
+            type: integer
+        - name: rideId
+          in: path
+          description: Id of the of the ride
           required: true
           schema:
             type: integer
@@ -1616,6 +1686,7 @@ paths:
                   format: string
                   example: The vehicle was bad and dirty
                   maxLength: 500
+
       responses:
         "200":
           description: ""
@@ -1634,11 +1705,13 @@ paths:
                     example: 3
                     minimum: 1
                     maximum: 10
-                  review:
+                  comment:
                     type: string
                     format: string
                     example: The driver was driving really fast
                     maxLength: 500
+                  passenger:
+                    $ref: "#/components/schemas/UserRef"
         "400":
           description: Invalid data or it is not possible to create a review
           content:
@@ -1647,6 +1720,8 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: Ride does not exist
+
+  /api/review/vehicle/{id}:
     get:
       tags:
         - review
@@ -1654,7 +1729,7 @@ paths:
       description: Get the reviews for the specific vehicle
       operationId: gettingTheReviewForVehicle
       parameters:
-        - name: vehicleId
+        - name: id
           in: path
           description: Id of the vehicle
           required: true
@@ -1690,8 +1765,10 @@ paths:
                               format: string
                               example: The driver was driving too fast
                               maxLength: 500
+                            passenger:
+                              $ref: "#/components/schemas/UserRef"
 
-  /api/review/{driverId}:
+  /api/review/{rideId}/driver/{id}:
     post:
       tags:
         - review
@@ -1699,9 +1776,15 @@ paths:
       description: Creating a review about the driver
       operationId: reviewCreation
       parameters:
-        - name: driverId
+        - name: id
           in: path
           description: Id of the driver
+          required: true
+          schema:
+            type: integer
+        - name: rideId
+          in: path
+          description: Id of the of the ride
           required: true
           schema:
             type: integer
@@ -1743,11 +1826,13 @@ paths:
                     example: 3
                     minimum: 1
                     maximum: 10
-                  review:
+                  comment:
                     type: string
                     format: string
                     example: The driver was driving really fast
                     maxLength: 500
+                  passenger:
+                    $ref: "#/components/schemas/UserRef"
         "400":
           description: Invalid data or it is not possible to create a review
           content:
@@ -1756,6 +1841,8 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: Ride does not exist
+
+  /api/review/driver/{id}:
     get:
       tags:
         - review
@@ -1763,7 +1850,7 @@ paths:
       description: Get the reviews for the specific driver
       operationId: gettingTheReview
       parameters:
-        - name: driverId
+        - name: id
           in: path
           description: Id of the ride
           required: true
@@ -1799,8 +1886,10 @@ paths:
                               format: string
                               example: The driver was driving too fast
                               maxLength: 500
+                            passenger:
+                              $ref: "#/components/schemas/UserRef"
 
-  /api/reviews/{rideId}:
+  /api/review/{rideId}:
     get:
       tags:
         - review
@@ -1820,44 +1909,50 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  vehicleReview:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        format: integer
-                        example: 123
-                      rating:
-                        type: integer
-                        format: integer
-                        example: 3
-                        minimum: 1
-                        maximum: 10
-                      comment:
-                        type: string
-                        format: string
-                        example: The vehicle was bad and dirty
-                        maxLength: 500
-                  driverReview:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        format: integer
-                        example: 123
-                      rating:
-                        type: integer
-                        format: integer
-                        example: 3
-                        minimum: 1
-                        maximum: 10
-                      comment:
-                        type: string
-                        format: string
-                        example: The driver was driving too fast
-                        maxLength: 500
+                type: array
+                items:
+                  type: object
+                  properties:
+                    vehicleReview:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: integer
+                          example: 123
+                        rating:
+                          type: integer
+                          format: integer
+                          example: 3
+                          minimum: 1
+                          maximum: 10
+                        comment:
+                          type: string
+                          format: string
+                          example: The vehicle was bad and dirty
+                          maxLength: 500
+                        passenger:
+                          $ref: "#/components/schemas/UserRef"
+                    driverReview:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: integer
+                          example: 123
+                        rating:
+                          type: integer
+                          format: integer
+                          example: 3
+                          minimum: 1
+                          maximum: 10
+                        comment:
+                          type: string
+                          format: string
+                          example: The driver was driving too fast
+                          maxLength: 500
+                        passenger:
+                          $ref: "#/components/schemas/UserRef"
 
 components:
   schemas:
@@ -1887,13 +1982,10 @@ components:
         email:
           type: string
           format: email
-        type:
-          type: string
-          example: VOZAC
     Error:
       type: object
       properties:
-        poruka:
+        message:
           type: string
           example: For example a wrong format of some field in the request
     User:
@@ -1993,11 +2085,15 @@ components:
       properties:
         departure:
           $ref: "#/components/schemas/GeoCoordinate"
-        destinations:
+        destination:
           $ref: "#/components/schemas/GeoCoordinate"
     Ride:
       type: object
       properties:
+        id:
+          type: integer
+          format: integer
+          example: 123
         startTime:
           type: string
           format: date-time
@@ -2025,6 +2121,22 @@ components:
           type: boolean
         petTransport:
           type: boolean
+        rejection:
+          type: object
+          properties:
+            reason:
+              type: string
+              format: string
+              example: Ride is canceled due to previous problems with the passenger
+            timeOfRejection:
+              type: string
+              format: date-time
+              example: 2022-11-25T17:32:28Z
+        locations:
+          type: array
+          description: List of locations which defines the order of the ride
+          items:
+            $ref: "#/components/schemas/LocationsForRide"
     Review:
       type: object
       properties:
@@ -2125,14 +2237,10 @@ components:
           type: integer
           format: integer
           example: 10
-        userId:
-          type: integer
-          format: integer
-          example: 123
-        rideId:
-          type: integer
-          format: integer
-          example: 123
+        user:
+          $ref: "#/components/schemas/User"
+        ride:
+          $ref: "#/components/schemas/Ride"
         time:
           type: string
           format: date-time
@@ -2191,7 +2299,7 @@ components:
           maxLength: 500
         type:
           type: string
-          example: VOZNJA
+          example: RIDE
         rideId:
           type: integer
           format: integer
