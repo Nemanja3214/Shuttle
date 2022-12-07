@@ -1,7 +1,9 @@
 package com.shuttle.user;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
@@ -20,18 +23,27 @@ import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
 import com.shuttle.user.dto.UserDTO;
 
+import jakarta.websocket.server.PathParam;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
 
 	@GetMapping("/{id}/ride")
-	public ResponseEntity<ListDTO<String>> getUserRides(@PathVariable long id, @PathVariable long page,
-														@PathVariable long size, @PathVariable String sort, @PathVariable LocalDateTime from, @PathVariable LocalDateTime to) {
+	public ResponseEntity<ListDTO<String>> getUserRides(
+			@PathVariable long id,
+			@PathParam("page") Optional<Long> page,
+			@PathParam("size") Optional<Long> size,
+			@PathParam("sort") Optional<String> sort,
+			@RequestParam @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  Optional<LocalDateTime> from,
+			@PathVariable @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  Optional<LocalDateTime> to) {
 		return new ResponseEntity<ListDTO<String>>(new ListDTO<String>(), HttpStatus.OK);
 	}
 	
 	@GetMapping
-	public ResponseEntity<ListDTO<UserDTO>> getUser(@PathVariable long page, @PathVariable long size) {
+	public ResponseEntity<ListDTO<UserDTO>> getUser(
+			@RequestParam Optional<Long>page,
+			@RequestParam Optional<Long> size) {
 		return new ResponseEntity<ListDTO<UserDTO>>(new ListDTO<UserDTO>(), HttpStatus.OK);
 	}
 	
@@ -51,22 +63,25 @@ public class UserController {
 	}
 	
 	@PutMapping("/{id}/block")
-	public ResponseEntity<Boolean> block(@PathVariable long userId){
+	public ResponseEntity<Boolean> block(@PathVariable long id){
 		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
 	}
 	
 	@PutMapping("/{id}/unblock")
-	public ResponseEntity<Boolean> unblock(@PathVariable long userId) {
+	public ResponseEntity<Boolean> unblock(@PathVariable long id) {
 		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
 	}
 	
 	@PostMapping("/{id}/note")
-	public ResponseEntity<NoteDTO> createNote(@PathVariable long userId, @RequestBody String message) {
+	public ResponseEntity<NoteDTO> createNote(@PathVariable long id, @RequestBody String message) {
 		return new ResponseEntity<NoteDTO>(new NoteDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}/note")
-	public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(@PathVariable long id, @PathVariable long page, @PathVariable long size){
+	public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(
+			@PathVariable long id,
+			@RequestParam Optional<Long> page,
+			@RequestParam Optional<Long> size){
 		return new ResponseEntity<ListDTO<NoteDTO>>(new ListDTO<NoteDTO>(), HttpStatus.OK);
 	}
 }

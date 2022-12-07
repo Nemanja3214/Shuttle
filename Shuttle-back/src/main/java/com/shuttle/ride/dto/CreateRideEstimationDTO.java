@@ -4,9 +4,7 @@ import java.util.List;
 
 import com.shuttle.location.dto.LocationPairDTO;
 
-public class CreateRideDTO {
-	
-//	List<PassengerCreationDTO> missing
+public class CreateRideEstimationDTO {
 	private List<LocationPairDTO> locations;
 	private String vehicleType;
 	private boolean babyTransport;
@@ -37,6 +35,4 @@ public class CreateRideDTO {
 		this.petTransport = petTransport;
 	}
 	
-	
-
 }

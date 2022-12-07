@@ -25,12 +25,12 @@ public class RideController {
 	
 	@GetMapping("/driver/{driverId}/active")
 	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
-		return new ResponseEntity<>(new RideDTO(), HttpStatus.OK);
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/passenger/{passengerId}/active")
 	public ResponseEntity<RideDTO> getActiveRideByPassenger(@PathVariable long passengerId){
-		return new ResponseEntity<>(new RideDTO(), HttpStatus.OK);
+		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")

@@ -2,6 +2,7 @@ package com.shuttle.ride.dto;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.List;
 
 import com.shuttle.location.dto.LocationPairDTO;
 
@@ -18,7 +19,7 @@ public class RideDTO{
 	private boolean babyTransport;
 	private boolean petTransport;
 	private RejectionDTO rejection;
-	private Collection<LocationPairDTO> locations;
+	private List<LocationPairDTO> locations;
 	private String status;
 	public long getId() {
 		return id;
@@ -74,10 +75,11 @@ public class RideDTO{
 	public void setRejection(RejectionDTO rejection) {
 		this.rejection = rejection;
 	}
-	public Collection<LocationPairDTO> getLocations() {
+	
+	public List<LocationPairDTO> getLocations() {
 		return locations;
 	}
-	public void setLocations(Collection<LocationPairDTO> locations) {
+	public void setLocations(List<LocationPairDTO> locations) {
 		this.locations = locations;
 	}
 	public String getStatus() {
