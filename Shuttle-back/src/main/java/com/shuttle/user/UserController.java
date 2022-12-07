@@ -1,7 +1,6 @@
 package com.shuttle.user;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -32,11 +31,11 @@ public class UserController {
 	@GetMapping("/{id}/ride")
 	public ResponseEntity<ListDTO<String>> getUserRides(
 			@PathVariable long id,
-			@PathParam("page") Optional<Long> page,
-			@PathParam("size") Optional<Long> size,
-			@PathParam("sort") Optional<String> sort,
-			@RequestParam @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  Optional<LocalDateTime> from,
-			@PathVariable @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  Optional<LocalDateTime> to) {
+			@PathParam("page") long page,
+			@PathParam("size") long size,
+			@PathParam("sort") String sort,
+			@RequestParam @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  LocalDateTime from,
+			@PathVariable @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  LocalDateTime to) {
 		
 		ListDTO<String> rides = new ListDTO<>();
 		rides.setTotalCount(243);
@@ -47,8 +46,8 @@ public class UserController {
 	
 	@GetMapping
 	public ResponseEntity<ListDTO<UserDTO>> getUsers(
-			@RequestParam Optional<Long>page,
-			@RequestParam Optional<Long> size) {
+			@RequestParam Long page,
+			@RequestParam Long size) {
 		
 		ListDTO<UserDTO> users = new ListDTO<>();
 		users.setTotalCount(243);
@@ -95,8 +94,8 @@ public class UserController {
 	@GetMapping("/{id}/note")
 	public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(
 			@PathVariable long id,
-			@RequestParam Optional<Long> page,
-			@RequestParam Optional<Long> size){
+			@RequestParam long page,
+			@RequestParam long size){
 		
 		ListDTO<NoteDTO> notes = new ListDTO<>();
 		notes.setTotalCount(243);

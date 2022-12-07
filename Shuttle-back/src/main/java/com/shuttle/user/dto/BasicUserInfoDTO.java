@@ -4,6 +4,12 @@ public class BasicUserInfoDTO {
 	private long id;
 	private String email;
 	
+	
+	
+	public BasicUserInfoDTO() {
+		super();
+	}
+
 	public BasicUserInfoDTO(long id, String email) {
 		super();
 		this.id = id;

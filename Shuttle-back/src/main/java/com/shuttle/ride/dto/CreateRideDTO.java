@@ -13,8 +13,13 @@ public class CreateRideDTO {
 	private String vehicleType;
 	private boolean babyTransport;
 	private boolean petTransport;
+	
+	
 		
 	
+	public CreateRideDTO() {
+		super();
+	}
 	public List<LocationPairDTO> getLocations() {
 		return locations;
 	}
