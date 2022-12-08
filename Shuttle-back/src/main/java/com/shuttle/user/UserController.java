@@ -1,8 +1,5 @@
 package com.shuttle.user;
 
-import java.time.LocalDateTime;
-
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,8 +31,8 @@ public class UserController {
 			@PathParam("page") long page,
 			@PathParam("size") long size,
 			@PathParam("sort") String sort,
-			@RequestParam @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  LocalDateTime from,
-			@PathVariable @DateTimeFormat(pattern="HH:mm:ss dd.MM.yyyy")  LocalDateTime to) {
+			@RequestParam String from,
+			@RequestParam String to) {
 		
 		ListDTO<String> rides = new ListDTO<>();
 		rides.setTotalCount(243);
