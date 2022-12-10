@@ -44,11 +44,11 @@ public class DriverController {
     @GetMapping("/api/driver/{id}/documents")
     public ResponseEntity<DriverDocumentDTO> getDriverDocs(@PathVariable(value = "id") Long id) {
         DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
-        return new ResponseEntity<>(driverControllerMockProvider.gedDriverDocument(), HttpStatus.OK);
+        return new ResponseEntity<>(driverControllerMockProvider.getDriverDocument(), HttpStatus.OK);
     }
 
-    @DeleteMapping("/api/driver/{id}/documents")
-    public ResponseEntity<Void> deleteDocsById(@PathVariable(value = "id") Long id) {
+    @DeleteMapping("/api/driver/document/{document-id}")
+    public ResponseEntity<Void> deleteDocsById(@PathVariable(value = "document-id") Long documentId) {
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
@@ -61,8 +61,7 @@ public class DriverController {
 
     @GetMapping("/api/driver/{id}/vehicle")
     public ResponseEntity<VehicleDTO> getVehicle(@PathVariable(value = "id") Long id) {
-        VehicleDTO vehicleDTO = new VehicleDTO();
-        vehicleDTO.setId(id);
+        VehicleDTO vehicleDTO = new DriverControllerMockProvider().getDriverVehicleDTO(id);
         return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
     }
 
@@ -78,7 +77,7 @@ public class DriverController {
         return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
     }
 
-    @GetMapping("/api/driver/{id}/working-hours")
+    @GetMapping("/api/driver/{id}/working-hour")
     public ResponseEntity<ListDTO<WorkHours>> getWorkHoursHistory(@PathVariable(value = "id") Long id,
                                                                   @PathParam("page") int page, @PathParam("size") int size,
                                                                   @PathParam("from") String from, @PathParam("to") String to) {
@@ -89,7 +88,7 @@ public class DriverController {
     }
 
 
-    @PostMapping("/api/driver/{id}/working-hours")
+    @PostMapping("/api/driver/{id}/working-hour")
     public ResponseEntity<WorkHours> createWorkHours(@PathVariable(value = "id") Long id) {
         WorkHours workHoursCollectionDTO = new WorkHours();
         workHoursCollectionDTO.setId(id);
