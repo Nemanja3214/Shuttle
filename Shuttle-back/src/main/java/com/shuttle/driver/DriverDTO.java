@@ -1,7 +1,5 @@
 package com.shuttle.driver;
 
-import com.shuttle.common.Entity;
-import com.shuttle.user.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 

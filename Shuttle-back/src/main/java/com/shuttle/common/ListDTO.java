@@ -1,10 +1,16 @@
 package com.shuttle.common;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListDTO<T> {
 	private long totalCount;
 	private List<T> results;
+	
+	public ListDTO() {
+		super();
+		this.results = new ArrayList<>();
+	}
 	public long getTotalCount() {
 		return totalCount;
 	}

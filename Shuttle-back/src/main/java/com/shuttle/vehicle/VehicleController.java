@@ -14,8 +14,7 @@ import com.shuttle.location.dto.LocationDTO;
 @RequestMapping("/api/vehicle")
 public class VehicleController {
 
-	@PutMapping
-	@RequestMapping("/{id}/location")
+	@PutMapping("/{id}/location")
 	public ResponseEntity<Boolean>changeLocation(@PathVariable long id, @RequestBody LocationDTO location) {
 		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
 	}

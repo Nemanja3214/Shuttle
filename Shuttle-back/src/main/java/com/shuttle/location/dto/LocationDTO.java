@@ -5,6 +5,18 @@ public class LocationDTO {
 	private Double latitude;
 	private Double longitude;
 	
+	public LocationDTO() {
+		super();
+	}
+	public LocationDTO(String address, double latitude, double longitude) {
+		super();
+		this.address = address;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+	public static LocationDTO getMock() {
+		return new LocationDTO("Bulevar oslobodjenja 46", 45.267136, 19.833549);
+	}
 	public String getAddress() {
 		return address;
 	}
@@ -23,5 +35,4 @@ public class LocationDTO {
 	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	
 }

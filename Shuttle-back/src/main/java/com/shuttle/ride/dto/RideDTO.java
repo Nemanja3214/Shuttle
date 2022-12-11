@@ -25,9 +25,5 @@ public class RideDTO{
 	private boolean babyTransport;
 	private boolean petTransport;
 	private RejectionDTO rejection;
-	private Collection<LocationPairDTO> locations;
 	private String status;
-
-
-	
 }
