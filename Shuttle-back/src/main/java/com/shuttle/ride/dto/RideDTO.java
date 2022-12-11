@@ -27,19 +27,20 @@ public class RideDTO {
 	private Vehicle.Type vehicleType;
 	private RejectionDTO rejection;
 	private String status;
-	
+
 	public RideDTO(Ride ride) {
 		this.id = ride.getId();
 		this.locations = new ArrayList<RouteDTO>();
-		
-		
+
 		List<Location> ls = ride.getLocations().stream().toList();
 		for (int i = 0; i < ls.size(); i += 2) {
 			RouteDTO d = new RouteDTO(new LocationDTO(ls.get(i)), new LocationDTO(ls.get(i + 1)));
 			locations.add(d);
 		}
-		
-		//this.locations.add(new RouteDTO(new LocationDTO(new Location()), new LocationDTO(new Location())));// ride.getLocations().stream().map(l -> new LocationDTO(l)).toList();
+
+		// this.locations.add(new RouteDTO(new LocationDTO(new Location()), new
+		// LocationDTO(new Location())));// ride.getLocations().stream().map(l -> new
+		// LocationDTO(l)).toList();
 		this.startTime = ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME);
 		this.endTime = ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME);
 		this.totalCost = ride.getTotalCost();
@@ -51,14 +52,15 @@ public class RideDTO {
 		this.vehicleType = ride.getVehicleType();
 		this.rejection = new RejectionDTO(new Rejection());
 	}
-	
+
 	public RideDTO() {
 		super();
 	}
-	
+
 	public RideDTO(long id, LocalDateTime startTime, LocalDateTime endTime, Integer totalCost, RideDriverDTO driver,
-			List<RidePassengerDTO> passengers, int estimatedTimeInMinutes, Vehicle.Type vehicleType, boolean babyTransport,
-			boolean petTransport, RejectionDTO rejection, List<RouteDTO> locations, String status) {
+			List<RidePassengerDTO> passengers, int estimatedTimeInMinutes, Vehicle.Type vehicleType,
+			boolean babyTransport, boolean petTransport, RejectionDTO rejection, List<RouteDTO> locations,
+			String status) {
 		super();
 		this.id = id;
 		this.startTime = startTime.format(DateTimeFormatter.ISO_DATE_TIME);
@@ -180,6 +182,5 @@ public class RideDTO {
 	public void setRejection(RejectionDTO rejection) {
 		this.rejection = rejection;
 	}
-	
-	
+
 }
