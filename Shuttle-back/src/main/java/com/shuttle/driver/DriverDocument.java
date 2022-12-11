@@ -7,6 +7,7 @@ public class DriverDocument extends Entity {
 	private String image;
 	private Driver driver;
 
+
 	public String getName() {
 		return name;
 	}

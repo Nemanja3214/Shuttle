@@ -1,6 +1,7 @@
 package com.shuttle.ride;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.shuttle.common.Entity;
