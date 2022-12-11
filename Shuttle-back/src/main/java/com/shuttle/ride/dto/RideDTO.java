@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
-import com.shuttle.location.LocationDTO;
+import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.Route;
 import com.shuttle.location.RouteDTO;
 import com.shuttle.passenger.Passenger;
