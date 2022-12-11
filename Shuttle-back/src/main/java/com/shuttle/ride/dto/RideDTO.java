@@ -3,15 +3,20 @@ package com.shuttle.ride.dto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
+import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.location.LocationDTO;
 import com.shuttle.location.Route;
 import com.shuttle.location.RouteDTO;
+import com.shuttle.passenger.Passenger;
+import com.shuttle.passenger.PassengerDTO;
 import com.shuttle.ride.Rejection;
 import com.shuttle.ride.Ride;
 import com.shuttle.vehicle.Vehicle;
+import com.shuttle.vehicle.Vehicle.Type;
 
 public class RideDTO {
 	private Long id;
@@ -26,7 +31,7 @@ public class RideDTO {
 	private Boolean petTransport;
 	private Vehicle.Type vehicleType;
 	private RejectionDTO rejection;
-	private String status;
+	private Ride.Status status;
 
 	public RideDTO(Ride ride) {
 		this.id = ride.getId();
@@ -38,9 +43,6 @@ public class RideDTO {
 			locations.add(d);
 		}
 
-		// this.locations.add(new RouteDTO(new LocationDTO(new Location()), new
-		// LocationDTO(new Location())));// ride.getLocations().stream().map(l -> new
-		// LocationDTO(l)).toList();
 		this.startTime = ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME);
 		this.endTime = ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME);
 		this.totalCost = ride.getTotalCost();
@@ -51,41 +53,68 @@ public class RideDTO {
 		this.petTransport = ride.getPetTransport();
 		this.vehicleType = ride.getVehicleType();
 		this.rejection = new RejectionDTO(new Rejection());
+		this.status = ride.getStatus();
 	}
 
 	public RideDTO() {
 		super();
 	}
 
-	public RideDTO(long id, LocalDateTime startTime, LocalDateTime endTime, Integer totalCost, RideDriverDTO driver,
-			List<RidePassengerDTO> passengers, int estimatedTimeInMinutes, Vehicle.Type vehicleType,
-			boolean babyTransport, boolean petTransport, RejectionDTO rejection, List<RouteDTO> locations,
-			String status) {
-		super();
-		this.id = id;
-		this.startTime = startTime.format(DateTimeFormatter.ISO_DATE_TIME);
-		this.endTime = endTime.format(DateTimeFormatter.ISO_DATE_TIME);
-		this.totalCost = totalCost;
-		this.driver = driver;
-		this.passengers = passengers;
-		this.estimatedTimeInMinutes = estimatedTimeInMinutes;
-		this.vehicleType = vehicleType;
-		this.babyTransport = babyTransport;
-		this.petTransport = petTransport;
-		this.rejection = rejection;
-		this.locations = locations;
-		this.status = status;
+	public static RideDTO getMock() {
+		Ride r = new Ride();
+		r.setDriver(new Driver());
+		
+		r.setId(Long.valueOf(43798));
+		
+		r.getDriver().setId(Long.valueOf(0));
+		r.getDriver().setAddress("ASBABS");
+		r.getDriver().setEmail("haksjah");
+		r.getDriver().setName("SJKAHS");
+		r.getDriver().setSurname("ahsjka");
+		r.getDriver().setPassword("hdjk");
+		r.getDriver().setTelephoneNumber("hdkwdhswkjdhsjk");
+		r.getDriver().setProfilePicture("hjksfhfkrjefyewiuf4yur983hf==");
+		
+		r.setPassengers(new HashSet<>());
+		
+		Passenger p = new Passenger();
+		p.setId(Long.valueOf(0));
+		p.setAddress("ASBABS");
+		p.setEmail("haksjah");
+		p.setName("SJKAHS");
+		p.setSurname("ahsjka");
+		p.setPassword("hdjk");
+		p.setTelephoneNumber("hdkwdhswkjdhsjk");
+		p.setProfilePicture("hjksfhfkrjefyewiuf4yur983hf==");
+		r.getPassengers().add(p);
+		
+		Location l = new Location();
+		l.setLatitude(23.32);
+		l.setLongitude(32.23);
+		l.setAddress("hfdkjdfhkdsj");
+		
+		// We need two (specifically, an even number) to build RidePageDTO and it's a set so no duplicates.
+		Location l2 = new Location();
+		l2.setLatitude(23.32);
+		l2.setLongitude(542.23);
+		l2.setAddress("ds");
+				
+		r.setLocations(new HashSet<>());
+		r.getLocations().add(l);
+		r.getLocations().add(l2);
+		
+		
+		r.setStartTime(LocalDateTime.now());
+		r.setEndTime(LocalDateTime.now());
+		r.setTotalCost(13902);
+		r.setBabyTransport(false);
+		r.setPetTransport(false);
+		r.setEstimatedTimeInMinutes(12);
+		r.setVehicleType(Type.STANDARD);
+		r.setStatus(Ride.Status.Pending);
+		
+		return new RideDTO(r);
 	}
-
-//	public static RideDTO getMock() {
-//		List<LocationPairDTO> locations = new ArrayList<>();
-//		locations.add(LocationPairDTO.getMock());
-//		
-//		List<BasicUserInfoDTO> passengers = new ArrayList<>();
-//		passengers.add(BasicUserInfoDTO.getMock());
-//		return new RideDTO(123, LocalDateTime.now(), LocalDateTime.now(), 1260, BasicUserInfoDTO.getMock(), passengers, 5, "STANDARDNO",
-//				true, true, RejectionDTO.getMock(), locations, "PENDING");
-//	}
 
 	public Long getId() {
 		return id;
@@ -183,4 +212,11 @@ public class RideDTO {
 		this.rejection = rejection;
 	}
 
+	public Ride.Status getStatus() {
+		return status;
+	}
+
+	public void setStatus(Ride.Status status) {
+		this.status = status;
+	}
 }
