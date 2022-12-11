@@ -11,7 +11,7 @@ import com.shuttle.ride.dto.CreateRideEstimationDTO;
 import com.shuttle.ride.dto.EstimationDTO;
 
 @RestController
-@RequestMapping("/api/unregisteredUser")
+@RequestMapping("/api/unregisteredUser/")
 public class UnregisteredUserController {
 	@PostMapping
 	public ResponseEntity<EstimationDTO> getEstimatedRide(@RequestBody CreateRideEstimationDTO rideDTO) {
