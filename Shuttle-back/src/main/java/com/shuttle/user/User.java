@@ -1,94 +1,46 @@
 package com.shuttle.user;
 
 import com.shuttle.common.Entity;
+import com.shuttle.credentials.dto.Credentials;
+import com.shuttle.note.Note;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+import javax.management.Notification;
+import java.util.List;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@jakarta.persistence.Entity
 public class User extends Entity {
-	private String name;
-	private String surname;
-	private String profilePicture;
-	private String telephoneNumber;
-	private String email;
-	private String address;
-	private String password;
 
-	public User() {
-	}
+    private String name;
+    private String surname;
+    private String profilePicture;
+    private String telephoneNumber;
+    @OneToMany
+    private List<Note> notifications;
+	@OneToOne
+    private Credentials credentials;
+    private String address;
 
-	public User(Long id, String name, String surname, String profilePicture, String telephoneNumber, String email, String address) {
-		this.name = name;
-		this.surname = surname;
-		this.profilePicture = profilePicture;
-		this.telephoneNumber = telephoneNumber;
-		this.email = email;
-		this.address = address;
-		this.setId(id);
-	}
 
-	public User(Long id, String name, String surname, String profilePicture, String telephoneNumber, String email, String address, String password) {
-		this.name = name;
-		this.surname = surname;
-		this.profilePicture = profilePicture;
-		this.telephoneNumber = telephoneNumber;
-		this.email = email;
-		this.address = address;
-		this.password = password;
-		this.setId(id);
-	}
+    public User(Long id, String name, String surname, String profilePicture, String telephoneNumber, Credentials credentials, String address) {
+        this.name = name;
+        this.surname = surname;
+        this.profilePicture = profilePicture;
+        this.telephoneNumber = telephoneNumber;
+        this.credentials = credentials;
+        this.address = address;
+        this.setId(id);
+    }
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getSurname() {
-		return surname;
-	}
-
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
-
-	public String getProfilePicture() {
-		return profilePicture;
-	}
-
-	public void setProfilePicture(String profilePicture) {
-		this.profilePicture = profilePicture;
-	}
-
-	public String getTelephoneNumber() {
-		return telephoneNumber;
-	}
-
-	public void setTelephoneNumber(String telephoneNumber) {
-		this.telephoneNumber = telephoneNumber;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
 
 }

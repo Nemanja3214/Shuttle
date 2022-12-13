@@ -1,24 +1,16 @@
 package com.shuttle.driver;
 
 import com.shuttle.common.Entity;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+@Data
 public class DriverDocumentDTO extends Entity {
 
-    @Getter
-    @Setter
     Long id;
 
-    @Getter
-    @Setter
     String name;
 
-    @Getter
-    @Setter
     String documentImage;
 
-    @Getter
-    @Setter
     Long driverId;
 }

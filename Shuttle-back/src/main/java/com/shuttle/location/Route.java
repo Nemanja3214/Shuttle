@@ -1,22 +1,17 @@
 package com.shuttle.location;
 
-public class Route {
-	private Location departure;
-	private Location destination;
-	
-	public Location getDeparture() {
-		return departure;
-	}
-	
-	public void setDeparture(Location departure) {
-		this.departure = departure;
-	}
-	
-	public Location getDestination() {
-		return destination;
-	}
-	
-	public void setDestination(Location destination) {
-		this.destination = destination;
-	}
+import com.shuttle.common.Entity;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.List;
+
+@EqualsAndHashCode(callSuper = true)
+@jakarta.persistence.Entity
+@Data
+public class Route extends Entity {
+	@ManyToMany
+	List<Location> locations;
 }

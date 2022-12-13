@@ -11,8 +11,8 @@ public class RouteDTO {
 	}
 	
 	public RouteDTO(Route r) {
-		this.departure = new LocationDTO(r.getDeparture());
-		this.destination = new LocationDTO(r.getDestination());
+//		this.departure = new LocationDTO(r.getDeparture());
+//		this.destination = new LocationDTO(r.getDestination());
 
 	}
 	

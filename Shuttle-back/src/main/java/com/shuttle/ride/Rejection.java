@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 
 import com.shuttle.common.Entity;
 import com.shuttle.user.User;
+import jakarta.persistence.ManyToOne;
 
 public class Rejection extends Entity {
 	private Ride ride;
 	private String reason;
+	@ManyToOne
 	private User user;
 	private LocalDateTime timeOfRejection;
 

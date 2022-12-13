@@ -5,42 +5,19 @@ import java.time.LocalDateTime;
 import com.shuttle.common.Entity;
 import com.shuttle.ride.Ride;
 import com.shuttle.user.User;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import lombok.Data;
 
+@Data
+@jakarta.persistence.Entity
 public class Panic extends Entity {
+	@ManyToOne
 	private User user;
+	@ManyToOne
 	private Ride ride;
 	private LocalDateTime time;
 	private String reason;
 
-	public User getUser() {
-		return user;
-	}
 
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public Ride getRide() {
-		return ride;
-	}
-
-	public void setRide(Ride ride) {
-		this.ride = ride;
-	}
-
-	public LocalDateTime getTime() {
-		return time;
-	}
-
-	public void setTime(LocalDateTime time) {
-		this.time = time;
-	}
-
-	public String getReason() {
-		return reason;
-	}
-
-	public void setReason(String reason) {
-		this.reason = reason;
-	}
 }
