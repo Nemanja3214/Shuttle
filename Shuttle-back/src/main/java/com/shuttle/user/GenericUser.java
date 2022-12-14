@@ -5,7 +5,6 @@ import com.shuttle.note.Note;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -14,7 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class User {
+@Inheritance(strategy = InheritanceType.JOINED)
+public class GenericUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;

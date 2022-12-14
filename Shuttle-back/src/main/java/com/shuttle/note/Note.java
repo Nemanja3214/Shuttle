@@ -1,9 +1,8 @@
 package com.shuttle.note;
 
-import com.shuttle.user.User;
+import com.shuttle.user.GenericUser;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
@@ -17,5 +16,5 @@ public class Note {
     private String title;
     private LocalDateTime timeCreated;
     @OneToOne
-    private User user;
+    private GenericUser user;
 }

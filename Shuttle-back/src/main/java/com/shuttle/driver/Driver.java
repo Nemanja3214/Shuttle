@@ -1,6 +1,6 @@
 package com.shuttle.driver;
 
-import com.shuttle.user.User;
+import com.shuttle.user.GenericUser;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Driver extends User {
+public class Driver extends GenericUser {
     boolean available;
     Long timeWorkedToday;
     boolean blocked;

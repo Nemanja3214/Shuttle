@@ -3,7 +3,7 @@ package com.shuttle.passenger;
 import java.util.Set;
 
 import com.shuttle.location.Route;
-import com.shuttle.user.User;
+import com.shuttle.user.GenericUser;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Entity
-public class Passenger extends User {
+public class Passenger extends GenericUser {
     @OneToMany
     private Set<Route> favoriteRoutes;
     Double finance;

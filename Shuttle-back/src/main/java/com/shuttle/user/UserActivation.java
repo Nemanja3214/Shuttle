@@ -10,7 +10,7 @@ public class UserActivation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    private User user;
+    private GenericUser user;
     private LocalDateTime time;
     // lifetime??
 }

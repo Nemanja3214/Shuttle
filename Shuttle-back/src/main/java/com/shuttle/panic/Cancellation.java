@@ -1,7 +1,7 @@
 package com.shuttle.panic;
 
 import com.shuttle.ride.Ride;
-import com.shuttle.user.User;
+import com.shuttle.user.GenericUser;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +15,7 @@ public class Cancellation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @ManyToOne
-    private User user;
+    private GenericUser user;
     @ManyToOne
     private Ride ride;
     private LocalDateTime time;

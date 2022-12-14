@@ -3,7 +3,7 @@ package com.shuttle.message;
 import java.time.LocalDateTime;
 
 import com.shuttle.ride.Ride;
-import com.shuttle.user.User;
+import com.shuttle.user.GenericUser;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,9 +14,9 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @ManyToOne
-    private User sender;
+    private GenericUser sender;
     @ManyToOne
-    private User receiver;
+    private GenericUser receiver;
     private String message;
     private LocalDateTime time;
     @ManyToOne
