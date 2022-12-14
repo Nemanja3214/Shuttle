@@ -1,29 +1,30 @@
 package com.shuttle.ride.dto;
 
-import java.time.LocalDateTime;
-import com.shuttle.ride.Rejection;
+import com.shuttle.panic.Cancellation;
 
-public class RejectionDTO {
+import java.time.LocalDateTime;
+
+public class CancellationDTO {
 	private String reason;
 	private LocalDateTime timeOfRejection;
 
-	public RejectionDTO(Rejection rej) {
+	public CancellationDTO(Cancellation rej) {
 		this.reason = rej.getReason();
-		this.timeOfRejection = rej.getTimeOfRejection();
+		this.timeOfRejection = rej.getTime();
 	}
 
-	public RejectionDTO() {
+	public CancellationDTO() {
 		super();
 	}
 
-	public RejectionDTO(String reason, LocalDateTime timeOfRejection) {
+	public CancellationDTO(String reason, LocalDateTime timeOfRejection) {
 		super();
 		this.reason = reason;
 		this.timeOfRejection = timeOfRejection;
 	}
 
-	public static RejectionDTO getMock() {
-		return new RejectionDTO("Ride is canceled due to previous problems with the passenger", LocalDateTime.now());
+	public static CancellationDTO getMock() {
+		return new CancellationDTO("Ride is canceled due to previous problems with the passenger", LocalDateTime.now());
 	}
 
 	public String getReason() {

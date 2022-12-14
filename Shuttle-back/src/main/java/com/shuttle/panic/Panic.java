@@ -2,16 +2,17 @@ package com.shuttle.panic;
 
 import java.time.LocalDateTime;
 
-import com.shuttle.common.Entity;
 import com.shuttle.ride.Ride;
 import com.shuttle.user.User;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
-@jakarta.persistence.Entity
-public class Panic extends Entity {
+@Entity
+public class Panic {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
 	@ManyToOne
 	private User user;
 	@ManyToOne

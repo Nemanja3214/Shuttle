@@ -1,28 +1,24 @@
 package com.shuttle.ride;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.shuttle.common.Entity;
 import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.location.Route;
 import com.shuttle.vehicle.Vehicle;
-import com.shuttle.vehicle.VehicleType;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@jakarta.persistence.Entity
-public class Ride extends Entity {
+@Entity
+public class Ride {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer totalCost;
@@ -44,7 +40,7 @@ public class Ride extends Entity {
         Pending, Accepted, Rejected, Active, Finished
     }
 
-    public List<Location> getLocations(){
+    public List<Location> getLocations() {
         return this.route.getLocations();
     }
 

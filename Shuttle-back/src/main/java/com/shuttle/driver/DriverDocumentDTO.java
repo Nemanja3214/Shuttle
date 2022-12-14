@@ -1,10 +1,9 @@
 package com.shuttle.driver;
 
-import com.shuttle.common.Entity;
 import lombok.Data;
 
 @Data
-public class DriverDocumentDTO extends Entity {
+public class DriverDocumentDTO  {
 
     Long id;
 

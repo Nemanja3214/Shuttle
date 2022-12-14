@@ -1,17 +1,17 @@
 package com.shuttle.location;
 
-import com.shuttle.common.Entity;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
-@jakarta.persistence.Entity
+@Entity
 @Data
-public class Route extends Entity {
+public class Route {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
 	@ManyToMany
 	List<Location> locations;
 }

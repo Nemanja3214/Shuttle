@@ -1,21 +1,14 @@
 package com.shuttle.ride.dto;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
-import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
-import com.shuttle.location.Route;
 import com.shuttle.location.RouteDTO;
-import com.shuttle.passenger.Passenger;
-import com.shuttle.passenger.PassengerDTO;
-import com.shuttle.ride.Rejection;
+import com.shuttle.panic.Cancellation;
 import com.shuttle.ride.Ride;
-import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleType;
 import lombok.Data;
 
@@ -32,7 +25,7 @@ public class RideDTO {
 	private Boolean babyTransport;
 	private Boolean petTransport;
 	private VehicleType vehicleType;
-	private RejectionDTO rejection;
+	private CancellationDTO rejection;
 	private Ride.Status status;
 
 	public RideDTO(Ride ride) {
@@ -54,7 +47,7 @@ public class RideDTO {
 		this.babyTransport = ride.getBabyTransport();
 		this.petTransport = ride.getPetTransport();
 		this.vehicleType = ride.getVehicle().getVehicleType();
-		this.rejection = new RejectionDTO(new Rejection());
+		this.rejection = new CancellationDTO(new Cancellation());
 		this.status = ride.getStatus();
 	}
 

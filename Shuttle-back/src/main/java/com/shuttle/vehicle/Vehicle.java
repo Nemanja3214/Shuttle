@@ -1,19 +1,19 @@
 package com.shuttle.vehicle;
 
-import com.shuttle.common.Entity;
-import com.shuttle.driver.DriverDocument;
 import com.shuttle.location.Location;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@jakarta.persistence.Entity
-public class Vehicle extends Entity {
+@Entity
+public class Vehicle {
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
 	private String model;
 	private String licenseNumber;
 	private Integer passengerSeats;

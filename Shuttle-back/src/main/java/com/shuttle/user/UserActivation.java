@@ -1,11 +1,16 @@
 package com.shuttle.user;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalDateTime;
 
-import com.shuttle.common.Entity;
-
-public class UserActivation extends Entity {
-	private User user;
-	private LocalDateTime time;
-	// lifetime??
+public class UserActivation {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    private User user;
+    private LocalDateTime time;
+    // lifetime??
 }

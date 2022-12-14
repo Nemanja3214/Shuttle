@@ -1,17 +1,19 @@
 package com.shuttle.panic;
 
-import com.shuttle.common.Entity;
 import com.shuttle.ride.Ride;
 import com.shuttle.user.User;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-@jakarta.persistence.Entity
-public class Cancelation extends Entity {
+@Entity
+public class Cancellation {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     @ManyToOne
     private User user;
     @ManyToOne

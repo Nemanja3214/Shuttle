@@ -2,15 +2,17 @@ package com.shuttle.message;
 
 import java.time.LocalDateTime;
 
-import com.shuttle.common.Entity;
 import com.shuttle.ride.Ride;
 import com.shuttle.user.User;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
-@jakarta.persistence.Entity
-public class Message extends Entity {
+@Entity
+public class Message {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     @ManyToOne
     private User sender;
     @ManyToOne

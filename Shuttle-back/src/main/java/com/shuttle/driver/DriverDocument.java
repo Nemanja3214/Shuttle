@@ -1,34 +1,18 @@
 package com.shuttle.driver;
 
-import com.shuttle.common.Entity;
+import jakarta.persistence.*;
+import lombok.Data;
 
-public class DriverDocument extends Entity {
+@Entity
+@Data
+public class DriverDocument {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
 	private String name;
 	private String image;
+	@ManyToOne
 	private Driver driver;
 
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getImage() {
-		return image;
-	}
-
-	public void setImage(String image) {
-		this.image = image;
-	}
-
-	public Driver getDriver() {
-		return driver;
-	}
-
-	public void setDriver(Driver driver) {
-		this.driver = driver;
-	}
 }
