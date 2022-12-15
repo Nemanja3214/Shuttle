@@ -25,7 +25,7 @@ public class ReviewController {
 		review.setId(Long.valueOf(123));
 		review.setPassenger(new Passenger());
 		review.getPassenger().setId(Long.valueOf(213));
-		review.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		review.getPassenger().getCredentials().setEmail("dhskjdsh@hskjdhskj");
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
@@ -34,7 +34,7 @@ public class ReviewController {
 		review.setId(Long.valueOf(123));
 		review.setPassenger(new Passenger());
 		review.getPassenger().setId(Long.valueOf(213));
-		review.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		review.getPassenger().getCredentials().setEmail("dhskjdsh@hskjdhskj");
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
@@ -46,7 +46,7 @@ public class ReviewController {
 		r.setId(Long.valueOf(123));
 		r.setPassenger(new Passenger());
 		r.getPassenger().setId(Long.valueOf(213));
-		r.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		r.getPassenger().getCredentials().setEmail("dhskjdsh@hskjdhskj");
 		r.setRating(9);
 		r.setComment("fhekjfhewkjrhewjkr32hf");
 		reviewsMock.add(r);
@@ -61,7 +61,7 @@ public class ReviewController {
 		r.setId(Long.valueOf(123));
 		r.setPassenger(new Passenger());
 		r.getPassenger().setId(Long.valueOf(213));
-		r.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		r.getPassenger().getCredentials().setEmail("dhskjdsh@hskjdhskj");
 		r.setRating(9);
 		r.setComment("fhekjfhewkjrhewjkr32hf");
 		reviewsMock.add(r);
@@ -76,7 +76,7 @@ public class ReviewController {
 		vehicleReview.setId(Long.valueOf(123));
 		vehicleReview.setPassenger(new Passenger());
 		vehicleReview.getPassenger().setId(Long.valueOf(213));
-		vehicleReview.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+		vehicleReview.getPassenger().getCredentials().setEmail("dhskjdsh@hskjdhskj");
 		vehicleReview.setRating(9);
 		vehicleReview.setComment("fhekjfhewkjrhewjkr32hf");
 		Review driverReview = vehicleReview;

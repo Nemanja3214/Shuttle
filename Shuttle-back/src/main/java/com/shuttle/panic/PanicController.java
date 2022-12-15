@@ -18,7 +18,7 @@ public class PanicController {
 		
 		ListDTO<PanicDTO> panics = new ListDTO<>();
 		panics.setTotalCount(243);
-		panics.getResults().add(PanicDTO.getMock());
+		panics.getResults().add(new PanicDTO());
 		
 		return new ResponseEntity<>(panics, HttpStatus.OK);
 	}

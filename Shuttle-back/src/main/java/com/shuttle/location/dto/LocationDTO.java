@@ -1,9 +1,17 @@
 package com.shuttle.location.dto;
 
+import com.shuttle.location.Location;
+
 public class LocationDTO {
 	private String address;
 	private Double latitude;
 	private Double longitude;
+	
+	public LocationDTO(Location l) {
+		this.address = l.getAddress();
+		this.latitude = l.getLatitude();
+		this.longitude = l.getLongitude();
+	}
 	
 	public LocationDTO() {
 		super();

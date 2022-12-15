@@ -1,26 +1,18 @@
 package com.shuttle.workhours;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
-import com.shuttle.common.Entity;
-
-public class WorkHours extends Entity {
+@Data
+public class WorkHours {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
 	private LocalDateTime start;
 	private LocalDateTime end;
 
-	public LocalDateTime getStart() {
-		return start;
-	}
-
-	public void setStart(LocalDateTime start) {
-		this.start = start;
-	}
-
-	public LocalDateTime getEnd() {
-		return end;
-	}
-
-	public void setEnd(LocalDateTime end) {
-		this.end = end;
-	}
 }

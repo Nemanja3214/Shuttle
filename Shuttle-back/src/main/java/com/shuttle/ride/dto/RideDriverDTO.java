@@ -8,6 +8,6 @@ public class RideDriverDTO {
 
 	public RideDriverDTO(Driver driver) {
 		this.id = driver.getId();
-		this.email = driver.getEmail();
+		this.email = driver.getCredentials().getEmail();
 	}
 }

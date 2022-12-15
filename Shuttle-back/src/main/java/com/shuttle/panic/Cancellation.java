@@ -1,5 +1,6 @@
-package com.shuttle.note;
+package com.shuttle.panic;
 
+import com.shuttle.ride.Ride;
 import com.shuttle.user.GenericUser;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -8,13 +9,16 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-public class Note {
+public class Cancellation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String message;
-    private String title;
-    private LocalDateTime timeCreated;
-    @OneToOne
+    Long id;
+    @ManyToOne
     private GenericUser user;
+    @ManyToOne
+    private Ride ride;
+    private LocalDateTime time;
+    private String reason;
+
 }

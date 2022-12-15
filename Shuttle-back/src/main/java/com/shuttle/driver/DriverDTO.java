@@ -1,29 +1,15 @@
 package com.shuttle.driver;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+@Data
 public class DriverDTO {
-    @Getter
-    @Setter
     Long id;
-    @Getter
-    @Setter
     private String name;
-    @Getter
-    @Setter
     private String surname;
-    @Getter
-    @Setter
     private String profilePicture;
-    @Getter
-    @Setter
     private String telephoneNumber;
-    @Getter
-    @Setter
     private String email;
-    @Getter
-    @Setter
     private String address;
 
     public DriverDTO(Long id, String name, String surname, String profilePicture, String telephoneNumber, String email, String address) {
@@ -41,6 +27,6 @@ public class DriverDTO {
 
     public static DriverDTO parse2DTO(Driver driver) {
         return new DriverDTO(driver.getId(), driver.getName(), driver.getSurname(), driver.getProfilePicture(),
-                driver.getTelephoneNumber(), driver.getEmail(), driver.getAddress());
+                driver.getTelephoneNumber(), driver.getCredentials().getEmail(), driver.getAddress());
     }
 }

@@ -8,6 +8,6 @@ public class RidePassengerDTO {
 
 	public RidePassengerDTO(Passenger passenger) {
 		this.id = passenger.getId();
-		this.email = passenger.getEmail();
+		this.email = passenger.getCredentials().getEmail();
 	}
 }

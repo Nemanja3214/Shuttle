@@ -1,22 +1,25 @@
-package com.shuttle.admin;
+package com.shuttle.ProfileChangeRequest;
 
 import com.shuttle.credentials.dto.Credentials;
+import com.shuttle.note.Note;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Entity
+import java.util.List;
+
 @Data
 @NoArgsConstructor
-public class Admin {
+@Entity
+public class ProfileChangeRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     private String name;
     private String surname;
     private String profilePicture;
-    boolean active;
+    private String telephoneNumber;
     @OneToOne
     private Credentials credentials;
+    private String address;
 }

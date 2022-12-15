@@ -15,7 +15,7 @@ public class PassengerDTO {
 		this.surname = p.getSurname();
 		this.profilePicture = p.getProfilePicture();
 		this.telephoneNumber = p.getTelephoneNumber();
-		this.email = p.getEmail();
+		this.email = p.getCredentials().getEmail();
 		this.address = p.getAddress();
 	}
 }
