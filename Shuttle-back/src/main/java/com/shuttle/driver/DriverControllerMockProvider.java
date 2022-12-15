@@ -1,11 +1,14 @@
 package com.shuttle.driver;
 
+import com.shuttle.driver.dto.DriverDTO;
+import com.shuttle.driver.dto.DriverDataPageDTO;
+import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.vehicle.VehicleDTO;
 
 public class DriverControllerMockProvider {
-    public DriverDataPage getDriverDataPage() {
-        DriverDataPage driverDataPage = new DriverDataPage(243);
+    public DriverDataPageDTO getDriverDataPageDTO() {
+    	DriverDataPageDTO driverDataPage = new DriverDataPageDTO(243);
         driverDataPage.addResult(getDriverData());
         return driverDataPage;
     }

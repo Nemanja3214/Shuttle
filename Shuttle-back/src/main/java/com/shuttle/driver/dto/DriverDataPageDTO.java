@@ -1,19 +1,17 @@
-package com.shuttle.driver;
+package com.shuttle.driver.dto;
 
-import java.awt.dnd.DragGestureEvent;
 import java.util.ArrayList;
-import java.util.List;
 
-public class DriverDataPage {
+public class DriverDataPageDTO {
     public int totalCount;
     public ArrayList<DriverDTO> results;
 
-    public DriverDataPage(int totalCount) {
+    public DriverDataPageDTO(int totalCount) {
         this.totalCount = totalCount;
         results = new ArrayList<>();
     }
 
-    public DriverDataPage(int totalCount, ArrayList<DriverDTO> results) {
+    public DriverDataPageDTO(int totalCount, ArrayList<DriverDTO> results) {
         this.totalCount = totalCount;
         this.results = results;
     }

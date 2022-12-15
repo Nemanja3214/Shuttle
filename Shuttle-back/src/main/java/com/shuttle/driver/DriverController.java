@@ -1,6 +1,9 @@
 package com.shuttle.driver;
 
 import com.shuttle.common.ListDTO;
+import com.shuttle.driver.dto.DriverDTO;
+import com.shuttle.driver.dto.DriverDataPageDTO;
+import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.WorkHours;
@@ -23,9 +26,9 @@ public class DriverController {
     }
 
     @GetMapping("/api/driver")
-    public ResponseEntity<DriverDataPage> getPaginatedDrivers(@PathParam("page") int page, @PathParam("size") int size) {
+    public ResponseEntity<DriverDataPageDTO> getPaginatedDrivers(@PathParam("page") int page, @PathParam("size") int size) {
         DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
-        return new ResponseEntity<>(driverControllerMockProvider.getDriverDataPage(), HttpStatus.OK);
+        return new ResponseEntity<>(driverControllerMockProvider.getDriverDataPageDTO(), HttpStatus.OK);
     }
 
     @GetMapping("/api/driver/{id}")
