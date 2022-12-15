@@ -34,7 +34,10 @@ public class RideDTO {
 
 		List<Location> ls = ride.getLocations();
 		for (int i = 0; i < ls.size(); i += 2) {
-			RouteDTO d = new RouteDTO(new LocationDTO(ls.get(i)), new LocationDTO(ls.get(i + 1)));
+			LocationDTO from = LocationDTO.from(ls.get(i));
+			LocationDTO to = LocationDTO.from(ls.get(i + 1));
+			
+			RouteDTO d = new RouteDTO(from, to);
 			locations.add(d);
 		}
 

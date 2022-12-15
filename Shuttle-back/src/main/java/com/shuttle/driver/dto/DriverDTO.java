@@ -25,6 +25,7 @@ public class DriverDTO {
     public Driver to() {
     	Driver d = new Driver();
     	Credentials c = new Credentials(null, email, password);
+    	d.setId(id);
     	d.setName(name);
     	d.setSurname(surname);
     	d.setAddress(address);

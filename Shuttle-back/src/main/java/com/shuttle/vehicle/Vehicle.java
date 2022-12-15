@@ -1,5 +1,6 @@
 package com.shuttle.vehicle;
 
+import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,11 +20,10 @@ public class Vehicle {
 	private Integer passengerSeats;
 	private Boolean babyTransport;
 	private Boolean petTransport;
-
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private Location currentLocation;
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL)
 	private VehicleType vehicleType;
-
-
+	@ManyToOne
+	private Driver driver;
 }
