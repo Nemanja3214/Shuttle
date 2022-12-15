@@ -13,6 +13,4 @@ public class DriverDocument {
 	private String image;
 	@ManyToOne
 	private Driver driver;
-
-
 }

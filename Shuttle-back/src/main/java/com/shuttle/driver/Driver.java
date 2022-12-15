@@ -16,7 +16,4 @@ public class Driver extends GenericUser {
     boolean available;
     Long timeWorkedToday;
     boolean blocked;
-
-
-
 }

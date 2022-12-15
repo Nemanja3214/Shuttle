@@ -15,7 +15,7 @@ public class DriverControllerMockProvider {
 
     public DriverDTO getDriverData() {
         return new DriverDTO(Long.parseLong("123"), "Pera", "Peric", "U3dhZ2dlciByb2Nrcw==",
-                "+381123123", "pera.peric@email.com", "Bulevar Oslobodjenja 74");
+                "+381123123", "Bulevar Oslobodjenja 74", "pera.peric@email.com", "123456");
     }
     public DriverDocumentDTO getDriverDocument(){
         DriverDocumentDTO driverDocument = new DriverDocumentDTO();
