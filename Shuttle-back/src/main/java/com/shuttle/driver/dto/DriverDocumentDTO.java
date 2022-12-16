@@ -1,4 +1,4 @@
-package com.shuttle.driver;
+package com.shuttle.driver.dto;
 
 import lombok.Data;
 

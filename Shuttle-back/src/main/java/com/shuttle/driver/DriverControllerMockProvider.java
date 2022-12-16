@@ -1,18 +1,21 @@
 package com.shuttle.driver;
 
+import com.shuttle.driver.dto.DriverDTO;
+import com.shuttle.driver.dto.DriverDataPageDTO;
+import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.vehicle.VehicleDTO;
 
 public class DriverControllerMockProvider {
-    public DriverDataPage getDriverDataPage() {
-        DriverDataPage driverDataPage = new DriverDataPage(243);
+    public DriverDataPageDTO getDriverDataPageDTO() {
+    	DriverDataPageDTO driverDataPage = new DriverDataPageDTO(243);
         driverDataPage.addResult(getDriverData());
         return driverDataPage;
     }
 
     public DriverDTO getDriverData() {
         return new DriverDTO(Long.parseLong("123"), "Pera", "Peric", "U3dhZ2dlciByb2Nrcw==",
-                "+381123123", "pera.peric@email.com", "Bulevar Oslobodjenja 74");
+                "+381123123", "Bulevar Oslobodjenja 74", "pera.peric@email.com", "123456");
     }
     public DriverDocumentDTO getDriverDocument(){
         DriverDocumentDTO driverDocument = new DriverDocumentDTO();

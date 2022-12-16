@@ -24,7 +24,7 @@ public class GenericUser {
     private String telephoneNumber;
     @OneToMany
     private List<Note> notifications;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Credentials credentials;
     private String address;
 

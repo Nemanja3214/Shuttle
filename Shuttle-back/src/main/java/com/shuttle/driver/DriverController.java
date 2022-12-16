@@ -1,10 +1,15 @@
 package com.shuttle.driver;
 
 import com.shuttle.common.ListDTO;
+import com.shuttle.driver.dto.DriverDTO;
+import com.shuttle.driver.dto.DriverDataPageDTO;
+import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.WorkHours;
 import jakarta.websocket.server.PathParam;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +20,24 @@ import java.util.List;
 @CrossOrigin
 @RestController
 public class DriverController {
+	private IDriverService driverService;
+	
+	@Autowired
+	public DriverController(IDriverService driverService) {
+		this.driverService = driverService;
+	}
 
     @PostMapping("/api/driver")
-    public ResponseEntity<DriverDTO> createDriver(@RequestBody Driver driver) {
-        driver.setId(Long.valueOf(123));
-        return new ResponseEntity<>(DriverDTO.parse2DTO(driver), HttpStatus.OK);
+    public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO driverDTO) {
+    	Driver driver = driverDTO.to();
+    	driver = driverService.add(driver);
+        return new ResponseEntity<>(DriverDTO.from(driver), HttpStatus.OK);
     }
 
     @GetMapping("/api/driver")
-    public ResponseEntity<DriverDataPage> getPaginatedDrivers(@PathParam("page") int page, @PathParam("size") int size) {
+    public ResponseEntity<DriverDataPageDTO> getPaginatedDrivers(@PathParam("page") int page, @PathParam("size") int size) {
         DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
-        return new ResponseEntity<>(driverControllerMockProvider.getDriverDataPage(), HttpStatus.OK);
+        return new ResponseEntity<>(driverControllerMockProvider.getDriverDataPageDTO(), HttpStatus.OK);
     }
 
     @GetMapping("/api/driver/{id}")
