@@ -30,7 +30,6 @@ public class VehicleDTO {
     public Vehicle to() {
     	Vehicle v = new Vehicle();
     	v.setId(id);
-    	v.setVehicleType(new VehicleType()); // TODO: Inconsistency in data model!
     	v.setModel(model);
     	v.setLicenseNumber(licenseNumber);
     	
@@ -50,7 +49,7 @@ public class VehicleDTO {
     	return new VehicleDTO(
     			v.getId(),
     			v.getDriver().getId(),
-    			v.getVehicleType().toString(),
+    			v.getVehicleType().getName(),
     			v.getModel(),
     			v.getLicenseNumber(),
     			LocationDTO.from(v.getCurrentLocation()),

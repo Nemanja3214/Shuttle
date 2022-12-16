@@ -22,7 +22,7 @@ public class Vehicle {
 	private Boolean petTransport;
 	@ManyToOne(cascade = CascadeType.ALL)
 	private Location currentLocation;
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	private VehicleType vehicleType;
 	@ManyToOne
 	private Driver driver;
