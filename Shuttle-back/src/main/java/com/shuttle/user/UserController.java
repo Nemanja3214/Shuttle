@@ -1,7 +1,14 @@
 package com.shuttle.user;
 
+import com.shuttle.security.jwt.JwtTokenUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +31,12 @@ import jakarta.websocket.server.PathParam;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
 
 	@GetMapping("/{id}/ride")
 	public ResponseEntity<ListDTO<String>> getUserRides(
@@ -55,6 +68,14 @@ public class UserController {
 	
 	@PostMapping("/login")
 	public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
+		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(),
+				credentialsDTO.getPassword());
+		Authentication auth = authenticationManager.authenticate(authReq);
+		SecurityContext sc = SecurityContextHolder.getContext();
+		sc.setAuthentication(auth);
+		String token = jwtTokenUtil.generateToken(credentialsDTO.getEmail());
+		TokenDTO tokens = new TokenDTO(token,token);
+		//TODO add refresh token
 		return new ResponseEntity<TokenDTO>(TokenDTO.getMock(), HttpStatus.OK);
 	}
 	

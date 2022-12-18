@@ -2,7 +2,7 @@ package com.shuttle.driver.dto;
 
 import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapProperties.Credential;
 
-import com.shuttle.credentials.dto.Credentials;
+import com.shuttle.credentials.Credentials;
 import com.shuttle.driver.Driver;
 
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ public class DriverDTO {
     
     public Driver to() {
     	Driver d = new Driver();
-    	Credentials c = new Credentials(null, email, password);
+    	Credentials c = new Credentials(email, password);
     	d.setId(id);
     	d.setName(name);
     	d.setSurname(surname);

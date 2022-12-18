@@ -1,6 +1,6 @@
 package com.shuttle.admin;
 
-import com.shuttle.credentials.dto.Credentials;
+import com.shuttle.credentials.Credentials;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

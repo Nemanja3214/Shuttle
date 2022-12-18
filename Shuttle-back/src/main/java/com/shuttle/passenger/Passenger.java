@@ -7,10 +7,10 @@ import com.shuttle.user.GenericUser;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
@@ -20,4 +20,5 @@ public class Passenger extends GenericUser {
     Double finance;
     boolean currentlyRiding;
     boolean Blocked;
+
 }

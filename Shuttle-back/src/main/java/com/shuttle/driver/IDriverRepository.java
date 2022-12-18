@@ -1,7 +1,7 @@
 package com.shuttle.driver;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IDriverRepository extends CrudRepository<Driver, Long> {
+public interface IDriverRepository extends JpaRepository<Driver, Long> {
 
 }
