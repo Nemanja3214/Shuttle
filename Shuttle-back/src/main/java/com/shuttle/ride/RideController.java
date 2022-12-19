@@ -1,5 +1,6 @@
 package com.shuttle.ride;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +18,16 @@ import com.shuttle.ride.dto.RideDTO;
 @RestController
 @RequestMapping("/api/ride")
 public class RideController {
+	@Autowired
+	private IRideService rideService;
 	
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO rideDTO){
+		try {
+			rideService.createRide(rideDTO);
+		} catch (NoAvailableDriverException e) {
+			// Couldn't find driver, notify user.
+		}
 		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
