@@ -33,7 +33,6 @@ public class Ride {
     private Double totalCost;
     @OneToOne
     private Driver driver;
-
     @OneToMany
     private Set<Passenger> passengers;
     @OneToOne
