@@ -45,4 +45,9 @@ public class VehicleService implements IVehicleService {
 		return vehicleTypeRepository.findVehicleTypeByName(name);
 	}
 	
+	@Override
+	public Vehicle findByDriver(Driver driver) {
+		return vehicleRepository.findByDriver(driver);
+	}
+	
 }

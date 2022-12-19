@@ -1,3 +1,4 @@
+
 package com.shuttle.user;
 
 import com.shuttle.credentials.dto.Credentials;
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Table(name="generic_user")
 public class GenericUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +29,4 @@ public class GenericUser {
     @OneToOne(cascade = CascadeType.ALL)
     private Credentials credentials;
     private String address;
-
-
 }

@@ -2,12 +2,12 @@ package com.shuttle.location;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @Entity
+@Table(name="location")
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
