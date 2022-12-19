@@ -67,15 +67,15 @@ public class RideService implements IRideService {
 	private List<Driver> findPotentialDrivers(CreateRideDTO rideDTO) throws NoAvailableDriverException {
 		List<Driver> potentialDrivers = new ArrayList<>();
 		
-		List<Driver> activeDrivers = new ArrayList<>(); // logged in, active, could drive this ride
-		if (activeDrivers.size() == 0) {
+		List<Driver> loggedIn = driverRepository.findAllLoggedIn();
+		if (loggedIn.size() == 0) {
 			throw new NoAvailableDriverException();
 		}
 		
-		List<Driver> availableDrivers = activeDrivers; // not driving
+		List<Driver> availableDrivers = driverRepository.findAllAvailable();
 		
 		if (availableDrivers.size() == 0) {
-			List<Driver> driversWithoutScheduledRide = activeDrivers; // driving but free in the future
+			List<Driver> driversWithoutScheduledRide = driverRepository.findAllNotAvailable(); // TODO: How to check if free in the future
 			
 			if (driversWithoutScheduledRide.size() == 0) {
 				throw new NoAvailableDriverException();
@@ -104,7 +104,7 @@ public class RideService implements IRideService {
 	private Ride getRideRequest(CreateRideDTO rideDTO, Driver driver) {
 		final Double distance = 0.5; // TODO: Where to get total distance from?
 		final Double velocity = 30.0 / 1000.0; // TODO: Where to get average vehicle velocity from?
-		
+
 		final VehicleType vehicleType = vehicleTypeRepository.findVehicleTypeByName(rideDTO.getVehicleType()).orElseThrow();
 		final Double cost = (vehicleType.getPricePerKM() + 120) * distance;
 		final Vehicle vehicle = vehicleRepository.findByDriver(driver);
@@ -114,10 +114,12 @@ public class RideService implements IRideService {
 				.stream()
 				.map(userInfo -> passengerRepository.findByEmail(userInfo.getEmail()))
 				.collect(Collectors.toSet());	
+
 		//	
+		
 		final List<RouteDTO> routeDTO = rideDTO.getLocations();
-		final List<LocationDTO> locationsDTO = routeDTO.stream().map(rou -> rou.getDeparture()).toList();
-		locationsDTO.add(routeDTO.get(routeDTO.size() - 1).getDestination());				
+		final List<LocationDTO> locationsDTO = new ArrayList<LocationDTO>(routeDTO.stream().map(rou -> rou.getDeparture()).toList());
+		locationsDTO.add(routeDTO.get(routeDTO.size() - 1).getDestination());	
 		final List<Location> locations = locationsDTO.stream().map(loc -> locationService.findOrAdd(loc)).toList();
 		
 		Route route = new Route();

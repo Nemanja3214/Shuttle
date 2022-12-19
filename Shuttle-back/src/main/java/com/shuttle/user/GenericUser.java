@@ -29,4 +29,5 @@ public class GenericUser {
     @OneToOne(cascade = CascadeType.ALL)
     private Credentials credentials;
     private String address;
+    private Boolean loggedIn;
 }
