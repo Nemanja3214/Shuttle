@@ -71,10 +71,10 @@ public class RideService implements IRideService {
 			throw new NoAvailableDriverException();
 		}
 		
-		List<Driver> availableDrivers = driverRepository.findAllAvailable();
+		List<Driver> availableDrivers = driverRepository.findAllLoggedInAvailable();
 		
 		if (availableDrivers.size() == 0) {
-			List<Driver> driversWithoutScheduledRide = driverRepository.findAllNotAvailable(); // TODO: How to check if free in the future
+			List<Driver> driversWithoutScheduledRide = driverRepository.findAllLoggedInNotAvailable(); // TODO: Check if the driver has no future rides scheduled.
 			
 			if (driversWithoutScheduledRide.size() == 0) {
 				throw new NoAvailableDriverException();

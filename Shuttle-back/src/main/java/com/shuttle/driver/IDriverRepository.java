@@ -9,9 +9,9 @@ public interface IDriverRepository extends CrudRepository<Driver, Long> {
 	@Query("select d from Driver d where d.loggedIn = true")
 	public List<Driver> findAllLoggedIn();
 	
-	@Query("select d from Driver d where d.available = true")
-	public List<Driver> findAllAvailable(); // loggedIn = true
+	@Query("select d from Driver d where d.available = true and d.loggedIn = true")
+	public List<Driver> findAllLoggedInAvailable();
 	
-	@Query("select d from Driver d where d.available = false")
-	public List<Driver> findAllNotAvailable(); // loggedIn = true
+	@Query("select d from Driver d where d.available = false and d.loggedIn = true")
+	public List<Driver> findAllLoggedInNotAvailable();
 }
