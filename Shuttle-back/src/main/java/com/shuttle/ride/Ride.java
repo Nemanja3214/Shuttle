@@ -35,7 +35,7 @@ public class Ride {
     private Driver driver;
     @OneToMany
     private Set<Passenger> passengers;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Route route;
     private Integer estimatedTimeInMinutes;
     private Boolean babyTransport;

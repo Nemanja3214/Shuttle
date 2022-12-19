@@ -56,7 +56,6 @@ public class RideService implements IRideService {
 		Ride ride = getRideRequest(rideDTO, driver);
 		rideRepository.save(ride);
 		
-		// Create Ride from rideDTO.
 		// Send notification to the Driver.
 	}
 	
@@ -109,25 +108,23 @@ public class RideService implements IRideService {
 		final Double cost = (vehicleType.getPricePerKM() + 120) * distance;
 		final Vehicle vehicle = vehicleRepository.findByDriver(driver);
 		assert(vehicle.getVehicleType().getName().equals(vehicleType.getName()));
-		//	
+		
 		final Set<Passenger> passengers = rideDTO.getPassengers()
 				.stream()
 				.map(userInfo -> passengerRepository.findByEmail(userInfo.getEmail()))
 				.collect(Collectors.toSet());	
-
-		//	
 		
 		final List<RouteDTO> routeDTO = rideDTO.getLocations();
+		
+		// .stream().toList() returns an *immutable* list, hence the new ArrayList<...>().
+		
 		final List<LocationDTO> locationsDTO = new ArrayList<LocationDTO>(routeDTO.stream().map(rou -> rou.getDeparture()).toList());
 		locationsDTO.add(routeDTO.get(routeDTO.size() - 1).getDestination());	
 		final List<Location> locations = locationsDTO.stream().map(loc -> locationService.findOrAdd(loc)).toList();
 		
 		Route route = new Route();
 		route.setLocations(locations);
-		routeRepository.save(route);
 		
-		//
-
 		Ride r = new Ride();		
 		r.setStatus(Status.Pending);
 		r.setTotalCost(cost);
