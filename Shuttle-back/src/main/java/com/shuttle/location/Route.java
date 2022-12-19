@@ -12,6 +12,6 @@ public class Route {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Long id;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	List<Location> locations;
 }

@@ -49,12 +49,14 @@ public class RideService implements IRideService {
 	// TODO: Use services instead of repositories?
 	
 	@Override
-	public void createRide(CreateRideDTO rideDTO) throws NoAvailableDriverException {
+	public Ride createRide(CreateRideDTO rideDTO) throws NoAvailableDriverException {
 		final List<Driver> potentialDrivers = findPotentialDrivers(rideDTO);
 		final Driver driver = findMostSuitableDriver(potentialDrivers, rideDTO);
 		
 		Ride ride = getRideRequest(rideDTO, driver);
 		rideRepository.save(ride);
+		
+		return ride;
 		
 		// Send notification to the Driver.
 	}
@@ -137,5 +139,10 @@ public class RideService implements IRideService {
 		r.setRoute(route);
 		
 		return r;
+	}
+
+	@Override
+	public List<Ride> findPendingRidesForDriver(Driver driver) {
+		return rideRepository.findByDriverAndStatus(driver, Status.Pending);
 	}
 }

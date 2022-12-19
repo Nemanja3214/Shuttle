@@ -33,7 +33,7 @@ public class Ride {
     private Double totalCost;
     @OneToOne
     private Driver driver;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private Set<Passenger> passengers;
     @OneToOne(cascade = CascadeType.ALL)
     private Route route;

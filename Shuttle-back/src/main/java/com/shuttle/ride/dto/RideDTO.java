@@ -18,7 +18,7 @@ public class RideDTO {
 	private List<RouteDTO> locations;
 	private String startTime;
 	private String endTime;
-	private Integer totalCost;
+	private Double totalCost;
 	private RideDriverDTO driver;
 	private List<RidePassengerDTO> passengers;
 	private Integer estimatedTimeInMinutes;
@@ -33,6 +33,8 @@ public class RideDTO {
 		this.locations = new ArrayList<RouteDTO>();
 
 		List<Location> ls = ride.getLocations();
+		
+		System.err.println(ls);
 		for (int i = 0; i < ls.size(); i += 2) {
 			LocationDTO from = LocationDTO.from(ls.get(i));
 			LocationDTO to = LocationDTO.from(ls.get(i + 1));
@@ -41,15 +43,21 @@ public class RideDTO {
 			locations.add(d);
 		}
 
-		this.startTime = ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME);
-		this.endTime = ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME);
-		//this.totalCost = ride.getTotalCost();
+		if (ride.getStartTime() != null) {
+			this.startTime = ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME);
+		}
+		
+		if (ride.getEndTime() != null) {
+			this.endTime = ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME);
+		}
+		
+		this.totalCost = ride.getTotalCost();
 		this.driver = new RideDriverDTO(ride.getDriver());
 		this.passengers = ride.getPassengers().stream().map(p -> new RidePassengerDTO(p)).toList();
 		this.estimatedTimeInMinutes = ride.getEstimatedTimeInMinutes();
 		this.babyTransport = ride.getBabyTransport();
 		this.petTransport = ride.getPetTransport();
-		//this.vehicleType = ride.getVehicle().getVehicleType();
+		this.vehicleType = null; // TODO: Fetch from database.
 		this.rejection = new CancellationDTO(new Cancellation());
 		this.status = ride.getStatus();
 	}
