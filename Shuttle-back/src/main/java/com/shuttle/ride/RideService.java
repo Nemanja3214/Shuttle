@@ -2,6 +2,7 @@ package com.shuttle.ride;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -142,7 +143,13 @@ public class RideService implements IRideService {
 	}
 
 	@Override
-	public List<Ride> findPendingRidesForDriver(Driver driver) {
-		return rideRepository.findByDriverAndStatus(driver, Status.Pending);
+	public Optional<Ride> findPendingRideForDriver(Driver driver) {
+		List<Ride> allPending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
+		
+		if (allPending.size() == 0) {
+			return Optional.empty();
+		} else {
+			return Optional.of(allPending.get(0));
+		}
 	}
 }

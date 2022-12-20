@@ -42,16 +42,20 @@ public class RideController {
 	}
 	
 	@GetMapping("/driver/{driverId}/ride-requests")
-	public ResponseEntity<List<RideDTO>> getRideRequests(@PathVariable long driverId) {
+	public ResponseEntity<RideDTO> getRideRequests(@PathVariable long driverId) {
 		final Optional<Driver> odriver = driverService.get(driverId);
 		
 		if (odriver.isEmpty()) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		} else {
 			final Driver driver = odriver.get();
-			List<Ride> rides = rideService.findPendingRidesForDriver(driver);
-			List<RideDTO> ridesDTO = rides.stream().map(ride -> new RideDTO(ride)).toList();
-			return new ResponseEntity<List<RideDTO>>(ridesDTO, HttpStatus.OK);
+			Optional<Ride> ride = rideService.findPendingRideForDriver(driver);
+			
+			if (ride.isEmpty()) {
+				return new ResponseEntity<>(null, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(new RideDTO(ride.get()), HttpStatus.OK);
+			}
 		}
 	}
 	
