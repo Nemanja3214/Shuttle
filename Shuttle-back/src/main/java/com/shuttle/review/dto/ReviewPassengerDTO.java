@@ -8,6 +8,6 @@ public class ReviewPassengerDTO {
 	
 	public ReviewPassengerDTO(Passenger p) {
 		this.id = p.getId();
-		this.email = p.getCredentials().getEmail();
+		this.email = p.getEmail();
 	}
 }

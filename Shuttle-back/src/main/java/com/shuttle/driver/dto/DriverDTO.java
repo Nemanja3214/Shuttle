@@ -24,14 +24,15 @@ public class DriverDTO {
     
     public Driver to() {
     	Driver d = new Driver();
-    	Credentials c = new Credentials(email, password);
+//    	Credentials c = new Credentials(email, password);
     	d.setId(id);
     	d.setName(name);
     	d.setSurname(surname);
     	d.setAddress(address);
     	d.setProfilePicture(profilePicture);
     	d.setTelephoneNumber(telephoneNumber);
-    	d.setCredentials(c);
+    	d.setEmail(email);
+		d.setPassword(password);
 		return d;
     }
     
@@ -43,8 +44,8 @@ public class DriverDTO {
     			driver.getProfilePicture(),
     			driver.getTelephoneNumber(),
     			driver.getAddress(),
-    			driver.getCredentials().getEmail(),
-    			driver.getCredentials().getPassword()
+    			driver.getEmail(),
+    			driver.getPassword()
     	);
     }
 }

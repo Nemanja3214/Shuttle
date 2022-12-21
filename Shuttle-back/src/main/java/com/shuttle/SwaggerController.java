@@ -2,6 +2,9 @@ package com.shuttle;
 
 import com.shuttle.credentials.CredentialsService;
 import com.shuttle.credentials.ICredentialsRepository;
+import com.shuttle.security.RoleServiceImpl;
+import com.shuttle.user.GenericUser;
+import com.shuttle.user.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,11 +19,23 @@ public class SwaggerController {
     @Autowired
     CredentialsService credentialsService;
 
+    @Autowired
+    RoleServiceImpl roleService;
+    @Autowired
+    UserServiceImpl userService;
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public void  index() {
+    public void index() {
         credentialsService.insert("admin@gmail.com","admin");
         credentialsService.insert("driver@gmail.com","driver");
         credentialsService.insert("passenger@gmail.com","passenger");
+
+        for (GenericUser user :
+                userService.findAll()) {
+            userService.encodeUserPassword(user, "admin");
+            System.out.println(user.getPassword());
+            userService.save(user);
+        }
+
     }
 
 }

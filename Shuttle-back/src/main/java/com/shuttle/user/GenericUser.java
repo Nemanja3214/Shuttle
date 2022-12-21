@@ -37,10 +37,12 @@ public class GenericUser implements UserDetails {
     private String surname;
     private String profilePicture;
     private String telephoneNumber;
+
+
     @OneToMany
     private List<Note> notifications;
-    @OneToOne(cascade = CascadeType.ALL)
-    private Credentials credentials;
+    //    @OneToOne(cascade = CascadeType.ALL)
+//    private Credentials credentials;
     private String address;
 
     private Timestamp lastPasswordResetDate;

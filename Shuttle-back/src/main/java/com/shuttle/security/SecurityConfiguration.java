@@ -39,7 +39,7 @@ public class SecurityConfiguration {
         http.csrf().disable() // csrf->disabled, pošto nam JWT odrađuje zaštitu od CSRF napada
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); //will use email as username
         http.addFilterBefore(new JwtRequestFilter(tokenUtils, userDetailsService()), UsernamePasswordAuthenticationFilter.class); // JWT procesiramo pre autentikacije
-
+        http.headers().frameOptions().disable();
         return http.build();
     }
 
