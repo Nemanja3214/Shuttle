@@ -2,7 +2,7 @@ package com.shuttle.ride.dto;
 
 import java.util.List;
 
-import com.shuttle.location.RouteDTO;
+import com.shuttle.location.dto.RouteDTO;
 
 public class CreateRideEstimationDTO {
 	private List<RouteDTO> locations;
