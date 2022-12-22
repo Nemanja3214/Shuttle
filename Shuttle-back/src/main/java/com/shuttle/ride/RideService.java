@@ -93,6 +93,7 @@ public class RideService implements IRideService {
 	@Override
 	public Ride rejectRide(Ride ride) {
 		ride.setStatus(Status.Rejected);
+		ride = rideRepository.save(ride);
 		return ride;
 	}
 
