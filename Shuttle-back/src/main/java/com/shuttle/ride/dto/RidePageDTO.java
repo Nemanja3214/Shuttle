@@ -11,8 +11,8 @@ public class RidePageDTO {
 	public List<RideDTO> results;
 	
 	public RidePageDTO(List<Ride> rides) {
-		// TODO: Cancellation shouldn't be null.
-		results = rides.stream().map(r -> new RideDTO(r, null)).toList();
+		// TODO: Mapping needs RideController.
+		results = rides.stream().map(r -> new RideDTO()).toList();
 		totalCount = results.size();
 	}
 }

@@ -103,6 +103,10 @@ public class RideController {
 		return r;
 	}
 	
+	public RideDTO to(Ride ride) {
+		return to(ride, null);
+	}
+	
 	public RideDTO to(Ride ride, Cancellation cancellation) {
 		RideDTO rideDTO = new RideDTO();
 		rideDTO.setId(ride.getId());
@@ -122,7 +126,11 @@ public class RideController {
 		rideDTO.setBabyTransport(ride.getBabyTransport());
 		rideDTO.setPetTransport(ride.getPetTransport());
 		rideDTO.setVehicleType(ride.getVehicleType().getName());
-		rideDTO.setRejection(new CancellationDTO(cancellation));
+		
+		if (cancellation != null) {
+			rideDTO.setRejection(new CancellationDTO(cancellation));
+		}
+		
 		rideDTO.setStatus(ride.getStatus());
 		
 		List<RouteDTO> locationsDTO = new ArrayList<>();
@@ -136,7 +144,6 @@ public class RideController {
 		}
 		rideDTO.setLocations(locationsDTO);
 		
-		
 		return rideDTO;
 	}
 	
@@ -146,10 +153,10 @@ public class RideController {
 			final Driver driver = rideService.findMostSuitableDriver(createRideDTO);
 			final Ride ride = from(createRideDTO, driver);
 			rideService.createRide(ride);
-			return new ResponseEntity<RideDTO>(new RideDTO(ride, null), HttpStatus.OK);
+			return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 		} catch (NoAvailableDriverException e1) {
 			System.err.println("Couldn't find driver.");
-			return new ResponseEntity<RideDTO>(new RideDTO(null, null), HttpStatus.OK);
+			return new ResponseEntity<RideDTO>(to(null), HttpStatus.OK);
 		}
 	}
 	
@@ -166,7 +173,7 @@ public class RideController {
 			if (ride.isEmpty()) {
 				return new ResponseEntity<>(null, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<>(new RideDTO(ride.get(), null), HttpStatus.OK);
+				return new ResponseEntity<>(to(ride.get()), HttpStatus.OK);
 			}
 		}
 	}
