@@ -11,9 +11,13 @@ import com.shuttle.ride.Ride;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.cancellation.dto.CancellationDTO;
 import com.shuttle.vehicle.VehicleType;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class RideDTO {
 	private Long id;
 	private List<RouteDTO> locations;
@@ -25,7 +29,7 @@ public class RideDTO {
 	private Integer estimatedTimeInMinutes;
 	private Boolean babyTransport;
 	private Boolean petTransport;
-	private VehicleType vehicleType;
+	private String vehicleType;
 	private CancellationDTO rejection;
 	private Ride.Status status;
 
@@ -69,9 +73,5 @@ public class RideDTO {
 		}
 		
 		this.status = ride.getStatus();
-	}
-
-	public RideDTO() {
-		super();
 	}
 }

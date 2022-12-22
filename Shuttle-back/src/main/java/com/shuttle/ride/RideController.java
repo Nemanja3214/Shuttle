@@ -1,5 +1,6 @@
 package com.shuttle.ride;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,8 +34,11 @@ import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.cancellation.CancellationBodyDTO;
 import com.shuttle.ride.cancellation.ICancellationService;
+import com.shuttle.ride.cancellation.dto.CancellationDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.ride.dto.RideDriverDTO;
+import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.IVehicleTypeRepository;
 import com.shuttle.vehicle.Vehicle;
@@ -97,6 +101,43 @@ public class RideController {
 		r.setRoute(route);
 		
 		return r;
+	}
+	
+	public RideDTO to(Ride ride, Cancellation cancellation) {
+		RideDTO rideDTO = new RideDTO();
+		rideDTO.setId(ride.getId());
+		
+		if (ride.getStartTime() != null) {
+			rideDTO.setStartTime(ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME));
+		}
+		
+		if (ride.getEndTime() != null) {
+			rideDTO.setEndTime(ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME));
+		}
+		
+		rideDTO.setTotalCost(ride.getTotalCost());
+		rideDTO.setDriver(new RideDriverDTO(ride.getDriver()));
+		rideDTO.setPassengers(ride.getPassengers().stream().map(p -> new RidePassengerDTO(p)).toList());
+		rideDTO.setEstimatedTimeInMinutes(ride.getEstimatedTimeInMinutes());
+		rideDTO.setBabyTransport(ride.getBabyTransport());
+		rideDTO.setPetTransport(ride.getPetTransport());
+		rideDTO.setVehicleType(ride.getVehicleType().getName());
+		rideDTO.setRejection(new CancellationDTO(cancellation));
+		rideDTO.setStatus(ride.getStatus());
+		
+		List<RouteDTO> locationsDTO = new ArrayList<>();
+		List<Location> ls = ride.getLocations();	
+		for (int i = 0; i < ls.size(); i += 2) {
+			LocationDTO from = LocationDTO.from(ls.get(i));
+			LocationDTO to = LocationDTO.from(ls.get(i + 1));
+			
+			RouteDTO d = new RouteDTO(from, to);
+			locationsDTO.add(d);
+		}
+		rideDTO.setLocations(locationsDTO);
+		
+		
+		return rideDTO;
 	}
 	
 	@PostMapping
@@ -180,7 +221,7 @@ public class RideController {
 		
 		Cancellation cancellation = cancellationService.create(ride, reason.getReason(), null); // TODO: Get user from JWT.
 		
-		return new ResponseEntity<RideDTO>(new RideDTO(ride, cancellation), HttpStatus.OK);
+		return new ResponseEntity<RideDTO>(to(ride, cancellation), HttpStatus.OK);
 	}
 	
 }

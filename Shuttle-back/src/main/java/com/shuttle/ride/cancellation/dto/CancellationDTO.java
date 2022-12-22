@@ -1,6 +1,7 @@
 package com.shuttle.ride.cancellation.dto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import com.shuttle.ride.cancellation.Cancellation;
 
@@ -20,7 +21,7 @@ public class CancellationDTO {
 
 	public CancellationDTO(String reason, LocalDateTime timeOfRejection) {
 		this.reason = reason;
-		this.timeOfRejection = timeOfRejection.toString();
+		this.timeOfRejection = timeOfRejection.format(DateTimeFormatter.ISO_DATE_TIME);
 	}
 
 	public static CancellationDTO getMock() {
