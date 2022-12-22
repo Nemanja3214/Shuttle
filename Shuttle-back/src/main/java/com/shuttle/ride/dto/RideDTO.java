@@ -7,7 +7,7 @@ import java.util.List;
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
-import com.shuttle.panic.Cancellation;
+import com.shuttle.ride.Cancellation;
 import com.shuttle.ride.Ride;
 import com.shuttle.vehicle.VehicleType;
 import lombok.Data;

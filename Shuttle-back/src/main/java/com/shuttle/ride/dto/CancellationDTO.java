@@ -1,8 +1,8 @@
 package com.shuttle.ride.dto;
 
-import com.shuttle.panic.Cancellation;
-
 import java.time.LocalDateTime;
+
+import com.shuttle.ride.Cancellation;
 
 public class CancellationDTO {
 	private String reason;
