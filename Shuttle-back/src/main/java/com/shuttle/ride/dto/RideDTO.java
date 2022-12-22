@@ -7,8 +7,9 @@ import java.util.List;
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
-import com.shuttle.ride.Cancellation;
 import com.shuttle.ride.Ride;
+import com.shuttle.ride.cancellation.Cancellation;
+import com.shuttle.ride.cancellation.dto.CancellationDTO;
 import com.shuttle.vehicle.VehicleType;
 import lombok.Data;
 
@@ -28,7 +29,12 @@ public class RideDTO {
 	private CancellationDTO rejection;
 	private Ride.Status status;
 
-	public RideDTO(Ride ride) {
+	/**
+	 * Create a RideDTO.
+	 * @param ride Base Ride objects.
+	 * @param cancellation Cancellation (if any), can be null.
+	 */
+	public RideDTO(Ride ride, Cancellation cancellation) {
 		this.id = ride.getId();
 		this.locations = new ArrayList<RouteDTO>();
 
@@ -57,7 +63,11 @@ public class RideDTO {
 		this.babyTransport = ride.getBabyTransport();
 		this.petTransport = ride.getPetTransport();
 		this.vehicleType = null; // TODO: Fetch from database.
-		this.rejection = new CancellationDTO(new Cancellation());
+
+		if (cancellation != null) {
+			this.rejection = new CancellationDTO(cancellation);
+		}
+		
 		this.status = ride.getStatus();
 	}
 

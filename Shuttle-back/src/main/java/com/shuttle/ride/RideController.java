@@ -30,6 +30,9 @@ import com.shuttle.panic.PanicDTO;
 import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
+import com.shuttle.ride.cancellation.Cancellation;
+import com.shuttle.ride.cancellation.CancellationBodyDTO;
+import com.shuttle.ride.cancellation.ICancellationService;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.IVehicleRepository;
@@ -52,6 +55,10 @@ public class RideController {
 	private IPassengerRepository passengerRepository;
 	@Autowired
 	private ILocationService locationService;
+	@Autowired
+	private ICancellationService cancellationService;
+	
+	// TODO: Everything that's injected as a repository should be a service, replace once we have the services!!!
 	
 	public Ride from(CreateRideDTO rideDTO, Driver driver) {
 		final Double distance = 0.5; // TODO: Where to get total distance from?
@@ -98,10 +105,10 @@ public class RideController {
 			final Driver driver = rideService.findMostSuitableDriver(createRideDTO);
 			final Ride ride = from(createRideDTO, driver);
 			rideService.createRide(ride);
-			return new ResponseEntity<RideDTO>(new RideDTO(ride), HttpStatus.OK);
+			return new ResponseEntity<RideDTO>(new RideDTO(ride, null), HttpStatus.OK);
 		} catch (NoAvailableDriverException e1) {
 			System.err.println("Couldn't find driver.");
-			return new ResponseEntity<RideDTO>(new RideDTO(null), HttpStatus.OK);
+			return new ResponseEntity<RideDTO>(new RideDTO(null, null), HttpStatus.OK);
 		}
 	}
 	
@@ -118,7 +125,7 @@ public class RideController {
 			if (ride.isEmpty()) {
 				return new ResponseEntity<>(null, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<>(new RideDTO(ride.get()), HttpStatus.OK);
+				return new ResponseEntity<>(new RideDTO(ride.get(), null), HttpStatus.OK);
 			}
 		}
 	}
@@ -159,7 +166,7 @@ public class RideController {
 	}
 	
 	@PutMapping("/{id}/cancel")
-	public ResponseEntity<?> reasonCancelRide(@PathVariable Long id, @RequestBody String reason) {
+	public ResponseEntity<?> reasonCancelRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
 		if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
 		}
@@ -171,10 +178,9 @@ public class RideController {
 		
 		rideService.rejectRide(ride);
 		
-		// Create Cancellation
-		// Create RideDTO from ride and the new cancellation
+		Cancellation cancellation = cancellationService.create(ride, reason.getReason(), null); // TODO: Get user from JWT.
 		
-		return new ResponseEntity<RideDTO>(new RideDTO(ride), HttpStatus.OK);
+		return new ResponseEntity<RideDTO>(new RideDTO(ride, cancellation), HttpStatus.OK);
 	}
 	
 }
