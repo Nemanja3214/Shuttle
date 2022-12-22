@@ -7,6 +7,7 @@ import com.shuttle.driver.Driver;
 import com.shuttle.ride.dto.CreateRideDTO;
 
 public interface IRideService {
-	Ride createRide(CreateRideDTO rideDTO) throws NoAvailableDriverException;
+	Ride createRide(Ride ride);
+	Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException;
 	Optional<Ride> findPendingRideForDriver(Driver driver);
 }
