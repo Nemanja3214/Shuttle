@@ -160,27 +160,22 @@ public class RideController {
 		}
 	}
 	
-	@GetMapping("/driver/{driverId}/ride-requests")
-	public ResponseEntity<RideDTO> getRideRequests(@PathVariable long driverId) {
+	@GetMapping("/driver/{driverId}/active")
+	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
 		final Optional<Driver> odriver = driverService.get(driverId);
 		
 		if (odriver.isEmpty()) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		} else {
 			final Driver driver = odriver.get();
-			Optional<Ride> ride = rideService.findPendingRideForDriver(driver);
+			Ride ride = rideService.findCurrentRideByDriver(driver);
 			
-			if (ride.isEmpty()) {
+			if (ride == null) {
 				return new ResponseEntity<>(null, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<>(to(ride.get()), HttpStatus.OK);
+				return new ResponseEntity<>(to(ride), HttpStatus.OK);
 			}
 		}
-	}
-	
-	@GetMapping("/driver/{driverId}/active")
-	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
-		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/passenger/{passengerId}/active")
