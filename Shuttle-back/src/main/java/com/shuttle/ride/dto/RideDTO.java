@@ -34,7 +34,6 @@ public class RideDTO {
 
 		List<Location> ls = ride.getLocations();
 		
-		System.err.println(ls);
 		for (int i = 0; i < ls.size(); i += 2) {
 			LocationDTO from = LocationDTO.from(ls.get(i));
 			LocationDTO to = LocationDTO.from(ls.get(i + 1));

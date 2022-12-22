@@ -16,7 +16,7 @@ public class Cancellation {
     Long id;
     @ManyToOne
     private GenericUser user;
-    @ManyToOne
+    @ManyToOne // TODO: Should be OneToOne
     private Ride ride;
     private LocalDateTime time;
     private String reason;

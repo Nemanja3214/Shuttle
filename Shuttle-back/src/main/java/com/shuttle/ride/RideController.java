@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shuttle.common.RESTError;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
@@ -158,8 +159,22 @@ public class RideController {
 	}
 	
 	@PutMapping("/{id}/cancel")
-	public ResponseEntity<RideDTO> reasonCancelRide(@PathVariable long id, @RequestBody String reason) {
-		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+	public ResponseEntity<?> reasonCancelRide(@PathVariable Long id, @RequestBody String reason) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+		}
+		
+		Ride ride = rideService.findById(id);
+		if (ride == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+		
+		rideService.rejectRide(ride);
+		
+		// Create Cancellation
+		// Create RideDTO from ride and the new cancellation
+		
+		return new ResponseEntity<RideDTO>(new RideDTO(ride), HttpStatus.OK);
 	}
 	
 }

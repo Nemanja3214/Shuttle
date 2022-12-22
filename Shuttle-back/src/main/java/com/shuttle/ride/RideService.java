@@ -85,4 +85,15 @@ public class RideService implements IRideService {
 		return potentialDrivers.get(0);
 	}
 
+	@Override
+	public Ride findById(Long id) {
+		return rideRepository.findById(id).orElse(null);
+	}
+
+	@Override
+	public Ride rejectRide(Ride ride) {
+		ride.setStatus(Status.Rejected);
+		return ride;
+	}
+
 }

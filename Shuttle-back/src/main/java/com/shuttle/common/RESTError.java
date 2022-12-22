@@ -1,0 +1,12 @@
+package com.shuttle.common;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class RESTError {
+	String message;
+}
