@@ -1,20 +1,17 @@
 package com.shuttle.security.jwt;
 
-import com.shuttle.user.GenericUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil {
@@ -53,16 +50,19 @@ public class JwtTokenUtil {
     /**
      * Funkcija za generisanje JWT tokena.
      *
-     * @param username Korisničko ime korisnika kojem se token izdaje
+     * @param email       Korisničko ime korisnika kojem se token izdaje
+     * @param authorities
      * @return JWT token
      */
-    public String generateToken(String username) {
+    public String generateToken(Long id, String email, Collection<? extends GrantedAuthority> authorities) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
-                .setSubject(username)
+                .setSubject(email)
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
+                .claim("id", id)
+                .claim("roles", authorities)
                 .signWith(SIGNATURE_ALGORITHM, secret).compact();
 
 
@@ -71,6 +71,7 @@ public class JwtTokenUtil {
 
     /**
      * Funkcija za utvrđivanje tipa uređaja za koji se JWT kreira.
+     *
      * @return Tip uređaja.
      */
     private String generateAudience() {
@@ -124,6 +125,7 @@ public class JwtTokenUtil {
 
     /**
      * Funkcija za preuzimanje vlasnika tokena (korisničko ime).
+     *
      * @param token JWT token.
      * @return Korisničko ime iz tokena ili null ukoliko ne postoji.
      */
@@ -144,6 +146,7 @@ public class JwtTokenUtil {
 
     /**
      * Funkcija za preuzimanje datuma kreiranja tokena.
+     *
      * @param token JWT token.
      * @return Datum kada je token kreiran.
      */
@@ -230,7 +233,7 @@ public class JwtTokenUtil {
     /**
      * Funkcija za validaciju JWT tokena.
      *
-     * @param token JWT token.
+     * @param token       JWT token.
      * @param userDetails Informacije o korisniku koji je vlasnik JWT tokena.
      * @return Informacija da li je token validan ili ne.
      */
@@ -253,7 +256,7 @@ public class JwtTokenUtil {
     /**
      * Funkcija proverava da li je lozinka korisnika izmenjena nakon izdavanja tokena.
      *
-     * @param created Datum kreiranja tokena.
+     * @param created           Datum kreiranja tokena.
      * @param lastPasswordReset Datum poslednje izmene lozinke.
      * @return Informacija da li je token kreiran pre poslednje izmene lozinke ili ne.
      */
@@ -276,10 +279,10 @@ public class JwtTokenUtil {
      * Funkcija za preuzimanje sadržaja AUTH_HEADER-a iz zahteva.
      *
      * @param request HTTP zahtev.
-     *
      * @return Sadrzaj iz AUTH_HEADER-a.
      */
     public String getAuthHeaderFromHeader(HttpServletRequest request) {
         return request.getHeader(AUTH_HEADER);
     }
+
 }

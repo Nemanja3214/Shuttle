@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,93 +33,95 @@ import jakarta.websocket.server.PathParam;
 @RequestMapping("/api/user")
 public class UserController {
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
-	@GetMapping("/{id}/ride")
-	public ResponseEntity<ListDTO<String>> getUserRides(
-			@PathVariable long id,
-			@PathParam("page") long page,
-			@PathParam("size") long size,
-			@PathParam("sort") String sort,
-			@RequestParam String from,
-			@RequestParam String to) {
-		
-		ListDTO<String> rides = new ListDTO<>();
-		rides.setTotalCount(243);
-		rides.getResults().add("string");
-		
-		return new ResponseEntity<>(rides, HttpStatus.OK);
-	}
-	
-	@GetMapping
-	public ResponseEntity<ListDTO<UserDTO>> getUsers(
-			@RequestParam Long page,
-			@RequestParam Long size) {
-		
-		ListDTO<UserDTO> users = new ListDTO<>();
-		users.setTotalCount(243);
-		users.getResults().add(UserDTO.getMock());
-		
-		return new ResponseEntity<>(users, HttpStatus.OK);
-	}
-	
-	@PostMapping("/login")
-	public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
-		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(),
-				credentialsDTO.getPassword());
-		Authentication auth = authenticationManager.authenticate(authReq);
-		SecurityContext sc = SecurityContextHolder.getContext();
-		sc.setAuthentication(auth);
-		String token = jwtTokenUtil.generateToken(credentialsDTO.getEmail());
-		TokenDTO tokens = new TokenDTO(token,token);
-		//TODO add refresh token
-		return new ResponseEntity<TokenDTO>(TokenDTO.getMock(), HttpStatus.OK);
-	}
-	
-	@GetMapping("/{id}/message")
-	public ResponseEntity<ListDTO<MessageDTO>> getMessages(@PathVariable long id){
-		
-		ListDTO<MessageDTO> messages = new ListDTO<>();
-		messages.setTotalCount(243);
-		messages.getResults().add(MessageDTO.getMock());
-		
-		return new ResponseEntity<>(messages, HttpStatus.OK);
-	}
-	
-	@PostMapping("/{id}/message")
-	public ResponseEntity<MessageDTO> sendMessage(@RequestBody CreateMessageDTO messageDTO) {
-		return new ResponseEntity<MessageDTO>(MessageDTO.getMock(), HttpStatus.OK);
-	}
-	
-	@PutMapping("/{id}/block")
-	public ResponseEntity<Boolean> block(@PathVariable long id){
-		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
-	}
-	
-	@PutMapping("/{id}/unblock")
-	public ResponseEntity<Boolean> unblock(@PathVariable long id) {
-		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
-	}
-	
-	@PostMapping("/{id}/note")
-	public ResponseEntity<NoteDTO> createNote(@PathVariable long id, @RequestBody String message) {
-		return new ResponseEntity<NoteDTO>(NoteDTO.getMock(), HttpStatus.OK);
-	}
-	
-	@GetMapping("/{id}/note")
-	public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(
-			@PathVariable long id,
-			@RequestParam long page,
-			@RequestParam long size){
-		
-		ListDTO<NoteDTO> notes = new ListDTO<>();
-		notes.setTotalCount(243);
-		notes.getResults().add(NoteDTO.getMock());
-		
-		return new ResponseEntity<>(notes, HttpStatus.OK);
-	}
+
+    @GetMapping("/{id}/ride")
+    public ResponseEntity<ListDTO<String>> getUserRides(
+            @PathVariable long id,
+            @PathParam("page") long page,
+            @PathParam("size") long size,
+            @PathParam("sort") String sort,
+            @RequestParam String from,
+            @RequestParam String to) {
+
+        ListDTO<String> rides = new ListDTO<>();
+        rides.setTotalCount(243);
+        rides.getResults().add("string");
+
+        return new ResponseEntity<>(rides, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<ListDTO<UserDTO>> getUsers(
+            @RequestParam Long page,
+            @RequestParam Long size) {
+
+        ListDTO<UserDTO> users = new ListDTO<>();
+        users.setTotalCount(243);
+        users.getResults().add(UserDTO.getMock());
+
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
+        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(),
+                credentialsDTO.getPassword());
+        Authentication auth = authenticationManager.authenticate(authReq);
+        SecurityContext sc = SecurityContextHolder.getContext();
+        sc.setAuthentication(auth);
+        String token = jwtTokenUtil.generateToken
+                (((GenericUser) auth.getPrincipal()).getId(), credentialsDTO.getEmail(), auth.getAuthorities());
+        TokenDTO tokens = new TokenDTO(token, token);
+        //TODO add refresh token
+        return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/message")
+    public ResponseEntity<ListDTO<MessageDTO>> getMessages(@PathVariable long id) {
+
+        ListDTO<MessageDTO> messages = new ListDTO<>();
+        messages.setTotalCount(243);
+        messages.getResults().add(MessageDTO.getMock());
+
+        return new ResponseEntity<>(messages, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/message")
+    public ResponseEntity<MessageDTO> sendMessage(@RequestBody CreateMessageDTO messageDTO) {
+        return new ResponseEntity<MessageDTO>(MessageDTO.getMock(), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/block")
+    public ResponseEntity<Boolean> block(@PathVariable long id) {
+        return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/{id}/unblock")
+    public ResponseEntity<Boolean> unblock(@PathVariable long id) {
+        return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/{id}/note")
+    public ResponseEntity<NoteDTO> createNote(@PathVariable long id, @RequestBody String message) {
+        return new ResponseEntity<NoteDTO>(NoteDTO.getMock(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/note")
+    public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(
+            @PathVariable long id,
+            @RequestParam long page,
+            @RequestParam long size) {
+
+        ListDTO<NoteDTO> notes = new ListDTO<>();
+        notes.setTotalCount(243);
+        notes.getResults().add(NoteDTO.getMock());
+
+        return new ResponseEntity<>(notes, HttpStatus.OK);
+    }
 }

@@ -81,7 +81,7 @@ public class SecurityConfiguration {
         // Autentifikacija ce biti ignorisana ispod navedenih putanja (kako bismo ubrzali pristup resursima)
         // Zahtevi koji se mecuju za web.ignoring().antMatchers() nemaju pristup SecurityContext-u
         // Dozvoljena POST metoda na ruti /auth/login, za svaki drugi tip HTTP metode greska je 401 Unauthorized
-        return (web) -> web.ignoring().requestMatchers(HttpMethod.POST, "/auth/login")
+        return (web) -> web.ignoring().requestMatchers(HttpMethod.POST, "/api/user/login")
 
 
                 // Ovim smo dozvolili pristup statickim resursima aplikacije

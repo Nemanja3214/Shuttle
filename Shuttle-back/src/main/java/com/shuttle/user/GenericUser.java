@@ -39,7 +39,7 @@ public class GenericUser implements UserDetails {
     private String telephoneNumber;
 
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Note> notifications;
     //    @OneToOne(cascade = CascadeType.ALL)
 //    private Credentials credentials;
