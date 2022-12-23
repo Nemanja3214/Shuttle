@@ -1,5 +1,6 @@
 package com.shuttle.ride;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shuttle.common.RESTError;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
@@ -29,8 +31,14 @@ import com.shuttle.panic.PanicDTO;
 import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
+import com.shuttle.ride.cancellation.Cancellation;
+import com.shuttle.ride.cancellation.CancellationBodyDTO;
+import com.shuttle.ride.cancellation.ICancellationService;
+import com.shuttle.ride.cancellation.dto.CancellationDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.ride.dto.RideDriverDTO;
+import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.IVehicleTypeRepository;
 import com.shuttle.vehicle.Vehicle;
@@ -51,6 +59,10 @@ public class RideController {
 	private IPassengerRepository passengerRepository;
 	@Autowired
 	private ILocationService locationService;
+	@Autowired
+	private ICancellationService cancellationService;
+	
+	// TODO: Everything that's injected as a repository should be a service, replace once we have the services!!!
 	
 	public Ride from(CreateRideDTO rideDTO, Driver driver) {
 		final Double distance = 0.5; // TODO: Where to get total distance from?
@@ -91,40 +103,79 @@ public class RideController {
 		return r;
 	}
 	
+	public RideDTO to(Ride ride) {
+		return to(ride, null);
+	}
+	
+	public RideDTO to(Ride ride, Cancellation cancellation) {
+		RideDTO rideDTO = new RideDTO();
+		rideDTO.setId(ride.getId());
+		
+		if (ride.getStartTime() != null) {
+			rideDTO.setStartTime(ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME));
+		}
+		
+		if (ride.getEndTime() != null) {
+			rideDTO.setEndTime(ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME));
+		}
+		
+		rideDTO.setTotalCost(ride.getTotalCost());
+		rideDTO.setDriver(new RideDriverDTO(ride.getDriver()));
+		rideDTO.setPassengers(ride.getPassengers().stream().map(p -> new RidePassengerDTO(p)).toList());
+		rideDTO.setEstimatedTimeInMinutes(ride.getEstimatedTimeInMinutes());
+		rideDTO.setBabyTransport(ride.getBabyTransport());
+		rideDTO.setPetTransport(ride.getPetTransport());
+		rideDTO.setVehicleType(ride.getVehicleType().getName());
+		
+		if (cancellation != null) {
+			rideDTO.setRejection(new CancellationDTO(cancellation));
+		}
+		
+		rideDTO.setStatus(ride.getStatus());
+		
+		List<RouteDTO> locationsDTO = new ArrayList<>();
+		List<Location> ls = ride.getLocations();	
+		for (int i = 0; i < ls.size(); i += 2) {
+			LocationDTO from = LocationDTO.from(ls.get(i));
+			LocationDTO to = LocationDTO.from(ls.get(i + 1));
+			
+			RouteDTO d = new RouteDTO(from, to);
+			locationsDTO.add(d);
+		}
+		rideDTO.setLocations(locationsDTO);
+		
+		return rideDTO;
+	}
+	
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO createRideDTO){
 		try {
 			final Driver driver = rideService.findMostSuitableDriver(createRideDTO);
 			final Ride ride = from(createRideDTO, driver);
 			rideService.createRide(ride);
-			return new ResponseEntity<RideDTO>(new RideDTO(ride), HttpStatus.OK);
+			return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 		} catch (NoAvailableDriverException e1) {
 			System.err.println("Couldn't find driver.");
-			return new ResponseEntity<RideDTO>(new RideDTO(null), HttpStatus.OK);
+			return new ResponseEntity<RideDTO>(to(null), HttpStatus.OK);
 		}
 	}
 	
-	@GetMapping("/driver/{driverId}/ride-requests")
-	public ResponseEntity<RideDTO> getRideRequests(@PathVariable long driverId) {
+	@GetMapping("/driver/{driverId}/active")
+	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
 		final Optional<Driver> odriver = driverService.get(driverId);
 		
 		if (odriver.isEmpty()) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		} else {
 			final Driver driver = odriver.get();
-			Optional<Ride> ride = rideService.findPendingRideForDriver(driver);
+			Ride ride = rideService.findCurrentRideByDriver(driver);
 			
-			if (ride.isEmpty()) {
+			if (ride == null) {
 				return new ResponseEntity<>(null, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<>(new RideDTO(ride.get()), HttpStatus.OK);
+				return new ResponseEntity<>(to(ride), HttpStatus.OK);
 			}
 		}
-	}
-	
-	@GetMapping("/driver/{driverId}/active")
-	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
-		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/passenger/{passengerId}/active")
@@ -158,8 +209,21 @@ public class RideController {
 	}
 	
 	@PutMapping("/{id}/cancel")
-	public ResponseEntity<RideDTO> reasonCancelRide(@PathVariable long id, @RequestBody String reason) {
-		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+	public ResponseEntity<?> reasonCancelRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+		}
+		
+		Ride ride = rideService.findById(id);
+		if (ride == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+		
+		rideService.rejectRide(ride);
+		
+		Cancellation cancellation = cancellationService.create(ride, reason.getReason(), null); // TODO: Get user from JWT.
+		
+		return new ResponseEntity<RideDTO>(to(ride, cancellation), HttpStatus.OK);
 	}
 	
 }

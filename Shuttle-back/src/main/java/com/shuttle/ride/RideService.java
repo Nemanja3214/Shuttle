@@ -35,17 +35,6 @@ public class RideService implements IRideService {
 		return driver;
 	}
 
-	@Override
-	public Optional<Ride> findPendingRideForDriver(Driver driver) {
-		List<Ride> allPending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
-		
-		if (allPending.size() == 0) {
-			return Optional.empty();
-		} else {
-			return Optional.of(allPending.get(0));
-		}
-	}
-	
 	/**
 	 * @return List of all Drivers that are currently logged in and which can potentially perform the requested ride.
 	 * @throws NoAvailableDriverException If no driver is currently active or all are busy in the future.
@@ -83,6 +72,37 @@ public class RideService implements IRideService {
 	private Driver pickBestDriver(List<Driver> potentialDrivers, CreateRideDTO createRideDTO) {
 		// Precondition: potentialDrivers.size() != 0.
 		return potentialDrivers.get(0);
+	}
+
+	@Override
+	public Ride findById(Long id) {
+		return rideRepository.findById(id).orElse(null);
+	}
+
+	@Override
+	public Ride rejectRide(Ride ride) {
+		ride.setStatus(Status.Rejected);
+		ride = rideRepository.save(ride);
+		return ride;
+	}
+
+	@Override
+	public Ride findCurrentRideByDriver(Driver driver) {
+		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
+		List<Ride> accepted = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
+		List<Ride> active = rideRepository.findByDriverAndStatus(driver, Status.Active);
+		
+		if (pending.size() != 0) {
+			return pending.get(0);
+		}
+		if (accepted.size() != 0) {
+			return accepted.get(0);
+		}
+		if (active.size() != 0) {
+			return active.get(0);
+		}
+		
+		return null;
 	}
 
 }
