@@ -66,6 +66,8 @@ public class RideService implements IRideService {
 			potentialDrivers = availableDrivers;
 		}		
 		
+		potentialDrivers = potentialDrivers.stream().filter(d -> d.getTimeWorkedToday() < 8 * 60).toList();
+		
 		return potentialDrivers;
 	}
 	
