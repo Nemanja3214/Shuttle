@@ -104,6 +104,7 @@ public class RideService implements IRideService {
 	@Override
 	public Ride rejectRide(Ride ride) {
 		ride.setStatus(Status.Rejected);
+		
 		ride = rideRepository.save(ride);
 		return ride;
 	}
@@ -112,7 +113,6 @@ public class RideService implements IRideService {
 	public Ride findCurrentRideByDriver(Driver driver) {
 		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
 		List<Ride> accepted = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
-		List<Ride> active = rideRepository.findByDriverAndStatus(driver, Status.Active);
 		
 		if (pending.size() != 0) {
 			return pending.get(0);
@@ -120,6 +120,13 @@ public class RideService implements IRideService {
 		if (accepted.size() != 0) {
 			return accepted.get(0);
 		}
+		
+		return null;
+	}
+
+	@Override
+	public Ride findCurrentRideByDriverInProgress(Driver driver) {
+		List<Ride> active = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
 		if (active.size() != 0) {
 			return active.get(0);
 		}
@@ -128,12 +135,11 @@ public class RideService implements IRideService {
 	}
 
 	@Override
-	public Ride findCurrentRideByDriverInProgress(Driver driver) {
-		List<Ride> active = rideRepository.findByDriverAndStatus(driver, Status.Active);
-		if (active.size() != 0) {
-			return active.get(0);
-		}
+	public Ride acceptRide(Ride ride) {
+		ride.setStatus(Status.Accepted);
+		ride.setStartTime(LocalDateTime.now());
 		
-		return null;
+		ride = rideRepository.save(ride);
+		return ride;
 	}
 }

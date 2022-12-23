@@ -44,6 +44,14 @@ public interface IRideService {
 	/**
 	 * Reject the ride (by driver).
 	 * @param ride The ride that's rejected.
+	 * @return The ride.
 	 */
 	Ride rejectRide(Ride ride);
+
+	/**
+	 * Accept and start the ride (by driver).
+	 * @param ride The ride that's accepted.
+	 * @return The ride.
+	 */
+	Ride acceptRide(Ride ride);
 }
