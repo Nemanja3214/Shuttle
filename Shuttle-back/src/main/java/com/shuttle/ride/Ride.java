@@ -46,4 +46,11 @@ public class Ride {
     public List<Location> getLocations() {
     	return this.route.getLocations();
     }
+    
+    public LocalDateTime getEstimatedEndTime() {
+    	if (estimatedTimeInMinutes != null && startTime != null) {
+    		return startTime.plusMinutes(estimatedTimeInMinutes.longValue());
+    	}
+    	return null;
+    }
 }

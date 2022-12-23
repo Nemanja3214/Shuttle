@@ -1,6 +1,8 @@
 package com.shuttle.ride;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
+import com.shuttle.location.ILocationService;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.dto.CreateRideDTO;
 
@@ -42,15 +45,17 @@ public class RideService implements IRideService {
 	private List<Driver> findPotentialDrivers() throws NoAvailableDriverException {
 		List<Driver> potentialDrivers = new ArrayList<>();
 		
-		List<Driver> loggedIn = driverRepository.findAllLoggedIn();
+		final List<Driver> loggedIn = driverRepository.findAllLoggedIn();
 		if (loggedIn.size() == 0) {
 			throw new NoAvailableDriverException();
 		}
 		
-		List<Driver> availableDrivers = driverRepository.findAllLoggedInAvailable();
+		final List<Driver> availableDrivers = driverRepository.findAllLoggedInAvailable();
 		
 		if (availableDrivers.size() == 0) {
-			List<Driver> driversWithoutScheduledRide = driverRepository.findAllLoggedInNotAvailable(); // TODO: Check if the driver has no future rides scheduled.
+			List<Driver> driversWithoutScheduledRide = driverRepository.findAllLoggedInNotAvailable();
+			
+			// TODO: Check if the driver has no future rides scheduled.
 			
 			if (driversWithoutScheduledRide.size() == 0) {
 				throw new NoAvailableDriverException();
@@ -71,7 +76,22 @@ public class RideService implements IRideService {
 	 */
 	private Driver pickBestDriver(List<Driver> potentialDrivers, CreateRideDTO createRideDTO) {
 		// Precondition: potentialDrivers.size() != 0.
-		return potentialDrivers.get(0);
+		
+		List<Driver> closestFreeDrivers = potentialDrivers.stream().filter(d -> d.isAvailable()).toList();
+		
+		if (closestFreeDrivers.size() > 0) {
+			// Find closest one.
+			
+			return closestFreeDrivers.get(0);
+		} else {
+			// Find one who's most likely to finish soon.
+			
+			return potentialDrivers.stream().sorted((d1, d2) -> {
+				final LocalDateTime ldt1 = findCurrentRideByDriverInProgress(d1).getEstimatedEndTime();
+				final LocalDateTime ldt2 = findCurrentRideByDriverInProgress(d2).getEstimatedEndTime();
+				return ldt1.compareTo(ldt2);
+			}).findFirst().get();
+		}
 	}
 
 	@Override
@@ -105,4 +125,13 @@ public class RideService implements IRideService {
 		return null;
 	}
 
+	@Override
+	public Ride findCurrentRideByDriverInProgress(Driver driver) {
+		List<Ride> active = rideRepository.findByDriverAndStatus(driver, Status.Active);
+		if (active.size() != 0) {
+			return active.get(0);
+		}
+		
+		return null;
+	}
 }
