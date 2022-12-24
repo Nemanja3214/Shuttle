@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
-import com.shuttle.location.RouteDTO;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
 import com.shuttle.location.Route;

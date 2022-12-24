@@ -8,7 +8,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Data
-@AllArgsConstructor()
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -37,13 +36,10 @@ public class GenericUser implements UserDetails {
     private String surname;
     private String profilePicture;
     private String telephoneNumber;
-
-
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany
     private List<Note> notifications;
-    //    @OneToOne(cascade = CascadeType.ALL)
-//    private Credentials credentials;
     private String address;
+    private Boolean loggedIn;
 
     private Timestamp lastPasswordResetDate;
 
