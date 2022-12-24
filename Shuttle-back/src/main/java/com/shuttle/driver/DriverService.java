@@ -23,4 +23,14 @@ public class DriverService implements IDriverService {
 	public Optional<Driver> get(Long id) {
 		return driverRepository.findById(id);
 	}
+
+	@Override
+	public Driver setAvailable(Driver driver, boolean available) {
+		driver.setAvailable(available);
+		driver = driverRepository.save(driver);
+		
+		return driver;
+	}
+	
+	
 }
