@@ -62,7 +62,7 @@ public class JwtTokenUtil {
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
                 .claim("id", id)
-                .claim("roles", authorities)
+                .claim("role", authorities)
                 .signWith(SIGNATURE_ALGORITHM, secret).compact();
 
 
