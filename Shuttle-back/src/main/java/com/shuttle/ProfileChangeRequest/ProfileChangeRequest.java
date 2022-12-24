@@ -1,7 +1,8 @@
 package com.shuttle.ProfileChangeRequest;
 
-import com.shuttle.credentials.Credentials;
+
 import com.shuttle.note.Note;
+import com.shuttle.user.GenericUser;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,6 @@ public class ProfileChangeRequest {
     private String profilePicture;
     private String telephoneNumber;
     @OneToOne
-    private Credentials credentials;
+    private GenericUser user;
     private String address;
 }

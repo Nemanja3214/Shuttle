@@ -1,7 +1,6 @@
 package com.shuttle.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.shuttle.credentials.Credentials;
 import com.shuttle.note.Note;
 import com.shuttle.security.Role;
 import jakarta.persistence.*;
