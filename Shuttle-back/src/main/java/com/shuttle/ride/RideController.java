@@ -199,8 +199,19 @@ public class RideController {
 	}
 	
 	@PutMapping("/{id}/accept")
-	public ResponseEntity<RideDTO> acceptRide(@PathVariable long id) {
-		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+	public ResponseEntity<?> acceptRide(@PathVariable Long id) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+		}
+		
+		Ride ride = rideService.findById(id);
+		if (ride == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+		
+		rideService.acceptRide(ride);
+		
+		return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/end")

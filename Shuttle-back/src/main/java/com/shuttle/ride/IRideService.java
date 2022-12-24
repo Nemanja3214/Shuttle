@@ -8,6 +8,14 @@ import com.shuttle.ride.dto.CreateRideDTO;
 
 public interface IRideService {
 	Ride createRide(Ride ride);
+	
+	/**
+	 * Find a driver best suited for performing this ride.
+	 * The decision is made using a proximity heuristic.
+	 * @param createRideDTO The ride that's being created.
+	 * @return Instance of the driver most suited for this ride.
+	 * @throws NoAvailableDriverException If no driver can be found.
+	 */
 	Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException;
 	
 	/**
@@ -19,6 +27,14 @@ public interface IRideService {
 	Ride findCurrentRideByDriver(Driver driver);
 	
 	/**
+	 * Find ride of this driver that's ACTIVE.
+	 * This is a subset of findCurrentRideByDriver
+	 * @param driver The driver.
+	 * @return The ride or null if none found.
+	 */
+	Ride findCurrentRideByDriverInProgress(Driver driver);
+	
+	/**
 	 * Returns the ride from the given ID.
 	 * @param id ID to search for. Must not be null.
 	 * @return Ride object with the matching ID or null if none found.
@@ -28,6 +44,14 @@ public interface IRideService {
 	/**
 	 * Reject the ride (by driver).
 	 * @param ride The ride that's rejected.
+	 * @return The ride.
 	 */
 	Ride rejectRide(Ride ride);
+
+	/**
+	 * Accept and start the ride (by driver).
+	 * @param ride The ride that's accepted.
+	 * @return The ride.
+	 */
+	Ride acceptRide(Ride ride);
 }

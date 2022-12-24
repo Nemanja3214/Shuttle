@@ -28,7 +28,7 @@ public class Ride {
     private Double totalCost;
     @OneToOne
     private Driver driver;
-    @OneToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Passenger> passengers;
     @OneToOne(cascade = CascadeType.ALL)
     private Route route;
@@ -40,10 +40,17 @@ public class Ride {
     private Status status;
 
     public enum Status {
-        Pending, Accepted, Rejected, Active, Finished
+        Pending, Accepted, Rejected, Canceled, Finished
     }
 
     public List<Location> getLocations() {
     	return this.route.getLocations();
+    }
+    
+    public LocalDateTime getEstimatedEndTime() {
+    	if (estimatedTimeInMinutes != null && startTime != null) {
+    		return startTime.plusMinutes(estimatedTimeInMinutes.longValue());
+    	}
+    	return null;
     }
 }

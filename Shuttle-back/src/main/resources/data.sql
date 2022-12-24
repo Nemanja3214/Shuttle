@@ -15,7 +15,7 @@ insert into generic_user(id, name, credentials_id, logged_in) values (1, 'Bob', 
 insert into generic_user(id, name, credentials_id, logged_in) values (2, 'John', 2, true);
 insert into generic_user(id, name, credentials_id, logged_in) values (3, 'Troy', 3, true);
 
-insert into driver(id, available, blocked) values (1, true, false);
+insert into driver(id, available, blocked, time_worked_today) values (1, true, false, 0);
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 
