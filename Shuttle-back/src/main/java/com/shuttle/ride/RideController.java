@@ -173,6 +173,7 @@ public class RideController {
 			if (ride == null) {
 				return new ResponseEntity<>(null, HttpStatus.OK);
 			} else {
+				driverService.setAvailable(ride.getDriver(), false);
 				return new ResponseEntity<>(to(ride), HttpStatus.OK);
 			}
 		}
