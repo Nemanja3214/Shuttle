@@ -14,7 +14,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
-    // Funkcija koja na osnovu email-a iz baze vraca objekat User-a
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         GenericUser user = userRepository.findByEmail(email);

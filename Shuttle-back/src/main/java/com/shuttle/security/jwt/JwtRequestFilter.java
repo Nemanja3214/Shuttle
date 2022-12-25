@@ -38,25 +38,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String username;
 
-        // 1. Preuzimanje JWT tokena iz zahteva
+
         String authToken = tokenUtil.getToken(request);
 
         try {
 
             if (authToken != null) {
 
-                // 2. Citanje korisnickog imena iz tokena
                 username = tokenUtil.getUsernameFromToken(authToken);
 
                 if (username != null) {
 
-                    // 3. Preuzimanje korisnika na osnovu username-a
+
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                    // 4. Provera da li je prosledjeni token validan
                     if (tokenUtil.validateToken(authToken, userDetails)) {
 
-                        // 5. Kreiraj autentifikaciju
+
                         TokenBasedAuthentication authentication = new TokenBasedAuthentication(userDetails);
                         authentication.setToken(authToken);
                         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -68,7 +66,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             LOGGER.debug("Token expired!");
         }
 
-        // prosledi request dalje u sledeci filter
         chain.doFilter(request, response);
     }
 }
