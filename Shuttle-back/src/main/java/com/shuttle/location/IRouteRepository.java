@@ -1,6 +1,5 @@
 package com.shuttle.location;
 
-import org.springframework.data.repository.CrudRepository;
-
-public interface IRouteRepository extends CrudRepository<Route, Long> {
+import org.springframework.data.jpa.repository.JpaRepository;
+public interface IRouteRepository extends JpaRepository<Route, Long> {
 }

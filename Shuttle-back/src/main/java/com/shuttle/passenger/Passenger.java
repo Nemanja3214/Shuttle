@@ -7,18 +7,14 @@ import com.shuttle.user.GenericUser;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Entity
-@Table(name="passenger")
 public class Passenger extends GenericUser {
     @OneToMany(fetch = FetchType.EAGER)
     private Set<Route> favoriteRoutes;
