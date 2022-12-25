@@ -54,4 +54,12 @@ public interface IRideService {
 	 * @return The ride.
 	 */
 	Ride acceptRide(Ride ride);
+	
+	
+	/**
+	 * Finish the ride (by driver).
+	 * @param ride The ride that's finished.
+	 * @return The ride.
+	 */
+	Ride finishRide(Ride ride);
 }

@@ -173,6 +173,7 @@ public class RideController {
 			if (ride == null) {
 				return new ResponseEntity<>(null, HttpStatus.OK);
 			} else {
+				driverService.setAvailable(ride.getDriver(), false);
 				return new ResponseEntity<>(to(ride), HttpStatus.OK);
 			}
 		}
@@ -210,13 +211,26 @@ public class RideController {
 		}
 		
 		rideService.acceptRide(ride);
+		driverService.setAvailable(ride.getDriver(), false);
 		
 		return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/end")
-	public ResponseEntity<RideDTO> endRide(@PathVariable long id) {
-		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+	public ResponseEntity<?> endRide(@PathVariable Long id) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+		}
+		
+		Ride ride = rideService.findById(id);
+		if (ride == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+		
+		rideService.finishRide(ride);
+		driverService.setAvailable(ride.getDriver(), true);
+		
+		return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}/cancel")
@@ -231,6 +245,7 @@ public class RideController {
 		}
 		
 		rideService.rejectRide(ride);
+		driverService.setAvailable(ride.getDriver(), true);
 		
 		Cancellation cancellation = cancellationService.create(ride, reason.getReason(), null); // TODO: Get user from JWT.
 		

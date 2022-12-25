@@ -142,4 +142,13 @@ public class RideService implements IRideService {
 		ride = rideRepository.save(ride);
 		return ride;
 	}
+
+	@Override
+	public Ride finishRide(Ride ride) {
+		ride.setStatus(Status.Finished);
+		ride.setEndTime(LocalDateTime.now());
+		
+		ride = rideRepository.save(ride);
+		return ride;
+	}
 }
