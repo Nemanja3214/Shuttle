@@ -2,14 +2,15 @@ package com.shuttle.driver;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
 
@@ -67,10 +68,27 @@ public class DriverService implements IDriverService {
 		}
 		
 	}
-	
 
 	@Override
 	public List<Driver> findByAvailableTrue() {
 		return this.driverRepository.findByAvailableTrue();
+	}
+	
+//	Simulation of driver moving
+	@Scheduled(initialDelay = 2000, fixedDelay = 2000)
+	public void simulateLocationChange() {
+		List<Driver> activeDrivers = this.driverRepository.findByAvailableTrue();
+		if(activeDrivers.size() > 0) {
+			Driver activeDriver = activeDrivers.get(0);
+			
+			Location driverLocation = activeDriver.getCurrentLocation();
+			Random r = new Random();
+			double increment = r.nextDouble(-4, 4);
+			driverLocation.setLatitude(driverLocation.getLatitude() + increment);
+			driverLocation.setLongitude(driverLocation.getLongitude() + increment);
+			
+			changeCurrentLocation(activeDriver.getId(), LocationDTO.from(driverLocation)); 
+			
+		}
 	}
 }
