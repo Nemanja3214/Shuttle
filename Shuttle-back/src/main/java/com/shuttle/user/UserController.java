@@ -121,6 +121,19 @@ public class UserController {
         return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
     }
     
+    @GetMapping("/{id}/active")
+    public ResponseEntity<?> getActive(@PathVariable Long id) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+		}	
+		GenericUser user = userService.findById(id);
+		if (user == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+		boolean isActive = userService.getActive(user);
+		return new ResponseEntity<Boolean>(isActive, HttpStatus.OK);
+    }
+    
     @PutMapping("/{id}/active")
     public ResponseEntity<?> active(@PathVariable Long id) {
 		if (id == null) {
