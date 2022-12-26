@@ -1,23 +1,30 @@
 package com.shuttle.driver;
 
-import com.shuttle.common.ListDTO;
-import com.shuttle.driver.dto.DriverDTO;
-import com.shuttle.driver.dto.DriverDataPageDTO;
-import com.shuttle.driver.dto.DriverDocumentDTO;
-import com.shuttle.ride.dto.RideDTO;
-import com.shuttle.vehicle.VehicleDTO;
-import com.shuttle.workhours.WorkHours;
-import jakarta.websocket.server.PathParam;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.shuttle.common.ListDTO;
+import com.shuttle.driver.dto.DriverDTO;
+import com.shuttle.driver.dto.DriverDataPageDTO;
+import com.shuttle.driver.dto.DriverDocumentDTO;
+import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.vehicle.VehicleDTO;
+import com.shuttle.workhours.WorkHours;
+
+import jakarta.websocket.server.PathParam;
 
 @CrossOrigin
 @RestController
@@ -141,9 +148,9 @@ public class DriverController {
     }
     
     @GetMapping("/api/driver/active")
-    public ResponseEntity<List<DriverDTO>> getActiveDrivers(){
-    	List<DriverDTO> activeDrivers = driverService.getActiveDrivers();
-    	return new ResponseEntity<List<DriverDTO>>(activeDrivers, HttpStatus.OK);
+    public ResponseEntity<List<LocationDTO>> getActiveDriversLocations(){
+    	List<LocationDTO> activeDriversLocations = driverService.getActiveDriversLocations();
+    	return new ResponseEntity<List<LocationDTO>>(activeDriversLocations, HttpStatus.OK);
     }
 
 }

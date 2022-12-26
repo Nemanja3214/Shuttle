@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.location.Location;
+import com.shuttle.location.dto.LocationDTO;
 
 @Service
 public class DriverService implements IDriverService {
@@ -40,8 +41,8 @@ public class DriverService implements IDriverService {
 	}
 
 	@Override
-	public List<DriverDTO> getActiveDrivers() {
-		return driverRepository.findByAvailableTrue().stream().map(x -> DriverDTO.from(x)).collect(Collectors.toList());
+	public List<LocationDTO> getActiveDriversLocations() {
+		return driverRepository.findByAvailableTrue().stream().map(x -> LocationDTO.from(x.getCurrentLocation())).collect(Collectors.toList());
 	}
 	
 //	TODO: remove, this is only for simulation
@@ -52,4 +53,6 @@ public class DriverService implements IDriverService {
 
         this.driverRepository.save(d);
     }
+
+	
 }

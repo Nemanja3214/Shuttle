@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
 import com.shuttle.driver.Driver;
-import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.location.ILocationService;
 import com.shuttle.location.Location;
