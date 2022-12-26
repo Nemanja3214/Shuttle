@@ -86,6 +86,13 @@ public class UserController {
                 (((GenericUser) auth.getPrincipal()).getId(), credentialsDTO.getEmail(), auth.getAuthorities());
         TokenDTO tokens = new TokenDTO(token, token);
         //TODO add refresh token
+        
+        GenericUser user = userService.findByEmail(credentialsDTO.getEmail());
+        if (user != null) {
+        	userService.setActive(user, true);
+        }
+        
+        
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
     }
 
