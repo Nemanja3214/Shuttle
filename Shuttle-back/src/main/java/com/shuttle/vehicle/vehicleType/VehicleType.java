@@ -1,4 +1,4 @@
-package com.shuttle.vehicle;
+package com.shuttle.vehicle.vehicleType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

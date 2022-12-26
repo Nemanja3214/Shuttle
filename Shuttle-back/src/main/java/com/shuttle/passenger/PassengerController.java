@@ -19,8 +19,8 @@ import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 import com.shuttle.location.Route;
-import com.shuttle.vehicle.VehicleType;
 
 import jakarta.websocket.server.PathParam;
 

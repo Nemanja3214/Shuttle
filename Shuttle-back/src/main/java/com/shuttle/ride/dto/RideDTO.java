@@ -10,7 +10,7 @@ import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.cancellation.dto.CancellationDTO;
-import com.shuttle.vehicle.VehicleType;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -9,6 +9,8 @@ public class CreateRideEstimationDTO {
 	private String vehicleType;
 	private boolean babyTransport;
 	private boolean petTransport;
+	private double routeLength;
+	private long travelTime;
 
 	public List<RouteDTO> getLocations() {
 		return locations;
@@ -41,5 +43,23 @@ public class CreateRideEstimationDTO {
 	public void setPetTransport(boolean petTransport) {
 		this.petTransport = petTransport;
 	}
+
+	public double getRouteLength() {
+		return routeLength;
+	}
+
+	public void setRouteLength(double routeLength) {
+		this.routeLength = routeLength;
+	}
+
+	public long getTravelTime() {
+		return travelTime;
+	}
+
+	public void setTravelTime(long travelTime) {
+		this.travelTime = travelTime;
+	}
+	
+	
 
 }

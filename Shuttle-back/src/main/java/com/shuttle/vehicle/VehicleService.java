@@ -1,13 +1,17 @@
 package com.shuttle.vehicle;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverService;
+import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 @Service
 public class VehicleService implements IVehicleService {
@@ -48,6 +52,11 @@ public class VehicleService implements IVehicleService {
 	@Override
 	public Vehicle findByDriver(Driver driver) {
 		return vehicleRepository.findByDriver(driver);
+	}
+
+	@Override
+	public List<String> getAllVehicleTypesNames() {
+		return vehicleTypeRepository.findAll().stream().map(x -> x.getName()).collect(Collectors.toList());
 	}
 	
 }

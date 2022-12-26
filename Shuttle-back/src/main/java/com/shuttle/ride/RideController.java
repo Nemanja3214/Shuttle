@@ -40,9 +40,9 @@ import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.vehicle.IVehicleRepository;
-import com.shuttle.vehicle.IVehicleTypeRepository;
 import com.shuttle.vehicle.Vehicle;
-import com.shuttle.vehicle.VehicleType;
+import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 @RestController
 @RequestMapping("/api/ride")
