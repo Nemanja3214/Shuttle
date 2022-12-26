@@ -21,7 +21,7 @@ public class SwaggerController {
 
         for (GenericUser user :
                 userService.findAll()) {
-            userService.encodeUserPassword(user, "sifra123");
+            userService.encodeUserPassword(user, user.getPassword());
 //            System.out.println(user.getPassword());
             userService.save(user);
         }
