@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class Admin extends GenericUser {
-    boolean active;
 }

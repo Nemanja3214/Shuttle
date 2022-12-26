@@ -20,5 +20,4 @@ public class Passenger extends GenericUser {
     private Set<Route> favoriteRoutes;
     Double finance;
     Boolean currentlyRiding;
-    Boolean blocked;
 }

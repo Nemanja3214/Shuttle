@@ -38,9 +38,12 @@ public class GenericUser implements UserDetails {
     @OneToMany
     private List<Note> notifications;
     private String address;
-    private Boolean loggedIn;
+    //private Boolean loggedIn;
 
     private Timestamp lastPasswordResetDate;
+    
+    private Boolean blocked;
+    private Boolean active;
 
     private Boolean enabled;
     @Column(unique = true)

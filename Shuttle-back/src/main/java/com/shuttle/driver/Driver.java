@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name="driver")
 public class Driver extends GenericUser {
-    boolean available;
+    boolean available; // This is determined by the current ride.
+	//boolean blocked;
     Long timeWorkedToday;
-    boolean blocked;
 }

@@ -14,10 +14,10 @@ insert into role(name) values('admin');
 
 -- Elementary user data
 
-insert into generic_user(email, password, enabled) values ('bob@gmail.com', 'bob123', true);
-insert into generic_user(email, password, enabled) values ('john@gmail.com', 'john123', true);
-insert into generic_user(email, password, enabled) values ('troy@gmail.com', 'troy123', true);
-insert into generic_user(email, password, enabled) values ('admin@gmail.com', 'admin', true);
+insert into generic_user(email, password, enabled, blocked, active) values ('bob@gmail.com', 'bob123', true, false, true);
+insert into generic_user(email, password, enabled, blocked, active) values ('john@gmail.com', 'john123', true, false, false);
+insert into generic_user(email, password, enabled, blocked, active) values ('troy@gmail.com', 'troy123', true, false, false);
+insert into generic_user(email, password, enabled, blocked, active) values ('admin@gmail.com', 'admin', true, false, false);
 
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
@@ -26,7 +26,7 @@ insert into user_role(user_id, role_id) values (4, 3);
 
 -- Role specific user data
 
-insert into driver(id, available, blocked, time_worked_today) values (1, true, false, 0);
+insert into driver(id, available, time_worked_today) values (1, true, 0);
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 
