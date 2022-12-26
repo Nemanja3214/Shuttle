@@ -36,7 +36,7 @@ public class Driver extends GenericUser {
     boolean blocked;
     
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "current_location_id", referencedColumnName = "id")
+    //@JoinColumn(name = "current_location_id", referencedColumnName = "id")
     Location currentLocation;
     
 //    TODO: remove, simulation constructor

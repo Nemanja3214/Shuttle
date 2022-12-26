@@ -47,13 +47,13 @@ public class DriverService implements IDriverService {
 	}
 	
 //	TODO: remove, this is only for simulation
-	@EventListener
-    public void appReady(ApplicationReadyEvent event) {
-		Driver d = new Driver("Zika", "Zikic", "", "0634141", "Karadjordjeva 1", "zika@email.com", "sifra123",
-	    		true, (long) 0, false, new Location(null, "Ruma", 45.007889, 19.822540));
-
-        this.driverRepository.save(d);
-    }
+//	@EventListener
+//    public void appReady(ApplicationReadyEvent event) {
+//		Driver d = new Driver("Zika", "Zikic", "", "0634141", "Karadjordjeva 1", "zika@email.com", "sifra123",
+//	    		true, (long) 0, false, new Location(null, "Ruma", 45.007889, 19.822540));
+//
+//        this.driverRepository.save(d);
+//    }
 
 	@Override
 	public boolean changeCurrentLocation(long driverId, LocationDTO location) {

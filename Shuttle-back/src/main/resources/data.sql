@@ -1,3 +1,6 @@
+insert into location(address, latitude, longitude) values ('Street 1', 45.267136, 19.833549);
+insert into location(address, latitude, longitude) values ('Street 2', 44.267136, 20.833549);
+
 -- Vehicle types are hardcoded at the start and never changed.
 -- Don't remove this!
 
@@ -26,7 +29,7 @@ insert into user_role(user_id, role_id) values (4, 3);
 
 -- Role specific user data
 
-insert into driver(id, available, blocked, time_worked_today) values (1, true, false, 0);
+insert into driver(id, available, blocked, time_worked_today, current_location_id) values (1, true, false, 0, 1);
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 
@@ -35,9 +38,6 @@ insert into passenger(id) values (3);
 insert into vehicle(vehicle_type_id, driver_id) values(1, 1);
 
 ----------------- Test ride, because swagger auth doesn't work and we don't have ride creation on the frontend yet.
-
-insert into location(address, latitude, longitude) values ('Street 1', 45.267136, 19.833549);
-insert into location(address, latitude, longitude) values ('Street 2', 44.267136, 20.833549);
 
 insert into route() values();
 
