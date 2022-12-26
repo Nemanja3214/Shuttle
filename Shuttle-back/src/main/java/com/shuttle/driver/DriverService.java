@@ -54,5 +54,23 @@ public class DriverService implements IDriverService {
         this.driverRepository.save(d);
     }
 
+	@Override
+	public boolean changeCurrentLocation(long driverId, LocationDTO location) {
+		Optional<Driver> d = this.driverRepository.findById(driverId);
+		if(d.isPresent()) {
+			d.get().setCurrentLocation(location.to());
+			this.driverRepository.save(d.get());
+			return true;
+		}
+		else {
+			return false;
+		}
+		
+	}
 	
+
+	@Override
+	public List<Driver> findByAvailableTrue() {
+		return this.driverRepository.findByAvailableTrue();
+	}
 }

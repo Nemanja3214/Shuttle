@@ -17,4 +17,6 @@ public interface IDriverService {
 	 */
 	public Driver setAvailable(Driver driver, boolean available);
 	public List<LocationDTO> getActiveDriversLocations();
+	public boolean changeCurrentLocation(long id, LocationDTO location);
+	public List<Driver> findByAvailableTrue();
 }

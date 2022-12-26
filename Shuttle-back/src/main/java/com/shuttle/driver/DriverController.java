@@ -152,6 +152,11 @@ public class DriverController {
     	List<LocationDTO> activeDriversLocations = driverService.getActiveDriversLocations();
     	return new ResponseEntity<List<LocationDTO>>(activeDriversLocations, HttpStatus.OK);
     }
+    @PutMapping("/api/{id}/change-location")
+    public ResponseEntity<Void> changeCurrentLocation(@RequestBody LocationDTO location, @PathVariable long id){
+    	boolean result = this.driverService.changeCurrentLocation(id, location);
+    	return new ResponseEntity<Void>(result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+    }
 
 }
 
