@@ -61,4 +61,11 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(password));
         return user;
     }
+
+	@Override
+	public GenericUser setActive(GenericUser user, boolean active) {
+		user.setActive(active);
+		userRepository.save(user);
+		return user;
+	}
 }

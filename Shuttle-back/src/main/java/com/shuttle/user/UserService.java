@@ -12,4 +12,5 @@ public interface UserService {
      GenericUser save(UserDTO userDTO);
      GenericUser save(GenericUser user);
     GenericUser encodeUserPassword(GenericUser user, String password);
+	GenericUser setActive(GenericUser user, boolean b);
 }

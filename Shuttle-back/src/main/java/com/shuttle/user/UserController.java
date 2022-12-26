@@ -20,11 +20,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
+import com.shuttle.common.RESTError;
 import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
+import com.shuttle.ride.Ride;
+import com.shuttle.ride.cancellation.Cancellation;
+import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.dto.UserDTO;
 
 import jakarta.websocket.server.PathParam;
@@ -38,6 +42,9 @@ public class UserController {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+    
+    @Autowired
+    private UserService userService;
 
 
     @GetMapping("/{id}/ride")
@@ -105,6 +112,32 @@ public class UserController {
     @PutMapping("/{id}/unblock")
     public ResponseEntity<Boolean> unblock(@PathVariable long id) {
         return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+    }
+    
+    @PutMapping("/{id}/active")
+    public ResponseEntity<?> active(@PathVariable Long id) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+		}	
+		GenericUser user = userService.findById(id);
+		if (user == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+		user = userService.setActive(user, true);
+		return new ResponseEntity<Boolean>(user.getActive(), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}/inactive")
+    public ResponseEntity<?> inactive(@PathVariable Long id) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+		}	
+		GenericUser user = userService.findById(id);
+		if (user == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+		user = userService.setActive(user, false);
+		return new ResponseEntity<Boolean>(user.getActive(), HttpStatus.OK);
     }
 
     @PostMapping("/{id}/note")
