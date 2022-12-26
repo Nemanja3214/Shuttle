@@ -1,8 +1,11 @@
 package com.shuttle.user;
 
 import com.shuttle.security.RoleService;
+import com.shuttle.driver.Driver;
 import com.shuttle.security.Role;
 import com.shuttle.user.dto.UserDTO;
+import com.shuttle.workhours.IWorkHoursService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +24,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleService roleService;
+    
+    @Autowired
+    private IWorkHoursService workHoursService;
+
 
     @Override
     public GenericUser findByEmail(String email) throws UsernameNotFoundException {
@@ -66,6 +73,23 @@ public class UserServiceImpl implements UserService {
 	public GenericUser setActive(GenericUser user, boolean active) {
 		user.setActive(active);
 		userRepository.save(user);
+		
+		// If user is a driver, update working hours.
+		
+		for (Role r : user.getRoles()) {
+			// TODO: Hardcoded!
+			System.err.println(r.getName());
+			if (r.getName().equals("driver")) {
+				System.err.println(r.getName());
+				if (active) {
+					workHoursService.addNew((Driver)user);
+				} else {
+					workHoursService.finishLast((Driver)user);
+				}
+				break;
+			}
+		}
+	
 		return user;
 	}
 }
