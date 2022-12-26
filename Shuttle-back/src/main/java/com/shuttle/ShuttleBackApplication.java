@@ -15,7 +15,7 @@ public class ShuttleBackApplication {
 	}
 	
 	@GetMapping("/hello")
-	@CrossOrigin(origins = "http://localhost:4200")
+	@CrossOrigin(origins = "http://localhost:8080")
 	public String helloWorld() {
 		return "Hello from Spring Boot";
 	}

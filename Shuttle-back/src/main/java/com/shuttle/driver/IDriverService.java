@@ -1,6 +1,9 @@
 package com.shuttle.driver;
 
+import java.util.List;
 import java.util.Optional;
+
+import com.shuttle.driver.dto.DriverDTO;
 
 public interface IDriverService {
 	public Driver add(Driver driver);
@@ -13,4 +16,5 @@ public interface IDriverService {
 	 * @return The driver.
 	 */
 	public Driver setAvailable(Driver driver, boolean available);
+	public List<DriverDTO> getActiveDrivers();
 }
