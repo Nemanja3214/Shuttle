@@ -3,24 +3,25 @@ package com.shuttle.driver;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.vehicle.IVehicleRepository;
+import com.shuttle.vehicle.Vehicle;
 
 @Service
 public class DriverService implements IDriverService {
 	private IDriverRepository driverRepository;
+	private IVehicleRepository vehicleRepository;
 	
 	@Autowired
-	public DriverService(IDriverRepository driverRepository) {
+	public DriverService(IDriverRepository driverRepository, IVehicleRepository vehicleRepository) {
 		this.driverRepository = driverRepository;
+		this.vehicleRepository = vehicleRepository;
 	}
 
 	@Override
@@ -43,24 +44,18 @@ public class DriverService implements IDriverService {
 
 	@Override
 	public List<LocationDTO> getActiveDriversLocations() {
-		return driverRepository.findByAvailableTrue().stream().map(x -> LocationDTO.from(x.getCurrentLocation())).collect(Collectors.toList());
+		List<Driver> activeDrivers = driverRepository.findByAvailableTrue();
+		List<Vehicle> driversVehicles = vehicleRepository.findByDriverIn(activeDrivers);
+		return driversVehicles.stream().map(vehicle -> LocationDTO.from(vehicle.getCurrentLocation())).toList();
 	}
-	
-//	TODO: remove, this is only for simulation
-//	@EventListener
-//    public void appReady(ApplicationReadyEvent event) {
-//		Driver d = new Driver("Zika", "Zikic", "", "0634141", "Karadjordjeva 1", "zika@email.com", "sifra123",
-//	    		true, (long) 0, false, new Location(null, "Ruma", 45.007889, 19.822540));
-//
-//        this.driverRepository.save(d);
-//    }
 
 	@Override
 	public boolean changeCurrentLocation(long driverId, LocationDTO location) {
-		Optional<Driver> d = this.driverRepository.findById(driverId);
-		if(d.isPresent()) {
-			d.get().setCurrentLocation(location.to());
-			this.driverRepository.save(d.get());
+		Optional<Driver> driver = this.driverRepository.findById(driverId);
+		if(driver.isPresent()) {
+			Vehicle vehicle = vehicleRepository.findByDriver(driver.get());
+			vehicle.setCurrentLocation(location.to());
+			this.vehicleRepository.save(vehicle);
 			return true;
 		}
 		else {
@@ -78,14 +73,15 @@ public class DriverService implements IDriverService {
 	@Scheduled(initialDelay = 2000, fixedDelay = 2000)
 	public void simulateLocationChange() {
 		List<Driver> activeDrivers = this.driverRepository.findByAvailableTrue();
-		if(activeDrivers.size() > 0) {
-			Driver activeDriver = activeDrivers.get(0);
+		for(Driver activeDriver : activeDrivers) {
+			Vehicle vehicle = vehicleRepository.findByDriver(activeDriver);
 			
-			Location driverLocation = activeDriver.getCurrentLocation();
+			Location driverLocation = vehicle.getCurrentLocation();
 			Random r = new Random();
-			double increment = r.nextDouble(-4, 4);
-			driverLocation.setLatitude(driverLocation.getLatitude() + increment);
-			driverLocation.setLongitude(driverLocation.getLongitude() + increment);
+			double incrementX = r.nextDouble(-0.001, 0.001);
+			double incrementY = r.nextDouble(-0.001, 0.001);
+			driverLocation.setLatitude(driverLocation.getLatitude() + incrementX);
+			driverLocation.setLongitude(driverLocation.getLongitude() + incrementY);
 			
 			changeCurrentLocation(activeDriver.getId(), LocationDTO.from(driverLocation)); 
 			

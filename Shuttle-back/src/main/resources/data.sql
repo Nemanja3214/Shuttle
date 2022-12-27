@@ -29,13 +29,15 @@ insert into user_role(user_id, role_id) values (4, 3);
 
 -- Role specific user data
 
-insert into driver(id, available, blocked, time_worked_today, current_location_id) values (1, true, false, 0, 1);
+insert into driver(id, available, blocked, time_worked_today) values (1, true, false, 0);
+insert into driver(id, available, blocked, time_worked_today) values (2, true, false, 0);
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 
 -- Vehicle
 
-insert into vehicle(vehicle_type_id, driver_id) values(1, 1);
+insert into vehicle(vehicle_type_id, driver_id, current_location_id) values(1, 1, 1);
+insert into vehicle(vehicle_type_id, driver_id, current_location_id) values(1, 2, 2);
 
 ----------------- Test ride, because swagger auth doesn't work and we don't have ride creation on the frontend yet.
 

@@ -34,15 +34,11 @@ public class Driver extends GenericUser {
     boolean available;
     Long timeWorkedToday;
     boolean blocked;
-    
-    @OneToOne(cascade = CascadeType.ALL)
-    //@JoinColumn(name = "current_location_id", referencedColumnName = "id")
-    Location currentLocation;
-    
+
 //    TODO: remove, simulation constructor
     @Builder
     public Driver(String name, String surname, String profilePicture, String telephoneNumber, String address, String email, String password,
-    		boolean available, Long timeWorkedToday, boolean blocked, Location currLocation) {
+    		boolean available, Long timeWorkedToday, boolean blocked) {
     	this.setName(name);
     	this.setSurname(surname);
     	this.setProfilePicture(profilePicture);
@@ -53,7 +49,6 @@ public class Driver extends GenericUser {
     	this.available = available;
     	this.timeWorkedToday = timeWorkedToday;
     	this.blocked = blocked;
-    	this.currentLocation = currLocation;
     	
     }
 

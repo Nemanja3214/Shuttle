@@ -21,7 +21,6 @@ public class DriverDTO {
     private String address;
     private String email;
     private String password;
-    private LocationDTO currentLocation;
     
     public Driver to() {
     	Driver d = new Driver();
@@ -33,7 +32,6 @@ public class DriverDTO {
     	d.setTelephoneNumber(telephoneNumber);
     	d.setEmail(email);
 		d.setPassword(password);
-		d.setCurrentLocation(currentLocation.to());
 		return d;
     }
     
@@ -46,8 +44,7 @@ public class DriverDTO {
     			driver.getTelephoneNumber(),
     			driver.getAddress(),
     			driver.getEmail(),
-    			driver.getPassword(),
-    			LocationDTO.from(driver.getCurrentLocation())
+    			driver.getPassword()
     	);
     }
 }
