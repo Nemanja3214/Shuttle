@@ -1,6 +1,6 @@
 package com.shuttle.driver;
 
-import java.util.Optional;
+import java.time.Duration;
 
 public interface IDriverService {
 	public Driver add(Driver driver);
@@ -13,4 +13,11 @@ public interface IDriverService {
 	 * @return The driver.
 	 */
 	public Driver setAvailable(Driver driver, boolean available);
+
+    /**
+     * Get duration of work done today (from 00:00:00 to now).
+     * @param driver The driver
+     * @return Duration of worktime.
+     */
+    public Duration getDurationOfWorkToday(Driver driver);
 }

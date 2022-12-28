@@ -26,7 +26,6 @@ import java.util.List;
 @CrossOrigin
 @RestController
 public class DriverController {
-	
 	@Autowired
 	private IDriverService driverService;
 	
@@ -53,7 +52,6 @@ public class DriverController {
     @GetMapping("/api/driver/{id}")
     public ResponseEntity<DriverDTO> getDriverDetails(@PathVariable(value = "id") Long id) {
         DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
-        System.out.println(id);
         return new ResponseEntity<>(driverControllerMockProvider.getDriverData(), HttpStatus.OK);
     }
 

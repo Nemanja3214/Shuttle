@@ -1,18 +1,22 @@
 package com.shuttle.driver;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.workhours.IWorkHoursService;
+import com.shuttle.workhours.WorkHours;
+
 @Service
 public class DriverService implements IDriverService {
+    @Autowired
 	private IDriverRepository driverRepository;
-	
-	@Autowired
-	public DriverService(IDriverRepository driverRepository) {
-		this.driverRepository = driverRepository;
-	}
+    @Autowired
+    private IWorkHoursService workHoursService;
 
 	@Override
 	public Driver add(Driver driver) {
@@ -31,6 +35,22 @@ public class DriverService implements IDriverService {
 		
 		return driver;
 	}
-	
-	
+
+    @Override
+    public Duration getDurationOfWorkToday(Driver driver) {
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime startOfToday = now.withHour(0).withMinute(0).withSecond(0);
+        Duration totalWorked = Duration.ZERO;
+        for (WorkHours wh : workHoursService.findAllByDriver(driver, startOfToday, now)) {
+            if (wh.getFinish() == null) {
+                // This is the last one in the list.
+                totalWorked = totalWorked.plus(Duration.between(wh.getStart(), now));
+            } else {
+                totalWorked = totalWorked.plus(Duration.between(wh.getStart(), wh.getFinish()));
+            }
+            
+        }
+
+        return totalWorked;
+    }
 }

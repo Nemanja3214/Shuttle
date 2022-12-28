@@ -155,7 +155,6 @@ public class RideController {
 			rideService.createRide(ride);
 			return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 		} catch (NoAvailableDriverException e1) {
-			System.err.println("Couldn't find driver.");
 			return new ResponseEntity<RideDTO>(to(null), HttpStatus.OK);
 		}
 	}

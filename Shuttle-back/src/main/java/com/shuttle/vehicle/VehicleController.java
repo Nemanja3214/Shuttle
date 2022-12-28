@@ -30,8 +30,6 @@ public class VehicleController {
 	
 	@PostMapping
 	public ResponseEntity<VehicleDTO> createVehicle(@RequestBody VehicleDTO vehicleDTO) {
-		System.err.println(vehicleDTO.getDriverId());
-		
 		Vehicle vehicle = vehicleService.add(vehicleDTO);
 		return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
 	}

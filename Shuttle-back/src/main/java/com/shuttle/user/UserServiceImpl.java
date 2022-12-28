@@ -83,9 +83,7 @@ public class UserServiceImpl implements UserService {
 		if (newActiveState) {	
 			for (Role r : user.getRoles()) {
 				// TODO: Hardcoded!
-				System.err.println(r.getName());
 				if (r.getName().equals("driver")) {
-					System.err.println(r.getName());
 					if (active) {
 						workHoursService.addNew((Driver)user);
 					} else {
