@@ -1,7 +1,7 @@
 package com.shuttle.ride.cancellation;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ICancellationRepository extends CrudRepository<Cancellation, Long> {
+public interface ICancellationRepository extends JpaRepository<Cancellation, Long> {
 
 }

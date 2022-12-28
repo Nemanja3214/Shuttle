@@ -1,11 +1,18 @@
 package com.shuttle.ride;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.shuttle.driver.Driver;
+import org.springframework.data.jpa.repository.Query;
 
-public interface IRideRepository extends CrudRepository<Ride, Long> {
-	public List<Ride> findByDriverAndStatus(Driver driver, Ride.Status status);
+public interface IRideRepository extends JpaRepository<Ride, Long> {
+    public List<Ride> findByDriverAndStatus(Driver driver, Ride.Status status);
+
+    @Query(value = "from Ride r where r.driver.id = :driverId and ( r.endTime BETWEEN :startDate AND :endDate )")
+    public Page<Ride> getAllBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long driverId, Pageable pageable);
 }
