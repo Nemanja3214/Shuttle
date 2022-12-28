@@ -162,12 +162,11 @@ public class RideController {
 	
 	@GetMapping("/driver/{driverId}/active")
 	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
-		final Optional<Driver> odriver = driverService.get(driverId);
+        final  Driver driver = driverService.get(driverId);
 		
-		if (odriver.isEmpty()) {
+		if (driver == null) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		} else {
-			final Driver driver = odriver.get();
 			Ride ride = rideService.findCurrentRideByDriver(driver);
 			
 			if (ride == null) {

@@ -1,6 +1,7 @@
 package com.shuttle.workhours;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,6 +23,6 @@ public class WorkHours {
 	private LocalDateTime start;
 	private LocalDateTime finish;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Driver driver;
 }

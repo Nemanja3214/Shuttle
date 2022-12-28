@@ -20,8 +20,8 @@ public class DriverService implements IDriverService {
 	}
 
 	@Override
-	public Optional<Driver> get(Long id) {
-		return driverRepository.findById(id);
+	public Driver get(Long id) {
+		return driverRepository.findById(id).orElse(null);
 	}
 
 	@Override
