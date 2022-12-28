@@ -58,8 +58,7 @@ public class RideService implements IRideService {
 		final List<Driver> availableDrivers = driverRepository.findAllActiveAvailable();
 		
 		if (availableDrivers.size() == 0) {
-			List<Driver> driversWithoutScheduledRide = driverRepository.findAllActiveNotAvailable();
-			
+			List<Driver> driversWithoutScheduledRide = driverRepository.findAllActiveNotAvailable();	
 			// TODO: Check if the driver has no future rides scheduled.
 			
 			if (driversWithoutScheduledRide.size() == 0) {
@@ -79,7 +78,7 @@ public class RideService implements IRideService {
      * Helper function to check whether the driver has worked more than enough today.
      */
     private boolean workedMoreThan8Hours(Driver d) {
-        Duration dur = driverService.getDurationOfWorkToday(d);
+        Duration dur = driverService.getDurationOfWorkInTheLast24Hours(d);
         return (dur.compareTo(Duration.ofHours(8)) > 0);
     }
 	

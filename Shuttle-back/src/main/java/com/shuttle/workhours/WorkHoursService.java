@@ -41,7 +41,7 @@ public class WorkHoursService implements IWorkHoursService {
 	
 	@Override
 	public List<WorkHours> findAllByDriver(Driver driver, Pageable pageable, LocalDateTime from, LocalDateTime to) {
-        System.out.println("WorkHoursService::findAllByDriver() " + driverService.getDurationOfWorkToday(driver).toString());
+        System.out.println("WorkHoursService::findAllByDriver() " + driverService.getDurationOfWorkInTheLast24Hours(driver).toString());
 		return workHoursRepository.findByDriverId(driver.getId(), pageable, from, to).getContent();
 	}
 

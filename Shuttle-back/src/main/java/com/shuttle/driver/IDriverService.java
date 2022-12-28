@@ -15,9 +15,9 @@ public interface IDriverService {
 	public Driver setAvailable(Driver driver, boolean available);
 
     /**
-     * Get duration of work done today (from 00:00:00 to now).
+     * Get duration of work done in the last 24 hours.
      * @param driver The driver
      * @return Duration of worktime.
      */
-    public Duration getDurationOfWorkToday(Driver driver);
+    public Duration getDurationOfWorkInTheLast24Hours(Driver driver);
 }

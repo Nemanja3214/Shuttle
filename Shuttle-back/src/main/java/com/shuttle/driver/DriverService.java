@@ -37,9 +37,9 @@ public class DriverService implements IDriverService {
 	}
 
     @Override
-    public Duration getDurationOfWorkToday(Driver driver) {
+    public Duration getDurationOfWorkInTheLast24Hours(Driver driver) {
         final LocalDateTime now = LocalDateTime.now();
-        final LocalDateTime startOfToday = now.withHour(0).withMinute(0).withSecond(0);
+        final LocalDateTime startOfToday = now.minusHours(24);
         Duration totalWorked = Duration.ZERO;
         for (WorkHours wh : workHoursService.findAllByDriver(driver, startOfToday, now)) {
             if (wh.getFinish() == null) {
