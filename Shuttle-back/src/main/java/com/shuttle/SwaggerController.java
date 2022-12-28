@@ -18,11 +18,9 @@ public class SwaggerController {
     UserService userService;
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public void index() {
-
         for (GenericUser user :
                 userService.findAll()) {
             userService.encodeUserPassword(user, user.getPassword());
-//            System.out.println(user.getPassword());
             userService.save(user);
         }
 

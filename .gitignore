@@ -1,3 +1,5 @@
+.vscode/
+
 # Hide database
 **/data/db/*.db
 

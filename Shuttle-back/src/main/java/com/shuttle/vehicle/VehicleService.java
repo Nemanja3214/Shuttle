@@ -24,7 +24,7 @@ public class VehicleService implements IVehicleService {
 	
 	@Override
 	public Vehicle add(VehicleDTO vehicleDTO) throws NoSuchElementException {
-		Driver d = driverService.get(vehicleDTO.getDriverId()).orElseThrow();
+		Driver d = driverService.get(vehicleDTO.getDriverId());
 		VehicleType vehicleType = findVehicleTypeByName(vehicleDTO.getVehicleType()).orElseThrow();
 		
 		Vehicle vehicle = vehicleDTO.to();

@@ -11,6 +11,12 @@ public class ListDTO<T> {
 		super();
 		this.results = new ArrayList<>();
 	}
+
+    public ListDTO(List<T> list) {
+        this.results = list;
+        this.totalCount = list.size();
+    }
+
 	public long getTotalCount() {
 		return totalCount;
 	}

@@ -1,8 +1,11 @@
 package com.shuttle.user;
 
 import com.shuttle.security.RoleService;
+import com.shuttle.driver.Driver;
 import com.shuttle.security.Role;
 import com.shuttle.user.dto.UserDTO;
+import com.shuttle.workhours.IWorkHoursService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +24,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleService roleService;
+    
+    @Autowired
+    private IWorkHoursService workHoursService;
+
 
     @Override
     public GenericUser findByEmail(String email) throws UsernameNotFoundException {
@@ -61,4 +68,37 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(password));
         return user;
     }
+
+	@Override
+	public GenericUser setActive(GenericUser user, boolean active) {
+		final boolean newActiveState = active != user.getActive();
+		user.setActive(active);
+		userRepository.save(user);
+		
+		// If user is a driver, update working hours.
+		// But only do this if the activity has changed.
+		// Example: you are logged in and you log in again:
+		// this method should not fire.
+		
+		if (newActiveState) {	
+			for (Role r : user.getRoles()) {
+				// TODO: Hardcoded!
+				if (r.getName().equals("driver")) {
+					if (active) {
+						workHoursService.addNew((Driver)user);
+					} else {
+						workHoursService.finishLast((Driver)user);
+					}
+					break;
+				}
+			}
+		}
+	
+		return user;
+	}
+
+	@Override
+	public boolean getActive(GenericUser user) {
+		return user.getActive();
+	}
 }
