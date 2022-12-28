@@ -1,6 +1,5 @@
 package com.shuttle.ride;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -8,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.shuttle.driver.Driver;
-import org.springframework.data.jpa.repository.Query;
 
 public interface IRideRepository extends JpaRepository<Ride, Long> {
     public List<Ride> findByDriverAndStatus(Driver driver, Ride.Status status);
