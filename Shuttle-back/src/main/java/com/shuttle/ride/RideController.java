@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -152,11 +153,11 @@ public class RideController {
 		return rideDTO;
 	}
 	
-    @MessageMapping("/hello") // Full endpoint is /shuttle/hello because of the prefix in WebSocketConfiguration.
-    @SendTo("/new-ride-notification")
-    public String sendBroadcast(String message) {
-        return message + " BACK!";
-    }
+	@MessageMapping("/test")
+    @SendTo("/ride")
+	public String broadcastNotification(String message) {
+		return message + " RESPONSE";
+	}
 
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO createRideDTO){
