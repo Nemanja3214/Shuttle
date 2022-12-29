@@ -1,15 +1,15 @@
 package com.shuttle.driver;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.shuttle.common.ListDTO;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
-import com.shuttle.ride.IRideRepository;
-import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.VehicleDTO;
+import com.shuttle.workhours.IWorkHoursService;
 import com.shuttle.workhours.WorkHours;
+import com.shuttle.workhours.dto.WorkHoursNoDriverDTO;
+
 import jakarta.annotation.security.PermitAll;
 import jakarta.websocket.server.PathParam;
 
@@ -22,7 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -30,13 +29,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @CrossOrigin
 @RestController
-@NoArgsConstructor
 public class DriverController {
 
     @Autowired
@@ -44,11 +42,20 @@ public class DriverController {
     @Autowired
     public IRideRepository rideRepository;
 
+	@Autowired
+	private IDriverService driverService;
+
+	@Autowired
+	private IWorkHoursService workHoursService;
+
+    private ListDTO<WorkHoursNoDriverDTO> from(List<WorkHours> workHours) {
+        return new ListDTO<>(workHours.stream().map(w -> new WorkHoursNoDriverDTO(w)).toList());
+    }
 
     @PostMapping("/api/driver")
     public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO driverDTO) {
-        Driver driver = driverDTO.to();
-        driver = driverService.add(driver);
+    	Driver driver = driverDTO.to();
+    	driver = driverService.add(driver);
         return new ResponseEntity<>(DriverDTO.from(driver), HttpStatus.OK);
     }
 
@@ -142,24 +149,17 @@ public class DriverController {
 
     }
 
-    @PreAuthorize("hasAnyAuthority('driver','admin')")
-//    @PermitAll
     @GetMapping("/api/driver/{id}/ride")
-    public ResponseEntity<ListDTO<Ride>> getRideHistory(@PathVariable(value = "id") Long id,
-                                                     @PathParam("page") int page, @PathParam("size") int size,
-                                                     @PathParam("from") String from, @PathParam("to") String to,
-                                                     @PathParam("sort") String sort) {
-        Pageable pageParams =
-                PageRequest.of(page, size, Sort.by(sort));
-
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
-        LocalDateTime startTime = LocalDateTime.ofInstant(Instant.from(formatter.parse(from)), ZoneId.of(ZoneOffset.UTC.getId()));
-        LocalDateTime endTime = LocalDateTime.ofInstant(Instant.from(formatter.parse(to)), ZoneId.of(ZoneOffset.UTC.getId()));
-        Page<Ride> rides = rideRepository.getAllBetweenDates(startTime, endTime, id, pageParams);
-        ListDTO<Ride> rideListDTO = new ListDTO<>();
-        rideListDTO.setTotalCount(rides.getTotalElements());
-        rideListDTO.setResults(rides.getContent());
-        return new ResponseEntity<>(rideListDTO, HttpStatus.OK);
+    public ResponseEntity<ListDTO<RideDTO>> getRideHistory(@PathVariable(value = "id") Long id,
+                                                           @PathParam("page") int page, @PathParam("size") int size,
+                                                           @PathParam("from") String from, @PathParam("to") String to,
+                                                           @PathParam("to") String sort) {
+        ListDTO<RideDTO> rideDTOListDTO = new ListDTO<>();
+        rideDTOListDTO.setTotalCount(page);
+        List<RideDTO> rideDTOList = new ArrayList<>();
+        rideDTOList.add(new RideDTO());
+        rideDTOListDTO.setResults(rideDTOList);
+        return new ResponseEntity<>(rideDTOListDTO, HttpStatus.OK);
 
     }
 
