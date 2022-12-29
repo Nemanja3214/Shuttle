@@ -17,6 +17,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,6 +69,8 @@ public class RideController {
 	private ILocationService locationService;
 	@Autowired
 	private ICancellationService cancellationService;
+    @Autowired
+    private SimpMessagingTemplate template;
 	// TODO: Everything that's injected as a repository should be a service, replace once we have the services!!!
 	
 	public Ride from(CreateRideDTO rideDTO, Driver driver) {
@@ -157,6 +160,13 @@ public class RideController {
     @SendTo("/ride")
 	public String broadcastNotification(String message) {
 		return message + " RESPONSE";
+	}
+
+    @SendTo("/ride")
+    @Scheduled(fixedDelay = 1000)
+	public void sendPeriodically() {
+        template.convertAndSend("/ride", "Hey"); // template.convertAndSend when @Scheduled because return is ignored so @SendTo won't work.
+        System.out.println("Heyu");
 	}
 
 	@PostMapping
