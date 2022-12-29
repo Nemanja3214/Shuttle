@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,13 +108,28 @@ public class DriverController {
     }
 
     @GetMapping("/api/driver/{id}/working-hour")
-    public ResponseEntity<ListDTO<WorkHours>> getWorkHoursHistory(@PathVariable(value = "id") Long id,
-                                                                  @PathParam("page") int page, @PathParam("size") int size,
-                                                                  @PathParam("from") String from, @PathParam("to") String to) {
-        ListDTO<WorkHours> workHoursListDTO = new ListDTO<>();
-        workHoursListDTO.setTotalCount(page);
-        return new ResponseEntity<>(workHoursListDTO, HttpStatus.OK);
+    public ResponseEntity<?> getWorkHoursHistory(@PathVariable(value = "id") Long id, Pageable pageable, @RequestParam("from") String from, @RequestParam("to") String to) {
+        if (id == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
+        }
+        
+        final Driver driver = driverService.get(id);
 
+        if (driver == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+        }
+
+        LocalDateTime fromDate, toDate;
+
+        try {
+            fromDate = LocalDateTime.parse(from);
+            toDate = LocalDateTime.parse(to);
+        } catch (DateTimeParseException ex) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
+        }
+
+        final ListDTO<WorkHoursNoDriverDTO> li = from(workHoursService.findAllByDriver(driver, pageable, fromDate, toDate));
+        return new ResponseEntity<>(li, HttpStatus.OK);
     }
 
 

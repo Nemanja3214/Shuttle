@@ -122,14 +122,14 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride findCurrentRideByDriver(Driver driver) {
-		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
 		List<Ride> accepted = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
-		
+		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
+	
+        if (accepted.size() != 0) {
+			return accepted.get(0);
+		}
 		if (pending.size() != 0) {
 			return pending.get(0);
-		}
-		if (accepted.size() != 0) {
-			return accepted.get(0);
 		}
 		
 		return null;

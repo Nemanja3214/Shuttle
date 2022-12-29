@@ -1,8 +1,11 @@
 package com.shuttle.ride;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,6 +13,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,7 +70,8 @@ public class RideController {
 	private ILocationService locationService;
 	@Autowired
 	private ICancellationService cancellationService;
-	
+    @Autowired
+    private SimpMessagingTemplate template;
 	// TODO: Everything that's injected as a repository should be a service, replace once we have the services!!!
 	
 	public Ride from(CreateRideDTO rideDTO, Driver driver) {
@@ -146,13 +156,37 @@ public class RideController {
 		
 		return rideDTO;
 	}
-	
+
+    @Scheduled(fixedDelay = 4000)
+    @MessageMapping("/ride/driver/{driverId}")
+    public void sendCurrentRide() {
+        Long driverId = 1L;
+        final String dest = String.format("/ride/driver/%d", driverId.longValue());
+
+        if (driverId == null) {     
+            return;
+        }
+
+        final Driver driver = driverService.get(driverId);
+        if (driver == null) {
+            return;
+        }
+
+        final Ride ride = rideService.findCurrentRideByDriver(driver);
+        if (ride == null) {
+            return;
+        }
+
+        template.convertAndSend(dest, to(ride));
+    }
+
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO createRideDTO){
 		try {
 			final Driver driver = rideService.findMostSuitableDriver(createRideDTO);
 			final Ride ride = from(createRideDTO, driver);
 			rideService.createRide(ride);
+            driverService.setAvailable(driver, false);
 			return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 		} catch (NoAvailableDriverException e1) {
 			return new ResponseEntity<RideDTO>(to(null), HttpStatus.OK);
@@ -161,7 +195,7 @@ public class RideController {
 	
 	@GetMapping("/driver/{driverId}/active")
 	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
-        final  Driver driver = driverService.get(driverId);
+        final Driver driver = driverService.get(driverId);
 		
 		if (driver == null) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);

@@ -19,7 +19,7 @@ public interface IRideService {
 	Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException;
 	
 	/**
-	 * Find ride which is either PENDING, ACCEPTED or ACTIVE for this driver.
+	 * Find ride which is either ACTIVE or ACCEPTED for this driver.
 	 * Searching is done in the order above with short circuiting.
 	 * @param driver The driver.
 	 * @return The ride or null if none found.
