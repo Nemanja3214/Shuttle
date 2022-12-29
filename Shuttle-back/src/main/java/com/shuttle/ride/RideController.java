@@ -153,6 +153,7 @@ public class RideController {
 			final Driver driver = rideService.findMostSuitableDriver(createRideDTO);
 			final Ride ride = from(createRideDTO, driver);
 			rideService.createRide(ride);
+            driverService.setAvailable(driver, false);
 			return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 		} catch (NoAvailableDriverException e1) {
 			return new ResponseEntity<RideDTO>(to(null), HttpStatus.OK);
@@ -161,7 +162,7 @@ public class RideController {
 	
 	@GetMapping("/driver/{driverId}/active")
 	public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId){
-        final  Driver driver = driverService.get(driverId);
+        final Driver driver = driverService.get(driverId);
 		
 		if (driver == null) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);

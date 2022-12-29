@@ -64,8 +64,8 @@ insert into ride_passengers(ride_id, passengers_id) values (1, 3);
 ----------------- ^^^ DON'T TOUCH THIS
 
 
-insert into location(address, latitude, longitude) values ('Street 3', 44.267136, 19.833549);
-insert into location(address, latitude, longitude) values ('Street 4', 45.267136, 20.833549);
+insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
+insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
 insert into route() values();
 insert into route_locations(route_id, locations_id) values(2, 3);
 insert into route_locations(route_id, locations_id) values(2, 4);
