@@ -2,7 +2,7 @@ package com.shuttle.workhours.dto;
 
 import java.time.LocalDateTime;
 
-import com.shuttle.workhours.WorkHours;
+import com.shuttle.workhours.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
