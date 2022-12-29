@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -155,19 +156,29 @@ public class RideController {
 		
 		return rideDTO;
 	}
-	
-	@MessageMapping("/test")
-    @SendTo("/ride")
-	public String broadcastNotification(String message) {
-		return message + " RESPONSE";
-	}
 
-    @SendTo("/ride")
-    @Scheduled(fixedDelay = 1000)
-	public void sendPeriodically() {
-        template.convertAndSend("/ride", "Hey"); // template.convertAndSend when @Scheduled because return is ignored so @SendTo won't work.
-        System.out.println("Heyu");
-	}
+    @Scheduled(fixedDelay = 4000)
+    @MessageMapping("/ride/driver/{driverId}")
+    public void sendCurrentRide() {
+        Long driverId = 1L;
+        final String dest = String.format("/ride/driver/%d", driverId.longValue());
+
+        if (driverId == null) {     
+            return;
+        }
+
+        final Driver driver = driverService.get(driverId);
+        if (driver == null) {
+            return;
+        }
+
+        final Ride ride = rideService.findCurrentRideByDriver(driver);
+        if (ride == null) {
+            return;
+        }
+
+        template.convertAndSend(dest, to(ride));
+    }
 
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO createRideDTO){
