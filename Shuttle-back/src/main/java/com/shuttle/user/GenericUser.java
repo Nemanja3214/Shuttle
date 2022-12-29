@@ -35,7 +35,7 @@ public class GenericUser implements UserDetails {
     private String surname;
     private String profilePicture;
     private String telephoneNumber;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Note> notifications;
     private String address;
     //private Boolean loggedIn;
