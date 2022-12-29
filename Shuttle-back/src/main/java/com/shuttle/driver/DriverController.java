@@ -13,6 +13,7 @@ import com.shuttle.workhours.WorkHours;
 import jakarta.annotation.security.PermitAll;
 import jakarta.websocket.server.PathParam;
 
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -34,6 +36,7 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
+@NoArgsConstructor
 public class DriverController {
 
     @Autowired
@@ -41,10 +44,6 @@ public class DriverController {
     @Autowired
     public IRideRepository rideRepository;
 
-    @Autowired
-    public DriverController(IDriverService driverService) {
-        this.driverService = driverService;
-    }
 
     @PostMapping("/api/driver")
     public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO driverDTO) {
@@ -143,12 +142,13 @@ public class DriverController {
 
     }
 
-    @PermitAll
+    @PreAuthorize("hasAnyAuthority('driver','admin')")
+//    @PermitAll
     @GetMapping("/api/driver/{id}/ride")
     public ResponseEntity<ListDTO<Ride>> getRideHistory(@PathVariable(value = "id") Long id,
                                                      @PathParam("page") int page, @PathParam("size") int size,
                                                      @PathParam("from") String from, @PathParam("to") String to,
-                                                     @PathParam("to") String sort) {
+                                                     @PathParam("sort") String sort) {
         Pageable pageParams =
                 PageRequest.of(page, size, Sort.by(sort));
 
