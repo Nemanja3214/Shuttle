@@ -75,16 +75,6 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @GetMapping("/email/{email}")
-    public ResponseEntity<?> getByEmail(@PathVariable String email) {
-        GenericUser user = userService.findByEmail(email);
-        if (user == null) {
-            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<UserDTO>(new UserDTO(user), HttpStatus.OK);
-        }
-    }
-
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
         UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(),

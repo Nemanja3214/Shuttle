@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,9 @@ import jakarta.websocket.server.PathParam;
 
 @RestController
 public class PassengerController {
+    @Autowired
+    private IPassengerService passengerService;
+
 	@PostMapping("/api/passenger")
 	public ResponseEntity<PassengerDTO> create(@RequestBody Passenger passenger) {
 		passenger.setId(Long.valueOf(123));
@@ -98,6 +102,17 @@ public class PassengerController {
 
 		return new ResponseEntity<PassengerDTO>(new PassengerDTO(passengerFromDb), HttpStatus.OK);
 	}
+
+    
+    @GetMapping("/api/passenger/email")
+    public ResponseEntity<?> getByEmail(@PathParam("email") String email) {
+        Passenger p = passengerService.findByEmail(email);
+        if (p == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<PassengerDTO>(new PassengerDTO(p), HttpStatus.OK);
+        }
+    }
 
 	@GetMapping("/api/passenger/{id}/ride")
 	public ResponseEntity<RidePageDTO> getRides(@PathVariable("id") Long passengerId, @PathParam("page") int page,
