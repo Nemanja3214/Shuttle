@@ -1,8 +1,11 @@
 package com.shuttle.ride;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,6 +13,9 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,7 +67,6 @@ public class RideController {
 	private ILocationService locationService;
 	@Autowired
 	private ICancellationService cancellationService;
-	
 	// TODO: Everything that's injected as a repository should be a service, replace once we have the services!!!
 	
 	public Ride from(CreateRideDTO rideDTO, Driver driver) {
@@ -147,6 +152,12 @@ public class RideController {
 		return rideDTO;
 	}
 	
+    @MessageMapping("/hello") // Full endpoint is /shuttle/hello because of the prefix in WebSocketConfiguration.
+    @SendTo("/new-ride-notification")
+    public String sendBroadcast(String message) {
+        return message + " BACK!";
+    }
+
 	@PostMapping
 	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO createRideDTO){
 		try {
