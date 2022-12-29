@@ -1,5 +1,7 @@
 package com.shuttle.user.dto;
 
+import com.shuttle.user.GenericUser;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,16 @@ public class UserDTO {
     private String address;
     private String password;
 
+    public UserDTO(GenericUser user) {
+        this.id = user.getId();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.telephoneNumber = user.getTelephoneNumber();
+        this.address = user.getAddress();
+        this.profilePicture = user.getPassword();
+    }
 
     public UserDTO(long id, String name, String surname, String profilePicture, String telephoneNumber, String email,
                    String address) {
