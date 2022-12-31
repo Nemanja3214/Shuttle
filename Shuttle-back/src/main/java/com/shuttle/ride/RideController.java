@@ -31,6 +31,7 @@ import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.panic.PanicDTO;
 import com.shuttle.passenger.IPassengerRepository;
+import com.shuttle.passenger.IPassengerService;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
@@ -65,6 +66,9 @@ public class RideController {
 	private ICancellationService cancellationService;
     @Autowired
     private SimpMessagingTemplate template;
+    @Autowired
+    private IPassengerService passengerService;
+
 	// TODO: Everything that's injected as a repository should be a service, replace once we have the services!!!
 	
 	public Ride from(CreateRideDTO rideDTO, Driver driver) {
@@ -205,8 +209,24 @@ public class RideController {
 	}
 	
 	@GetMapping("/passenger/{passengerId}/active")
-	public ResponseEntity<RideDTO> getActiveRideByPassenger(@PathVariable long passengerId){
-		return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+	public ResponseEntity<?> getActiveRideByPassenger(@PathVariable Long passengerId) {
+        if (passengerId == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+
+        final Passenger passenger = passengerService.findById(passengerId);
+        if (passenger == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Passenger not found."), HttpStatus.NOT_FOUND);
+        }
+
+        Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
+        if (ride == null) {
+            return new ResponseEntity<>(null, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(to(ride), HttpStatus.OK);
+        }
+
+		//return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")

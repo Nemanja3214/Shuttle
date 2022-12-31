@@ -12,5 +12,10 @@ public class PassengerService implements IPassengerService {
     public Passenger findByEmail(String email) {
         return passengerRepository.findByEmail(email);
     }
+
+    @Override
+    public Passenger findById(Long passengerId) {
+        return passengerRepository.findById(passengerId).orElse(null);
+    }
     
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
+import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.dto.CreateRideDTO;
 
@@ -184,4 +185,21 @@ public class RideService implements IRideService {
 		ride = rideRepository.save(ride);
 		return ride;
 	}
+
+    @Override
+    public Ride findActiveOrPendingByPassenger(Passenger passenger) {
+        List<Ride> all = rideRepository.findActiveOrPendingByPassengerId(passenger.getId());
+        if (all.size() == 0) {
+            return null;
+        }
+        
+        Ride bestOne = all.get(0);
+        for (Ride r : all) {
+            if (r.getStatus() == Status.Accepted) {
+                bestOne = r;
+            }
+        }
+
+        return bestOne;
+    }
 }

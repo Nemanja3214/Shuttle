@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shuttle.driver.Driver;
+import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.dto.CreateRideDTO;
 
 public interface IRideService {
@@ -62,4 +63,12 @@ public interface IRideService {
 	 * @return The ride.
 	 */
 	Ride finishRide(Ride ride);
+
+    /**
+     * Find PENDING or ACCEPTED Ride from the provided passenger.
+     * If both exist, ACCEPTED is given priority.
+     * @param passenger The passenger. Must not be null.
+     * @return The ride or null.
+     */
+    Ride findActiveOrPendingByPassenger(Passenger passenger);
 }
