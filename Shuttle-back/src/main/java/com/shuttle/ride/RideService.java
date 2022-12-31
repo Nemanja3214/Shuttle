@@ -31,47 +31,73 @@ public class RideService implements IRideService {
 		rideRepository.save(ride);	
 		return ride;
 	}
-	
-	@Override
-	public Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException {
-		final List<Driver> potentialDrivers = findPotentialDrivers();
-		final Driver driver = pickBestDriver(potentialDrivers, createRideDTO);
-		return driver;
-	}
 
-	/**
-	 * @return List of all Drivers that are currently logged in and which could potentially perform a ride.
-	 * @throws NoAvailableDriverException If no driver is currently active or all are busy in the future.
-	 */
-	private List<Driver> findPotentialDrivers() throws NoAvailableDriverException {
-		List<Driver> potentialDrivers = new ArrayList<>();
-		
-        // No driver is logged in.
-
+    /**
+     * Heuristic method for finding a driver to take ride.
+     * @return A driver. Will never be null. 
+     * @throws NoAvailableDriverException If no driver can be found.
+     */
+    @Override
+    public Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException {
 		final List<Driver> activeDrivers = driverRepository.findAllActive();
 		if (activeDrivers.size() == 0) {
+            // No driver is logged in.
 			throw new NoAvailableDriverException();
 		}
-		
-		final List<Driver> availableDrivers = driverRepository.findAllActiveAvailable();
-		
-		if (availableDrivers.size() == 0) {
-			List<Driver> driversWithoutScheduledRide = driverRepository.findAllActiveNotAvailable();	
-			// TODO: Check if the driver has no future rides scheduled.
-			
-			if (driversWithoutScheduledRide.size() == 0) {
-				throw new NoAvailableDriverException();
-			} else {
-				potentialDrivers = driversWithoutScheduledRide;
-			}
-		} else {
-			potentialDrivers = availableDrivers;
-		}
-		
-        // Purge drivers that can't work anymore.
-		potentialDrivers = potentialDrivers.stream().filter(d -> !workedMoreThan8Hours(d)).toList();
-		return potentialDrivers;
-	}
+
+        // PENDING      ACCEPTED
+        //                          -> Suitable (High priority)
+        //                 x        -> Suitable (TODO: When to schedule?)
+        //    x                     -> Not suitable (has future ride).
+        //    x            x        -> Not suitable (busy and has future ride).
+        //
+
+        final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream().filter(d -> !workedMoreThan8Hours(d)).toList();
+        final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream().filter(d -> !workedMoreThan8Hours(d)).toList();
+
+        if (noPendingNoAccepted.size() > 0) {
+            // Find nearest one.
+            return findNearestDriver(noPendingNoAccepted);
+        } else if (noPendingYesAccepted.size() > 0) {
+            // Find the one that'll finish soon.
+            return findDriverAvailableMostSoon(noPendingYesAccepted);
+        } else {
+            // All logged in drivers have a pending ride. They are busy with a future ride.
+            throw new NoAvailableDriverException();
+        }
+    }
+
+    /**
+     * @return Logged-in drivers with no pending rides and no accepted rides.  
+     */
+    private List<Driver> findDriversWithNoPendingNoAccepted() {
+        List<Driver> drivers = new ArrayList<>();
+
+        for (Driver d : driverRepository.findAllActive()) {
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+
+            if (pending.size() == 0 && accepted.size() == 0)
+            drivers.add(d);
+        }	
+    	return drivers;        
+    }
+
+    /**
+     * @return Logged-in drivers with no pending rides but with accepted rides.  
+     */
+    private List<Driver> findDriversWithNoPendingYesAccepted() {
+        List<Driver> drivers = new ArrayList<>();
+        
+        for (Driver d : driverRepository.findAllActive()) {
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+
+            if (pending.size() == 0 && accepted.size() > 0)
+            drivers.add(d);
+        }	
+    	return drivers;        
+    }
 
     /**
      * Helper function to check whether the driver has worked more than 8 hours in the last 24 hours.
@@ -80,31 +106,28 @@ public class RideService implements IRideService {
         Duration dur = driverService.getDurationOfWorkInTheLast24Hours(d);
         return (dur.compareTo(Duration.ofHours(8)) > 0);
     }
-	
-	/**
-	 * @param potentialDrivers List of all potential drivers from which the result is picked.
-	 * @param createRideDTO The ride whose driver we're picking.
-	 * @return Most suitable driver for this ride (based on variables like distance etc.).
-	 */
-	private Driver pickBestDriver(List<Driver> potentialDrivers, CreateRideDTO createRideDTO) {
-		// Precondition: potentialDrivers.size() != 0.
-		
-		List<Driver> closestFreeDrivers = potentialDrivers.stream().filter(d -> d.isAvailable()).toList();
-		
-		if (closestFreeDrivers.size() > 0) {
-			// Find closest one.
-			
-			return closestFreeDrivers.get(0);
-		} else {
-			// Find one who's most likely to finish soon.
-			
-			return potentialDrivers.stream().sorted((d1, d2) -> {
-				final LocalDateTime ldt1 = findCurrentRideByDriverInProgress(d1).getEstimatedEndTime();
-				final LocalDateTime ldt2 = findCurrentRideByDriverInProgress(d2).getEstimatedEndTime();
-				return ldt1.compareTo(ldt2);
-			}).findFirst().get();
-		}
-	}
+    
+    /**
+     * 
+     * @param drivers List of drivers from which to pick.
+     * @return Nearest driver (Euclidean distance).
+     */
+    private Driver findNearestDriver(List<Driver> drivers) {
+        return drivers.get(0);
+    }
+
+    /**
+     * 
+     * @param drivers List of drivers from which to pick. They *must* all have an ACCEPTED ride.
+     * @return Driver who will finish the current ride the soonest.
+     */
+    private Driver findDriverAvailableMostSoon(List<Driver> drivers) {
+        return drivers.stream().sorted((d1, d2) -> {
+            final LocalDateTime ldt1 = findCurrentRideByDriverInProgress(d1).getEstimatedEndTime();
+            final LocalDateTime ldt2 = findCurrentRideByDriverInProgress(d2).getEstimatedEndTime();
+            return ldt1.compareTo(ldt2);
+        }).findFirst().get();
+    }
 
 	@Override
 	public Ride findById(Long id) {

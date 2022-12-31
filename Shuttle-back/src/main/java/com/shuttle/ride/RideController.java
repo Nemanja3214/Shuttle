@@ -197,7 +197,7 @@ public class RideController {
 			if (ride == null) {
 				return new ResponseEntity<>(null, HttpStatus.OK);
 			} else {
-				driverService.setAvailable(ride.getDriver(), false);
+				driverService.setAvailable(ride.getDriver(), false); // TODO: GET should not modify state.
 				return new ResponseEntity<>(to(ride), HttpStatus.OK);
 			}
 		}
