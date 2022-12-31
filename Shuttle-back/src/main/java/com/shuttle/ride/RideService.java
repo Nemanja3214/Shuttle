@@ -3,17 +3,13 @@ package com.shuttle.ride;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.driver.Driver;
-import com.shuttle.driver.DriverService;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
-import com.shuttle.location.ILocationService;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.dto.CreateRideDTO;
 
@@ -44,14 +40,16 @@ public class RideService implements IRideService {
 	}
 
 	/**
-	 * @return List of all Drivers that are currently logged in and which can potentially perform the requested ride.
+	 * @return List of all Drivers that are currently logged in and which could potentially perform a ride.
 	 * @throws NoAvailableDriverException If no driver is currently active or all are busy in the future.
 	 */
 	private List<Driver> findPotentialDrivers() throws NoAvailableDriverException {
 		List<Driver> potentialDrivers = new ArrayList<>();
 		
-		final List<Driver> loggedIn = driverRepository.findAllActive();
-		if (loggedIn.size() == 0) {
+        // No driver is logged in.
+
+		final List<Driver> activeDrivers = driverRepository.findAllActive();
+		if (activeDrivers.size() == 0) {
 			throw new NoAvailableDriverException();
 		}
 		
@@ -70,12 +68,13 @@ public class RideService implements IRideService {
 			potentialDrivers = availableDrivers;
 		}
 		
+        // Purge drivers that can't work anymore.
 		potentialDrivers = potentialDrivers.stream().filter(d -> !workedMoreThan8Hours(d)).toList();
 		return potentialDrivers;
 	}
 
     /**
-     * Helper function to check whether the driver has worked more than enough today.
+     * Helper function to check whether the driver has worked more than 8 hours in the last 24 hours.
      */
     private boolean workedMoreThan8Hours(Driver d) {
         Duration dur = driverService.getDurationOfWorkInTheLast24Hours(d);

@@ -1,22 +1,15 @@
 package com.shuttle.ride;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
 import com.shuttle.driver.Driver;
-import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.location.ILocationService;
 import com.shuttle.location.Location;
@@ -181,15 +173,15 @@ public class RideController {
     }
 
 	@PostMapping
-	public ResponseEntity<RideDTO> createRide(@RequestBody CreateRideDTO createRideDTO){
+	public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO){
 		try {
 			final Driver driver = rideService.findMostSuitableDriver(createRideDTO);
 			final Ride ride = from(createRideDTO, driver);
 			rideService.createRide(ride);
             driverService.setAvailable(driver, false);
 			return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
-		} catch (NoAvailableDriverException e1) {
-			return new ResponseEntity<RideDTO>(to(null), HttpStatus.OK);
+		} catch (NoAvailableDriverException e) {
+			return new ResponseEntity<RESTError>(new RESTError("No driver available!"), HttpStatus.BAD_REQUEST);
 		}
 	}
 	

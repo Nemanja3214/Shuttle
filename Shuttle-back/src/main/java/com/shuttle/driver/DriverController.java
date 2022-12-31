@@ -6,7 +6,6 @@ import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
-import com.shuttle.ride.dto.RideDTO;
 import org.springframework.data.domain.Page;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.*;
@@ -26,7 +25,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin
