@@ -2,6 +2,7 @@ package com.shuttle.ride;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -75,11 +76,11 @@ public class RideController {
 		final Vehicle vehicle = vehicleRepository.findByDriver(driver);
 		assert(vehicle.getVehicleType().getName().equals(vehicleType.getName()));
 		
-		final Set<Passenger> passengers = rideDTO.getPassengers()
-				.stream()
-				.map(userInfo -> passengerRepository.findByEmail(userInfo.getEmail()))
-				.collect(Collectors.toSet());	
-		
+		final List<Passenger> passengers = rideDTO.getPassengers()
+            .stream()
+            .map(userInfo -> passengerRepository.findByEmail(userInfo.getEmail()))
+            .collect(Collectors.toList());	
+
 		final List<RouteDTO> routeDTO = rideDTO.getLocations();
 		
 		// .stream().toList() returns an *immutable* list, hence the: new ArrayList<...>().
@@ -145,7 +146,7 @@ public class RideController {
 			locationsDTO.add(d);
 		}
 		rideDTO.setLocations(locationsDTO);
-		
+
 		return rideDTO;
 	}
 

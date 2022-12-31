@@ -29,7 +29,7 @@ public class Ride {
     @OneToOne
     private Driver driver;
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Passenger> passengers;
+    private List<Passenger> passengers;
     @OneToOne(cascade = CascadeType.ALL)
     private Route route;
     private Integer estimatedTimeInMinutes;
