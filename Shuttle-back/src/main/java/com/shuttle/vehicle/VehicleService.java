@@ -1,5 +1,6 @@
 package com.shuttle.vehicle;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -49,5 +50,9 @@ public class VehicleService implements IVehicleService {
 	public Vehicle findByDriver(Driver driver) {
 		return vehicleRepository.findByDriver(driver);
 	}
-	
+
+    @Override
+    public List<Vehicle> findAllCurrentlyActive() {
+        return vehicleRepository.findAllCurrentlyActive();
+    }
 }
