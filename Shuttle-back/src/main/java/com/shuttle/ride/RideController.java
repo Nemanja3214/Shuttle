@@ -298,6 +298,8 @@ public class RideController {
         rideService.acceptRide(ride);
         driverService.setAvailable(ride.getDriver(), false);
 
+        notifyRidePassengers(ride);
+
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
@@ -314,6 +316,8 @@ public class RideController {
 
         rideService.finishRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
+
+        notifyRidePassengers(ride);
 
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
