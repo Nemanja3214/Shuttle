@@ -2,9 +2,7 @@ package com.shuttle.ride;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -226,6 +223,7 @@ public class RideController {
             rideService.createRide(ride);
             driverService.setAvailable(driver, false);
             notifyRideDriver(ride);
+            notifyRidePassengers(ride);
             return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
         } catch (NoAvailableDriverException e) {
             return new ResponseEntity<RESTError>(new RESTError("No driver available!"), HttpStatus.BAD_REQUEST);
@@ -321,7 +319,7 @@ public class RideController {
     }
 
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<?> reasonCancelRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
+    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
         if (id == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
