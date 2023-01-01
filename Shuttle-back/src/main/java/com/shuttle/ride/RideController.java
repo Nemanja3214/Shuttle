@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -154,13 +155,9 @@ public class RideController {
 		return rideDTO;
 	}
 
-    @Scheduled(fixedDelay = 4000)
     @MessageMapping("/ride/driver/{driverId}")
-    public void sendCurrentRide() {
-        Long driverId = 1L;
-        final String dest = String.format("/ride/driver/%d", driverId.longValue());
-
-        if (driverId == null) {     
+    public void driverFetchRide(@DestinationVariable Long driverId) {
+        if (driverId == null) {
             return;
         }
 
@@ -174,7 +171,50 @@ public class RideController {
             return;
         }
 
+        final String dest = String.format("/ride/driver/%d", driverId.longValue());
         template.convertAndSend(dest, to(ride));
+    }
+    
+    @MessageMapping("/ride/passenger/{passengerId}")
+    public void passengerFetchRide(@DestinationVariable Long passengerId) {
+        if (passengerId == null) {
+            return;
+        }
+
+        final Passenger passenger = passengerService.findById(passengerId);
+        if (passenger == null) {
+            return;
+        }
+        System.out.println(passenger);
+
+        final Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
+        if (ride == null) {
+            return;
+        }
+
+        final String dest = String.format("/ride/passenger/%d", passengerId.longValue());
+        template.convertAndSend(dest, to(ride));
+    }
+
+
+    public void notifyRideDriver(Ride ride) {
+        // Pre-condition: ride is in the database
+        // Pre-condition: ride.driver is in the database
+
+        Long driverId = ride.getDriver().getId();
+        final String dest = String.format("/ride/driver/%d", driverId.longValue());
+        template.convertAndSend(dest, to(ride));
+    }
+
+    public void notifyRidePassengers(Ride ride) {
+        // Pre-condition: ride is in the database
+        // Pre-condition: ride.passengers; each passenger is in the database
+
+        for (Passenger p : ride.getPassengers()) {
+            Long passengerId = p.getId();
+            final String dest = String.format("/ride/passenger/%d", passengerId.longValue());
+            template.convertAndSend(dest, to(ride));
+        }
     }
 
 	@PostMapping
@@ -184,6 +224,7 @@ public class RideController {
 			final Ride ride = from(createRideDTO, driver);
 			rideService.createRide(ride);
             driverService.setAvailable(driver, false);
+            notifyRideDriver(ride);
 			return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
 		} catch (NoAvailableDriverException e) {
 			return new ResponseEntity<RESTError>(new RESTError("No driver available!"), HttpStatus.BAD_REQUEST);
