@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +20,16 @@ import com.shuttle.location.dto.LocationDTO;
 @RestController
 @RequestMapping("/api/vehicle")
 public class VehicleController {
+    @Autowired
+    private SimpMessagingTemplate template;
 	@Autowired
 	private IVehicleService vehicleService;
+
+    @Scheduled(fixedDelay = 3000)
+    private void notifyVehicleLocations() {
+        final String dest = "/vehicle/locations";
+        template.convertAndSend(dest, getAllActiveVehicleLocationsDTO());
+    }
 
     private VehicleLocationDTO conv(Vehicle vehicle) {
         VehicleLocationDTO v = new VehicleLocationDTO();
@@ -42,8 +52,12 @@ public class VehicleController {
 
     @GetMapping("/locations")
     public ResponseEntity<?> getAllActiveVehicleLocations() {
+        return new ResponseEntity<List<VehicleLocationDTO>>(getAllActiveVehicleLocationsDTO(), HttpStatus.OK);
+    }
+
+    private List<VehicleLocationDTO> getAllActiveVehicleLocationsDTO() {
         final List<Vehicle> vehicles = this.vehicleService.findAllCurrentlyActive();
         final List<VehicleLocationDTO> result = vehicles.stream().map(v -> conv(v)).toList();
-        return new ResponseEntity<List<VehicleLocationDTO>>(result, HttpStatus.OK);
+        return result;  
     }
 }

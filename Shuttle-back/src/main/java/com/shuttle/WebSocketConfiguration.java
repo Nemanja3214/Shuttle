@@ -21,6 +21,6 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry
             .setApplicationDestinationPrefixes("/shuttle")
-            .enableSimpleBroker("/ride/driver", "/ride/passenger");
+            .enableSimpleBroker("/ride/driver", "/ride/passenger", "/vehicle/locations");
     }
 }
