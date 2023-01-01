@@ -1,4 +1,4 @@
-package com.shuttle.ride.cancellation;
+package com.shuttle.ride.cancellation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

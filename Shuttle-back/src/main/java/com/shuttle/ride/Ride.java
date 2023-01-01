@@ -6,6 +6,7 @@ import java.util.Set;
 import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.passenger.Passenger;
+import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.location.Route;
 import com.shuttle.vehicle.VehicleType;
 
@@ -37,6 +38,8 @@ public class Ride {
     private Boolean petTransport;
     @ManyToOne
     private VehicleType vehicleType;
+    @OneToOne
+    private Cancellation rejection;
     private Status status;
 
     public enum Status {

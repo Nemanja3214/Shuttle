@@ -12,6 +12,7 @@ import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
+import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
 
 class NoAvailableDriverException extends Throwable {
@@ -136,8 +137,9 @@ public class RideService implements IRideService {
 	}
 
 	@Override
-	public Ride rejectRide(Ride ride) {
+	public Ride rejectRide(Ride ride, Cancellation cancellation) {
 		ride.setStatus(Status.Rejected);
+        ride.setRejection(cancellation);
 		
 		ride = rideRepository.save(ride);
 		return ride;

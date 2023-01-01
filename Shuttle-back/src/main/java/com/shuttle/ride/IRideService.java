@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
+import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
 
 public interface IRideService {
@@ -45,9 +46,10 @@ public interface IRideService {
 	/**
 	 * Reject the ride (by driver).
 	 * @param ride The ride that's rejected.
+     * @param cancellation Reason for rejection.
 	 * @return The ride.
 	 */
-	Ride rejectRide(Ride ride);
+	Ride rejectRide(Ride ride, Cancellation cancellation);
 
 	/**
 	 * Accept and start the ride (by driver).

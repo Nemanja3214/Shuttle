@@ -1,18 +1,10 @@
 package com.shuttle.ride.dto;
 
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.shuttle.location.Location;
-import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.ride.Ride;
-import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.cancellation.dto.CancellationDTO;
-import com.shuttle.vehicle.VehicleType;
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
