@@ -53,13 +53,13 @@ insert into passenger(id) values (3);
 
 -- Vehicle
 
-insert into location(latitude, longitude) values (45.235820, 19.803677);
-insert into location(latitude, longitude) values (45.233752, 19.816665);
-insert into location(latitude, longitude) values (45.244830, 19.846957);
-insert into location(latitude, longitude) values (45.249211, 19.816746);
-insert into location(latitude, longitude) values (45.260781, 19.832454);
-insert into location(latitude, longitude) values (45.238922, 19.693419);
-insert into location(latitude, longitude) values (45.236354, 19.715382);
+insert into location(latitude, longitude, address) values (45.235820, 19.803677, 'Novi Sad');
+insert into location(latitude, longitude, address) values (45.233752, 19.816665, 'Novi Sad');
+insert into location(latitude, longitude, address) values (45.244830, 19.846957, 'Novi Sad');
+insert into location(latitude, longitude, address) values (45.249211, 19.816746, 'Novi Sad');
+insert into location(latitude, longitude, address) values (45.260781, 19.832454, 'Futog');
+insert into location(latitude, longitude, address) values (45.238922, 19.693419, 'Futog');
+insert into location(latitude, longitude, address) values (45.236354, 19.715382, 'Futog');
 
 insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(1, 1, 1);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(5, 2, 1);
