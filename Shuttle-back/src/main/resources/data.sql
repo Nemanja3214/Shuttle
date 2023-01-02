@@ -19,62 +19,57 @@ insert into generic_user(email, password, enabled, blocked, active) values ('joh
 insert into generic_user(email, password, enabled, blocked, active) values ('troy@gmail.com', 'troy123', true, false, false);
 insert into generic_user(email, password, enabled, blocked, active) values ('admin@gmail.com', 'admin', true, false, false);
 
-insert into generic_user(email, password, enabled, blocked, active) values ('driver1@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver2@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver3@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver4@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver5@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver6@gmail.com', '1234', true, false, false);
-
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
 insert into user_role(user_id, role_id) values (3, 1);
 insert into user_role(user_id, role_id) values (4, 3);
 
-insert into user_role(user_id, role_id) values (5, 2);
-insert into user_role(user_id, role_id) values (6, 2);
-insert into user_role(user_id, role_id) values (7, 2);
-insert into user_role(user_id, role_id) values (8, 2);
-insert into user_role(user_id, role_id) values (9, 2);
-insert into user_role(user_id, role_id) values (10, 2);
-
 -- Role specific user data
 
 insert into driver(id, available, time_worked_today) values (1, true, 0);
-insert into driver(id, available, time_worked_today) values (5, true, 0);
-insert into driver(id, available, time_worked_today) values (6, true, 0);
-insert into driver(id, available, time_worked_today) values (7, true, 0);
-insert into driver(id, available, time_worked_today) values (8, true, 0);
-insert into driver(id, available, time_worked_today) values (9, true, 0);
-insert into driver(id, available, time_worked_today) values (10, true, 0);
-
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 
 -- Vehicle
 
-insert into location(latitude, longitude, address) values (45.235820, 19.803677, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.233752, 19.816665, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.244830, 19.846957, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.249211, 19.816746, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.260781, 19.832454, 'Futog');
-insert into location(latitude, longitude, address) values (45.238922, 19.693419, 'Futog');
-insert into location(latitude, longitude, address) values (45.236354, 19.715382, 'Futog');
+insert into vehicle(vehicle_type_id, driver_id) values(1, 1);
 
-insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(1, 1, 1);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(5, 2, 1);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(6, 3, 1);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(7, 4, 1);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(8, 5, 1);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(9, 6, 1);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id) values(10, 7, 1);
+----------------- Test ride, because swagger auth doesn't work and we don't have ride creation on the frontend yet.
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
 
--- insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
--- insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
--- insert into route() values();
--- insert into route_locations(route_id, locations_id) values(2, 3);
--- insert into route_locations(route_id, locations_id) values(2, 4);
+insert into location(address, latitude, longitude) values ('Street 1', 45.267136, 19.833549);
+insert into location(address, latitude, longitude) values ('Street 2', 44.267136, 20.833549);
 
--- insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, end_time) values (0, 1, 2, 1, true, false,CURRENT_TIMESTAMP);
--- insert into ride_passengers(ride_id, passengers_id) values (2, 2);
--- insert into ride_passengers(ride_id, passengers_id) values (2, 3);
+insert into route() values();
+
+insert into route_locations(route_id, locations_id) values(1, 1);
+insert into route_locations(route_id, locations_id) values(1, 2);
+
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport) values (0, 1, 1, 1, true, false);
+
+insert into ride_passengers(ride_id, passengers_id) values (1, 2);
+insert into ride_passengers(ride_id, passengers_id) values (1, 3);
+
+
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+
+
+insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
+insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
+insert into route() values();
+insert into route_locations(route_id, locations_id) values(2, 3);
+insert into route_locations(route_id, locations_id) values(2, 4);
+
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, end_time) values (0, 1, 2, 1, true, false,CURRENT_TIMESTAMP);
+insert into ride_passengers(ride_id, passengers_id) values (2, 2);
+insert into ride_passengers(ride_id, passengers_id) values (2, 3);
