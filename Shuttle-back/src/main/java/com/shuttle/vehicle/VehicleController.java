@@ -27,7 +27,8 @@ public class VehicleController {
 
 	@PutMapping("/{id}/location")
 	public ResponseEntity<Boolean>changeLocation(@PathVariable long id, @RequestBody LocationDTO location) {
-		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+		boolean result = this.vehicleService.changeCurrentLocation(id, location);
+    	return new ResponseEntity<Boolean>(result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
 	}
 	
 	@PostMapping

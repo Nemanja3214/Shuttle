@@ -50,41 +50,7 @@ public class DriverService implements IDriverService {
 	}
 
 	@Override
-	public boolean changeCurrentLocation(long driverId, LocationDTO location) {
-		Optional<Driver> driver = this.driverRepository.findById(driverId);
-		if(driver.isPresent()) {
-			Vehicle vehicle = vehicleRepository.findByDriver(driver.get());
-			vehicle.setCurrentLocation(location.to());
-			this.vehicleRepository.save(vehicle);
-			return true;
-		}
-		else {
-			return false;
-		}
-		
-	}
-
-	@Override
 	public List<Driver> findByAvailableTrue() {
 		return this.driverRepository.findByAvailableTrue();
-	}
-	
-//	Simulation of driver moving
-	@Scheduled(initialDelay = 2000, fixedDelay = 2000)
-	public void simulateLocationChange() {
-		List<Driver> activeDrivers = this.driverRepository.findByAvailableTrue();
-		for(Driver activeDriver : activeDrivers) {
-			Vehicle vehicle = vehicleRepository.findByDriver(activeDriver);
-			
-			Location driverLocation = vehicle.getCurrentLocation();
-			Random r = new Random();
-			double incrementX = r.nextDouble(-0.001, 0.001);
-			double incrementY = r.nextDouble(-0.001, 0.001);
-			driverLocation.setLatitude(driverLocation.getLatitude() + incrementX);
-			driverLocation.setLongitude(driverLocation.getLongitude() + incrementY);
-			
-			changeCurrentLocation(activeDriver.getId(), LocationDTO.from(driverLocation)); 
-			
-		}
 	}
 }
