@@ -39,10 +39,14 @@ import com.shuttle.ride.cancellation.dto.CancellationDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
+import com.shuttle.ride.dto.RideExtDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.vehicle.IVehicleRepository;
+import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.IVehicleTypeRepository;
 import com.shuttle.vehicle.Vehicle;
+import com.shuttle.vehicle.VehicleDTO;
+import com.shuttle.vehicle.VehicleService;
 import com.shuttle.vehicle.VehicleType;
 
 @RestController
@@ -66,13 +70,15 @@ public class RideController {
     private SimpMessagingTemplate template;
     @Autowired
     private IPassengerService passengerService;
+    @Autowired
+    private IVehicleService vehicleService;
 
     // TODO: Everything that's injected as a repository should be a service, replace
     // once we have the services!!!
 
     public Ride from(CreateRideDTO rideDTO, Driver driver) {
         final Double distance = 0.5; // TODO: Where to get total distance from?
-        final Double velocity = 30.0 / 1000.0; // TODO: Where to get average vehicle velocity from?
+        final Double velocity = 60.0 / 1000.0; // TODO: Where to get average vehicle velocity from?
 
         final VehicleType vehicleType = vehicleTypeRepository.findVehicleTypeByName(rideDTO.getVehicleType())
                 .orElseThrow();
@@ -133,7 +139,6 @@ public class RideController {
         rideDTO.setVehicleType(ride.getVehicleType().getName());
 
         if (ride.getRejection() != null) {
-            System.out.println("AAAAAAAAAAAAAAA\nAAA\nAAA\nAAA\nAAA\nAAA\nAAAAAAAAAAAAAAAAA");
             rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
         }
 
@@ -150,9 +155,53 @@ public class RideController {
         }
         rideDTO.setLocations(locationsDTO);
 
-        System.out.println(rideDTO.getRejection());
         return rideDTO;
     }
+
+    public RideExtDTO toExt(Ride ride) {
+        RideExtDTO rideDTO = new RideExtDTO();
+
+        rideDTO.setId(ride.getId());
+
+        if (ride.getStartTime() != null) {
+            rideDTO.setStartTime(ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME));
+        }
+
+        if (ride.getEndTime() != null) {
+            rideDTO.setEndTime(ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME));
+        }
+
+        rideDTO.setTotalCost(ride.getTotalCost());
+        rideDTO.setDriver(new RideDriverDTO(ride.getDriver()));
+        rideDTO.setPassengers(ride.getPassengers().stream().map(p -> new RidePassengerDTO(p)).toList());
+        rideDTO.setEstimatedTimeInMinutes(ride.getEstimatedTimeInMinutes());
+        rideDTO.setBabyTransport(ride.getBabyTransport());
+        rideDTO.setPetTransport(ride.getPetTransport());
+        rideDTO.setVehicleType(ride.getVehicleType().getName());
+
+        if (ride.getRejection() != null) {
+            rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
+        }
+
+        rideDTO.setStatus(ride.getStatus());
+
+        List<RouteDTO> locationsDTO = new ArrayList<>();
+        List<Location> ls = ride.getLocations();
+        for (int i = 0; i < ls.size(); i += 2) {
+            LocationDTO from = LocationDTO.from(ls.get(i));
+            LocationDTO to = LocationDTO.from(ls.get(i + 1));
+
+            RouteDTO d = new RouteDTO(from, to);
+            locationsDTO.add(d);
+        }
+        rideDTO.setLocations(locationsDTO);
+
+        final Vehicle v = vehicleService.findByDriver(ride.getDriver());
+        rideDTO.setVehicle(VehicleDTO.from(v));
+
+        return rideDTO;
+    }
+
 
     @MessageMapping("/ride/driver/{driverId}")
     public void driverFetchRide(@DestinationVariable Long driverId) {
@@ -171,7 +220,7 @@ public class RideController {
         }
 
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
-        template.convertAndSend(dest, to(ride));
+        template.convertAndSend(dest, toExt(ride));
     }
 
     @MessageMapping("/ride/passenger/{passengerId}")
@@ -192,7 +241,7 @@ public class RideController {
             template.convertAndSend(dest, (Void) null);
         }
 
-        template.convertAndSend(dest, to(ride));
+        template.convertAndSend(dest, toExt(ride));
     }
 
     public void notifyRideDriver(Ride ride) {
@@ -201,7 +250,7 @@ public class RideController {
 
         Long driverId = ride.getDriver().getId();
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
-        template.convertAndSend(dest, to(ride));
+        template.convertAndSend(dest, toExt(ride));
     }
 
     public void notifyRidePassengers(Ride ride) {
@@ -211,7 +260,7 @@ public class RideController {
         for (Passenger p : ride.getPassengers()) {
             Long passengerId = p.getId();
             final String dest = String.format("/ride/passenger/%d", passengerId.longValue());
-            template.convertAndSend(dest, to(ride));
+            template.convertAndSend(dest, toExt(ride));
         }
     }
 

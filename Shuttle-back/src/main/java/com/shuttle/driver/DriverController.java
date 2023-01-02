@@ -1,12 +1,16 @@
 package com.shuttle.driver;
 
 import com.shuttle.common.ListDTO;
+import com.shuttle.common.RESTError;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
 import org.springframework.data.domain.Page;
+
+import com.shuttle.vehicle.IVehicleService;
+import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.*;
 import com.shuttle.workhours.dto.WorkHoursNoDriverDTO;
@@ -30,11 +34,12 @@ import java.util.List;
 @CrossOrigin
 @RestController
 public class DriverController {
-
     @Autowired
     private IDriverService driverService;
     @Autowired
-    public IRideRepository rideRepository;
+    private IRideRepository rideRepository;
+    @Autowired
+    private IVehicleService vehicleService;
 
 	@Autowired
 	private IWorkHoursService workHoursService;
@@ -88,9 +93,23 @@ public class DriverController {
 
 
     @GetMapping("/api/driver/{id}/vehicle")
-    public ResponseEntity<VehicleDTO> getVehicle(@PathVariable(value = "id") Long id) {
-        VehicleDTO vehicleDTO = new DriverControllerMockProvider().getDriverVehicleDTO(id);
-        return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
+    public ResponseEntity<?> getVehicle(@PathVariable(value = "id") Long id) {
+        if (id == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
+        }
+        
+        final Driver driver = driverService.get(id);
+
+        if (driver == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+        }
+
+        Vehicle vehicle = vehicleService.findByDriver(driver);
+        if (vehicle == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Vehicle is not assigned."), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
     }
 
     @PostMapping("/api/driver/{id}/vehicle")
@@ -173,6 +192,5 @@ public class DriverController {
         return new ResponseEntity<>(rideListDTO, HttpStatus.OK);
 
     }
-
 }
 

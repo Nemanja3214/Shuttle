@@ -60,12 +60,23 @@ public class VehicleController {
 
                 final Double x2 = target.getLongitude();
                 final Double y2 = target.getLatitude();
-                final Double x1 = v.getCurrentLocation().getLongitude();
-                final Double y1 = v.getCurrentLocation().getLatitude();
-                final Double dx = (x2 - x1) * 0.2;
-                final Double dy = (y2 - y1) * 0.2;
-                v.getCurrentLocation().setLongitude(x1 + dx);
-                v.getCurrentLocation().setLatitude(y1 + dy);
+                Double x1 = v.getCurrentLocation().getLongitude();
+                Double y1 = v.getCurrentLocation().getLatitude();
+                final Double dx = 60.0 * 0.00003;
+                final Double dy = 60.0 * 0.00003;
+
+                x1 += dx * Math.signum(x2 - x1);
+                y1 += dy * Math.signum(y2 - y1);
+
+                if (Math.abs(x2 - x1) <= dx) {
+                    x1 = x2;
+                }
+                if (Math.abs(y2 - y1) <= dy) {
+                    y1 = y2;
+                }
+
+                v.getCurrentLocation().setLongitude(x1);
+                v.getCurrentLocation().setLatitude(y1);
             }
 
             vehicleService.add(v); // This will just update the vehicle in the database.
