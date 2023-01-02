@@ -67,6 +67,13 @@ public interface IRideService {
 	Ride finishRide(Ride ride);
 
     /**
+     * Cancel the ride.
+     * @param ride The ride that's canceled.
+     * @return The ride.
+     */
+    Ride cancelRide(Ride ride);
+
+    /**
      * Find PENDING or ACCEPTED Ride from the provided passenger.
      * If both exist, ACCEPTED is given priority.
      * @param passenger The passenger. Must not be null.

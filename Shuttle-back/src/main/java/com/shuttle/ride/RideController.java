@@ -27,6 +27,8 @@ import com.shuttle.location.Location;
 import com.shuttle.location.Route;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
+import com.shuttle.panic.IPanicService;
+import com.shuttle.panic.Panic;
 import com.shuttle.panic.PanicDTO;
 import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.IPassengerService;
@@ -41,6 +43,7 @@ import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RideExtDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.user.dto.UserDTO;
 import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.IVehicleTypeRepository;
@@ -72,6 +75,8 @@ public class RideController {
     private IPassengerService passengerService;
     @Autowired
     private IVehicleService vehicleService;
+    @Autowired
+    private IPanicService panicService;
 
     // TODO: Everything that's injected as a repository should be a service, replace
     // once we have the services!!!
@@ -329,8 +334,32 @@ public class RideController {
     }
 
     @PutMapping("/{id}/panic")
-    public ResponseEntity<PanicDTO> panicRide(@RequestBody String reason) {
-        return new ResponseEntity<PanicDTO>(new PanicDTO(), HttpStatus.OK);
+    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody String reason) {   
+        if (id == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
+        }
+        
+        Ride ride = rideService.findById(id);   
+        if (ride == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+
+        Panic p = panicService.add(ride, null, reason);
+
+        PanicDTO dto = new PanicDTO();
+        dto.setReason(p.getReason());
+        dto.setTime(p.getTime().toString());
+        dto.setId(p.getId());
+        dto.setRide(to(ride));
+        dto.setUser(new UserDTO()); // TODO: User from JWT.
+
+        rideService.cancelRide(ride);
+        driverService.setAvailable(ride.getDriver(), true);
+
+        notifyRideDriver(ride);
+        notifyRidePassengers(ride);
+
+        return new ResponseEntity<PanicDTO>(dto, HttpStatus.OK);
     }
 
     @PutMapping("/{id}/accept")

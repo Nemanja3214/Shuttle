@@ -232,4 +232,13 @@ public class RideService implements IRideService {
 
         return bestOne;
     }
+
+    @Override
+    public Ride cancelRide(Ride ride) {
+		ride.setStatus(Status.Canceled);
+		ride.setEndTime(LocalDateTime.now());
+		
+		ride = rideRepository.save(ride);
+		return ride;
+    }
 }
