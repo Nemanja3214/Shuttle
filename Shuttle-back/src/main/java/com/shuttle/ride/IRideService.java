@@ -9,7 +9,7 @@ import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
 
 public interface IRideService {
-	Ride createRide(Ride ride);
+	Ride save(Ride ride);
 	
 	/**
 	 * Find a driver best suited for performing this ride.
@@ -85,4 +85,10 @@ public interface IRideService {
      * @return The ride or null.
      */
     Ride findActiveOrPendingByPassenger(Passenger passenger);
+
+    /**
+     * Find all rides whose driver is null (scheduled in the future).
+     * @return List of rides with null drivers. Can be empty.
+     */
+    List<Ride> findRidesWithNoDriver();
 }

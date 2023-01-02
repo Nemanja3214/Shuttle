@@ -21,4 +21,8 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     @Query(value = "from Ride r join r.passengers plist where plist.id = :passengerId and r.status in (0, 1)")
     public List<Ride> findActiveOrPendingByPassengerId(Long passengerId);
 
+    /**
+     * @return List of Ride objects whose Driver is null.
+     */
+    public List<Ride> findByDriverNull();
 }

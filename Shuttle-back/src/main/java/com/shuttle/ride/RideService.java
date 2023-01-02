@@ -35,7 +35,7 @@ public class RideService implements IRideService {
     private IVehicleService vehicleService;
 
 	@Override
-	public Ride createRide(Ride ride) {
+	public Ride save(Ride ride) {
 		rideRepository.save(ride);	
 		return ride;
 	}
@@ -247,5 +247,10 @@ public class RideService implements IRideService {
 		
 		ride = rideRepository.save(ride);
 		return ride;
+    }
+
+    @Override
+    public List<Ride> findRidesWithNoDriver() {
+        return rideRepository.findByDriverNull();
     }
 }

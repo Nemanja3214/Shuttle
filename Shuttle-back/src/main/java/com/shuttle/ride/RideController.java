@@ -1,8 +1,10 @@
 package com.shuttle.ride;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,15 +43,9 @@ import com.shuttle.ride.cancellation.dto.CancellationDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
-import com.shuttle.ride.dto.RideExtDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.dto.UserDTO;
-import com.shuttle.vehicle.IVehicleRepository;
-import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.IVehicleTypeRepository;
-import com.shuttle.vehicle.Vehicle;
-import com.shuttle.vehicle.VehicleDTO;
-import com.shuttle.vehicle.VehicleService;
 import com.shuttle.vehicle.VehicleType;
 
 @RestController
@@ -71,8 +67,6 @@ public class RideController {
     private SimpMessagingTemplate template;
     @Autowired
     private IPassengerService passengerService;
-    @Autowired
-    private IVehicleService vehicleService;
     @Autowired
     private IPanicService panicService;
 
@@ -123,8 +117,12 @@ public class RideController {
         return r;
     }
 
+    /**
+     * DTO Mapper function
+     * @param ride Model object.
+     * @return DTO made from the ride.
+     */
     public RideDTO to(Ride ride) {
-        // TODO: driver can be null.
         RideDTO rideDTO = new RideDTO();
         rideDTO.setId(ride.getId());
 
@@ -164,50 +162,6 @@ public class RideController {
         return rideDTO;
     }
 
-    // public RideExtDTO toExt(Ride ride) {
-    //     RideExtDTO rideDTO = new RideExtDTO();
-
-    //     rideDTO.setId(ride.getId());
-
-    //     if (ride.getStartTime() != null) {
-    //         rideDTO.setStartTime(ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME));
-    //     }
-
-    //     if (ride.getEndTime() != null) {
-    //         rideDTO.setEndTime(ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME));
-    //     }
-
-    //     rideDTO.setTotalCost(ride.getTotalCost());
-    //     rideDTO.setDriver(new RideDriverDTO(ride.getDriver()));
-    //     rideDTO.setPassengers(ride.getPassengers().stream().map(p -> new RidePassengerDTO(p)).toList());
-    //     rideDTO.setEstimatedTimeInMinutes(ride.getEstimatedTimeInMinutes());
-    //     rideDTO.setBabyTransport(ride.getBabyTransport());
-    //     rideDTO.setPetTransport(ride.getPetTransport());
-    //     rideDTO.setVehicleType(ride.getVehicleType().getName());
-
-    //     if (ride.getRejection() != null) {
-    //         rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
-    //     }
-
-    //     rideDTO.setStatus(ride.getStatus());
-
-    //     List<RouteDTO> locationsDTO = new ArrayList<>();
-    //     List<Location> ls = ride.getLocations();
-    //     for (int i = 0; i < ls.size(); i += 2) {
-    //         LocationDTO from = LocationDTO.from(ls.get(i));
-    //         LocationDTO to = LocationDTO.from(ls.get(i + 1));
-
-    //         RouteDTO d = new RouteDTO(from, to);
-    //         locationsDTO.add(d);
-    //     }
-    //     rideDTO.setLocations(locationsDTO);
-
-    //     final Vehicle v = vehicleService.findByDriver(ride.getDriver());
-    //     rideDTO.setVehicle(VehicleDTO.from(v));
-
-    //     return rideDTO;
-    // }
-
     @MessageMapping("/ride/driver/{driverId}")
     public void driverFetchRide(@DestinationVariable Long driverId) {
         if (driverId == null) {
@@ -219,9 +173,25 @@ public class RideController {
             return;
         }
 
-        final Ride ride = rideService.findCurrentRideByDriver(driver);
+        Ride ride = rideService.findCurrentRideByDriver(driver);
         if (ride == null) {
-            return;
+            // Try to find a ride scheduled in the future that isn't assigned to anybody.
+            // If multiple, give priority to the one that's furthest away chronologically.
+            final Optional<Ride> r = rideService.findRidesWithNoDriver()
+                .stream()
+                .sorted((r1, r2) -> {
+                    // Descending order, so r2.compare(r1).
+                    return r2.getStartTime().compareTo(r1.getStartTime());
+                })
+                .findFirst();
+
+            if (r.isPresent()) {
+                ride = r.get();
+                ride.setDriver(driver);
+                rideService.save(ride);
+            } else {
+                return;
+            }   
         }
 
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
@@ -251,7 +221,10 @@ public class RideController {
 
     public void notifyRideDriver(Ride ride) {
         // Pre-condition: ride is in the database
-        // Pre-condition: ride.driver is in the database
+
+        if (ride.getDriver() == null) {
+            return;
+        }
 
         Long driverId = ride.getDriver().getId();
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
@@ -276,7 +249,18 @@ public class RideController {
             final Driver driver = rideService.findMostSuitableDriver(createRideDTO, forFuture);
             final Ride ride = from(createRideDTO, driver);
 
-            rideService.createRide(ride);
+        
+            if (forFuture) {
+                final int h = Integer.valueOf(createRideDTO.getHour());
+                final int m = Integer.valueOf(createRideDTO.getMinute());
+                final LocalDateTime start = LocalDateTime.now()
+                    .withHour(h)
+                    .withMinute(m)
+                    .withSecond(0);
+                ride.setStartTime(start);
+            }
+
+            rideService.save(ride);
             notifyRidePassengers(ride);
 
             if (driver != null) {
