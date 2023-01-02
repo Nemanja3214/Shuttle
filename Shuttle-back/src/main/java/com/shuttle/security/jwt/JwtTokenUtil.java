@@ -96,7 +96,7 @@ public class JwtTokenUtil {
         // Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
+            return authHeader.substring(7).replace("\"","");
         }
 
         return null;
@@ -182,7 +182,7 @@ public class JwtTokenUtil {
         try {
             claims = Jwts.parser()
                     .setSigningKey(secret)
-                    .parseClaimsJws(token)
+                    .parseClaimsJws(token.replace("\"",""))
                     .getBody();
         } catch (ExpiredJwtException ex) {
             throw ex;

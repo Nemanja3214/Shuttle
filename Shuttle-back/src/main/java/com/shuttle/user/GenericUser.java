@@ -35,12 +35,15 @@ public class GenericUser implements UserDetails {
     private String surname;
     private String profilePicture;
     private String telephoneNumber;
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Note> notifications;
     private String address;
-    private Boolean loggedIn;
+    //private Boolean loggedIn;
 
     private Timestamp lastPasswordResetDate;
+    
+    private Boolean blocked;
+    private Boolean active;
 
     private Boolean enabled;
     @Column(unique = true)

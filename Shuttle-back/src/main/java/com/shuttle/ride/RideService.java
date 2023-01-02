@@ -1,5 +1,6 @@
 package com.shuttle.ride;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.driver.Driver;
+import com.shuttle.driver.DriverService;
 import com.shuttle.driver.IDriverRepository;
+import com.shuttle.driver.IDriverService;
 import com.shuttle.location.ILocationService;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.dto.CreateRideDTO;
@@ -23,7 +26,9 @@ public class RideService implements IRideService {
 	@Autowired
 	private IRideRepository rideRepository;
 	@Autowired
-	private IDriverRepository driverRepository;
+	private IDriverRepository driverRepository; // TODO: Remove, we have driverService now.
+    @Autowired
+    private IDriverService driverService;
 	
 	@Override
 	public Ride createRide(Ride ride) {
@@ -45,16 +50,15 @@ public class RideService implements IRideService {
 	private List<Driver> findPotentialDrivers() throws NoAvailableDriverException {
 		List<Driver> potentialDrivers = new ArrayList<>();
 		
-		final List<Driver> loggedIn = driverRepository.findAllLoggedIn();
+		final List<Driver> loggedIn = driverRepository.findAllActive();
 		if (loggedIn.size() == 0) {
 			throw new NoAvailableDriverException();
 		}
 		
-		final List<Driver> availableDrivers = driverRepository.findAllLoggedInAvailable();
+		final List<Driver> availableDrivers = driverRepository.findAllActiveAvailable();
 		
 		if (availableDrivers.size() == 0) {
-			List<Driver> driversWithoutScheduledRide = driverRepository.findAllLoggedInNotAvailable();
-			
+			List<Driver> driversWithoutScheduledRide = driverRepository.findAllActiveNotAvailable();	
 			// TODO: Check if the driver has no future rides scheduled.
 			
 			if (driversWithoutScheduledRide.size() == 0) {
@@ -64,12 +68,19 @@ public class RideService implements IRideService {
 			}
 		} else {
 			potentialDrivers = availableDrivers;
-		}		
+		}
 		
-		potentialDrivers = potentialDrivers.stream().filter(d -> d.getTimeWorkedToday() < 8 * 60).toList();
-		
+		potentialDrivers = potentialDrivers.stream().filter(d -> !workedMoreThan8Hours(d)).toList();
 		return potentialDrivers;
 	}
+
+    /**
+     * Helper function to check whether the driver has worked more than enough today.
+     */
+    private boolean workedMoreThan8Hours(Driver d) {
+        Duration dur = driverService.getDurationOfWorkInTheLast24Hours(d);
+        return (dur.compareTo(Duration.ofHours(8)) > 0);
+    }
 	
 	/**
 	 * @param potentialDrivers List of all potential drivers from which the result is picked.
@@ -111,14 +122,14 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride findCurrentRideByDriver(Driver driver) {
-		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
 		List<Ride> accepted = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
-		
+		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
+	
+        if (accepted.size() != 0) {
+			return accepted.get(0);
+		}
 		if (pending.size() != 0) {
 			return pending.get(0);
-		}
-		if (accepted.size() != 0) {
-			return accepted.get(0);
 		}
 		
 		return null;

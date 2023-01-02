@@ -9,7 +9,9 @@ public interface UserService {
     GenericUser findById(Long id);
     GenericUser findByEmail(String email);
     List<GenericUser> findAll ();
-     GenericUser save(UserDTO userDTO);
-     GenericUser save(GenericUser user);
+    GenericUser save(UserDTO userDTO);
+    GenericUser save(GenericUser user);
     GenericUser encodeUserPassword(GenericUser user, String password);
+	GenericUser setActive(GenericUser user, boolean b);
+	boolean getActive(GenericUser user);
 }

@@ -1,20 +1,22 @@
 package com.shuttle.driver;
 
-
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.shuttle.location.Location;
 import com.shuttle.note.Note;
 import com.shuttle.security.Role;
-import com.shuttle.user.GenericUser;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import java.util.List;
+
+import com.shuttle.user.GenericUser;
+import com.shuttle.workhours.WorkHours;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import java.sql.Timestamp;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -31,26 +33,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name="driver")
 public class Driver extends GenericUser {
-    boolean available;
+    boolean available; // This is determined by the current ride.
     Long timeWorkedToday;
     boolean blocked;
 
-//    TODO: remove, simulation constructor
-    @Builder
-    public Driver(String name, String surname, String profilePicture, String telephoneNumber, String address, String email, String password,
-    		boolean available, Long timeWorkedToday, boolean blocked) {
-    	this.setName(name);
-    	this.setSurname(surname);
-    	this.setProfilePicture(profilePicture);
-    	this.setTelephoneNumber(telephoneNumber);
-    	this.setAddress(address);
-    	this.setEmail(email);
-    	this.setPassword(password);
-    	this.available = available;
-    	this.timeWorkedToday = timeWorkedToday;
-    	this.blocked = blocked;
-    	
-    }
 
-    
 }

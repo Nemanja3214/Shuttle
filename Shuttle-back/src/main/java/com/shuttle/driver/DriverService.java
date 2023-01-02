@@ -1,6 +1,9 @@
 package com.shuttle.driver;
 
 import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Random;
 
@@ -12,9 +15,12 @@ import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.Vehicle;
+import com.shuttle.workhours.IWorkHoursService;
+import com.shuttle.workhours.WorkHours;
 
 @Service
 public class DriverService implements IDriverService {
+    @Autowired
 	private IDriverRepository driverRepository;
 	private IVehicleRepository vehicleRepository;
 	
@@ -23,6 +29,7 @@ public class DriverService implements IDriverService {
 		this.driverRepository = driverRepository;
 		this.vehicleRepository = vehicleRepository;
 	}
+    private IWorkHoursService workHoursService;
 
 	@Override
 	public Driver add(Driver driver) {
@@ -30,8 +37,8 @@ public class DriverService implements IDriverService {
 	}
 
 	@Override
-	public Optional<Driver> get(Long id) {
-		return driverRepository.findById(id);
+	public Driver get(Long id) {
+		return driverRepository.findById(id).orElse(null);
 	}
 
 	@Override
@@ -53,4 +60,21 @@ public class DriverService implements IDriverService {
 	public List<Driver> findByAvailableTrue() {
 		return this.driverRepository.findByAvailableTrue();
 	}
+    @Override
+    public Duration getDurationOfWorkInTheLast24Hours(Driver driver) {
+        final LocalDateTime now = LocalDateTime.now();
+        final LocalDateTime startOfToday = now.minusHours(24);
+        Duration totalWorked = Duration.ZERO;
+        for (WorkHours wh : workHoursService.findAllByDriver(driver, startOfToday, now)) {
+            if (wh.getFinish() == null) {
+                // This is the last one in the list.
+                totalWorked = totalWorked.plus(Duration.between(wh.getStart(), now));
+            } else {
+                totalWorked = totalWorked.plus(Duration.between(wh.getStart(), wh.getFinish()));
+            }
+            
+        }
+
+        return totalWorked;
+    }
 }

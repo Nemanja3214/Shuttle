@@ -17,10 +17,10 @@ insert into role(name) values('admin');
 
 -- Elementary user data
 
-insert into generic_user(email, password, enabled) values ('bob@gmail.com', 'bob123', true);
-insert into generic_user(email, password, enabled) values ('john@gmail.com', 'john123', true);
-insert into generic_user(email, password, enabled) values ('troy@gmail.com', 'troy123', true);
-insert into generic_user(email, password, enabled) values ('admin@gmail.com', 'admin', true);
+insert into generic_user(email, password, enabled, blocked, active) values ('bob@gmail.com', 'bob123', true, false, false);
+insert into generic_user(email, password, enabled, blocked, active) values ('john@gmail.com', 'john123', true, false, false);
+insert into generic_user(email, password, enabled, blocked, active) values ('troy@gmail.com', 'troy123', true, false, false);
+insert into generic_user(email, password, enabled, blocked, active) values ('admin@gmail.com', 'admin', true, false, false);
 
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
@@ -29,8 +29,8 @@ insert into user_role(user_id, role_id) values (4, 3);
 
 -- Role specific user data
 
-insert into driver(id, available, blocked, time_worked_today) values (1, true, false, 0);
-insert into driver(id, available, blocked, time_worked_today) values (2, true, false, 0);
+
+insert into driver(id, available, time_worked_today) values (1, true, 0);
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 
@@ -40,6 +40,12 @@ insert into vehicle(vehicle_type_id, driver_id, current_location_id) values(1, 1
 insert into vehicle(vehicle_type_id, driver_id, current_location_id) values(1, 2, 2);
 
 ----------------- Test ride, because swagger auth doesn't work and we don't have ride creation on the frontend yet.
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
+----------------- vvv DON'T TOUCH THIS
 
 insert into route() values();
 
@@ -50,3 +56,22 @@ insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, ba
 
 insert into ride_passengers(ride_id, passengers_id) values (1, 2);
 insert into ride_passengers(ride_id, passengers_id) values (1, 3);
+
+
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+----------------- ^^^ DON'T TOUCH THIS
+
+
+insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
+insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
+insert into route() values();
+insert into route_locations(route_id, locations_id) values(2, 3);
+insert into route_locations(route_id, locations_id) values(2, 4);
+
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, end_time) values (0, 1, 2, 1, true, false,CURRENT_TIMESTAMP);
+insert into ride_passengers(ride_id, passengers_id) values (2, 2);
+insert into ride_passengers(ride_id, passengers_id) values (2, 3);
