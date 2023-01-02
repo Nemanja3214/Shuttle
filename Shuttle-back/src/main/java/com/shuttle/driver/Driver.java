@@ -36,6 +36,7 @@ public class Driver extends GenericUser {
     boolean available; // This is determined by the current ride.
     Long timeWorkedToday;
     boolean blocked;
+    Boolean loggedIn;
 
 
 }
