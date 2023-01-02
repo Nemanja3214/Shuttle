@@ -32,7 +32,7 @@ insert into passenger(id) values (3);
 
 -- Vehicle
 
-insert into vehicle(vehicle_type_id, driver_id) values(1, 1);
+
 
 ----------------- Test ride, because swagger auth doesn't work and we don't have ride creation on the frontend yet.
 ----------------- vvv DON'T TOUCH THIS
@@ -44,6 +44,8 @@ insert into vehicle(vehicle_type_id, driver_id) values(1, 1);
 
 insert into location(address, latitude, longitude) values ('Street 1', 45.267136, 19.833549);
 insert into location(address, latitude, longitude) values ('Street 2', 44.267136, 20.833549);
+
+insert into vehicle(vehicle_type_id, driver_id, current_location_id) values(1, 1, 1);
 
 insert into route() values();
 
