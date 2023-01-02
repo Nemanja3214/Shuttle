@@ -1,14 +1,33 @@
 package com.shuttle.driver;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.shuttle.common.ListDTO;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
+import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RideDTO;
 import org.springframework.data.domain.Page;
 import com.shuttle.vehicle.VehicleDTO;
+import com.shuttle.workhours.WorkHours;
+
+import jakarta.websocket.server.PathParam;
 import com.shuttle.workhours.*;
 import com.shuttle.workhours.dto.WorkHoursNoDriverDTO;
 import jakarta.websocket.server.PathParam;
@@ -174,6 +193,12 @@ public class DriverController {
         rideListDTO.setResults(rides.getContent());
         return new ResponseEntity<>(rideListDTO, HttpStatus.OK);
 
+    }
+    
+    @GetMapping("/api/driver/active")
+    public ResponseEntity<List<LocationDTO>> getActiveDriversLocations(){
+    	List<LocationDTO> activeDriversLocations = driverService.getActiveDriversLocations();
+    	return new ResponseEntity<List<LocationDTO>>(activeDriversLocations, HttpStatus.OK);
     }
 
 }

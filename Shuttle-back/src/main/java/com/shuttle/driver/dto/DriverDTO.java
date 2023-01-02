@@ -2,6 +2,8 @@ package com.shuttle.driver.dto;
 
 
 import com.shuttle.driver.Driver;
+import com.shuttle.location.Location;
+import com.shuttle.location.dto.LocationDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
