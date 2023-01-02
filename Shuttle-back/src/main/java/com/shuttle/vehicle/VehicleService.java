@@ -12,16 +12,12 @@ import com.shuttle.driver.IDriverService;
 
 @Service
 public class VehicleService implements IVehicleService {
+    @Autowired
 	private IVehicleRepository vehicleRepository;
+    @Autowired
 	private IDriverService driverService;
+    @Autowired
 	private IVehicleTypeRepository vehicleTypeRepository;
-	
-	@Autowired
-	public VehicleService(IVehicleRepository vehicleRepository, IDriverService driverService, IVehicleTypeRepository vehicleTypeRepository) {
-		this.vehicleRepository = vehicleRepository;
-		this.driverService = driverService; 
-		this.vehicleTypeRepository = vehicleTypeRepository;
-	}
 	
 	@Override
 	public Vehicle add(VehicleDTO vehicleDTO) throws NoSuchElementException {

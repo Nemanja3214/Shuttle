@@ -10,10 +10,14 @@ import org.springframework.stereotype.Service;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
+import com.shuttle.location.Location;
+import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.vehicle.IVehicleService;
+import com.shuttle.vehicle.Vehicle;
 
 class NoAvailableDriverException extends Throwable {
 	private static final long serialVersionUID = -2718176046357707329L;
@@ -27,7 +31,9 @@ public class RideService implements IRideService {
 	private IDriverRepository driverRepository; // TODO: Remove, we have driverService now.
     @Autowired
     private IDriverService driverService;
-	
+    @Autowired
+    private IVehicleService vehicleService;
+
 	@Override
 	public Ride createRide(Ride ride) {
 		rideRepository.save(ride);	
@@ -59,7 +65,7 @@ public class RideService implements IRideService {
 
         if (noPendingNoAccepted.size() > 0) {
             // Find nearest one.
-            return findNearestDriver(noPendingNoAccepted);
+            return findNearestDriver(noPendingNoAccepted, createRideDTO.getLocations().get(0).getDeparture());
         } else if (noPendingYesAccepted.size() > 0) {
             // Find the one that'll finish soon.
             return findDriverAvailableMostSoon(noPendingYesAccepted);
@@ -114,8 +120,30 @@ public class RideService implements IRideService {
      * @param drivers List of drivers from which to pick.
      * @return Nearest driver (Euclidean distance).
      */
-    private Driver findNearestDriver(List<Driver> drivers) {
-        return drivers.get(0);
+    private Driver findNearestDriver(List<Driver> drivers, LocationDTO point) {
+        final List<Vehicle> vehicles = drivers
+            .stream()
+            .map(d -> vehicleService.findByDriver(d))
+            .filter(v -> v != null)
+            .toList();
+
+        return vehicles.stream().sorted((v1, v2) -> {
+            final Location l1 = v1.getCurrentLocation();
+            final Location l2 = v2.getCurrentLocation();
+
+            final Double dy1 = (l1.getLatitude() - point.getLatitude());
+            final Double dx1 = (l1.getLongitude() - point.getLongitude());
+
+            final Double dy2 = (l2.getLatitude() - point.getLatitude());
+            final Double dx2 = (l2.getLongitude() - point.getLongitude());
+
+            final Double d1 = (dy1 * dy1) + (dx1 * dx1);
+            final Double d2 = (dy2 * dy2) + (dx2 * dx2);
+
+            if (d1 > d2) return 1;
+            if (d1 < d2) return -1;
+            return 0;
+        }).findFirst().get().getDriver();
     }
 
     /**

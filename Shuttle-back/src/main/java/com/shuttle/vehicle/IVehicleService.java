@@ -12,6 +12,11 @@ public interface IVehicleService {
 	// TODO: Optional<T> or just T?
 	
 	public Optional<VehicleType> findVehicleTypeByName(String name);
+
+    /**
+     * @param driver The driver.
+     * @return Vehicle v such that v.driver == driver. Null if none.
+     */
 	public Vehicle findByDriver(Driver driver);
     public List<Vehicle> findAllCurrentlyActive();
 }
