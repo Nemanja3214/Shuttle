@@ -15,10 +15,15 @@ public interface IRideService {
 	 * Find a driver best suited for performing this ride.
 	 * The decision is made using a proximity heuristic.
 	 * @param createRideDTO The ride that's being created.
-	 * @return Instance of the driver most suited for this ride.
-	 * @throws NoAvailableDriverException If no driver can be found.
+     * @param forFuture Is the ride scheduled in the future? Setting this to true will result in the
+     * ride being persisted (not in this function!) regardless of this function's return object. A
+     * ride scheduled in the future can have its driver be assigned later, once a driver has no 
+     * pending rides. Setting this to false means that a driver must be found now, else a ride can't
+     * be created, resulting in a NoAvailableDriverException.
+	 * @return Most suited driver. Can be null if forFuture is true.
+	 * @throws NoAvailableDriverException If no driver can be found (and forFuture is false).
 	 */
-	Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException;
+	Driver findMostSuitableDriver(CreateRideDTO createRideDTO, boolean forFuture) throws NoAvailableDriverException;
 	
 	/**
 	 * Find ride which is either ACCEPTED or PENDING for this driver.

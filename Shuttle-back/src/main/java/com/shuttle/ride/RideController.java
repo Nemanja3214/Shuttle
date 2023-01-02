@@ -62,8 +62,6 @@ public class RideController {
     @Autowired
     private IVehicleTypeRepository vehicleTypeRepository;
     @Autowired
-    private IVehicleRepository vehicleRepository;
-    @Autowired
     private IPassengerRepository passengerRepository;
     @Autowired
     private ILocationService locationService;
@@ -78,18 +76,21 @@ public class RideController {
     @Autowired
     private IPanicService panicService;
 
-    // TODO: Everything that's injected as a repository should be a service, replace
-    // once we have the services!!!
-
-    public Ride from(CreateRideDTO rideDTO, Driver driver) {
+    /**
+     * DTO Mapper function.
+     * @param rideDTO DTO object.
+     * @param driver Driver. Can be null (e.g. if the ride is scheduled in the future and no
+     * driver is available now).
+     * @return Ride object made from the DTO.
+     */
+    private Ride from(CreateRideDTO rideDTO, Driver driver) {
         final Double distance = 0.5; // TODO: Where to get total distance from?
         final Double velocity = 60.0 / 1000.0; // TODO: Where to get average vehicle velocity from?
 
-        final VehicleType vehicleType = vehicleTypeRepository.findVehicleTypeByName(rideDTO.getVehicleType())
+        final VehicleType vehicleType = vehicleTypeRepository
+                .findVehicleTypeByName(rideDTO.getVehicleType())
                 .orElseThrow();
         final Double cost = (vehicleType.getPricePerKM() + 120) * distance;
-        final Vehicle vehicle = vehicleRepository.findByDriver(driver);
-        assert (vehicle.getVehicleType().getName().equals(vehicleType.getName()));
 
         final List<Passenger> passengers = rideDTO.getPassengers()
                 .stream()
@@ -98,8 +99,7 @@ public class RideController {
 
         final List<RouteDTO> routeDTO = rideDTO.getLocations();
 
-        // .stream().toList() returns an *immutable* list, hence the: new
-        // ArrayList<...>().
+        // .stream().toList() returns an *immutable* list, hence the: new ArrayList<...>().
 
         final List<LocationDTO> locationsDTO = new ArrayList<LocationDTO>(
                 routeDTO.stream().map(rou -> rou.getDeparture()).toList());
@@ -124,6 +124,7 @@ public class RideController {
     }
 
     public RideDTO to(Ride ride) {
+        // TODO: driver can be null.
         RideDTO rideDTO = new RideDTO();
         rideDTO.setId(ride.getId());
 
@@ -163,50 +164,49 @@ public class RideController {
         return rideDTO;
     }
 
-    public RideExtDTO toExt(Ride ride) {
-        RideExtDTO rideDTO = new RideExtDTO();
+    // public RideExtDTO toExt(Ride ride) {
+    //     RideExtDTO rideDTO = new RideExtDTO();
 
-        rideDTO.setId(ride.getId());
+    //     rideDTO.setId(ride.getId());
 
-        if (ride.getStartTime() != null) {
-            rideDTO.setStartTime(ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME));
-        }
+    //     if (ride.getStartTime() != null) {
+    //         rideDTO.setStartTime(ride.getStartTime().format(DateTimeFormatter.ISO_DATE_TIME));
+    //     }
 
-        if (ride.getEndTime() != null) {
-            rideDTO.setEndTime(ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME));
-        }
+    //     if (ride.getEndTime() != null) {
+    //         rideDTO.setEndTime(ride.getEndTime().format(DateTimeFormatter.ISO_DATE_TIME));
+    //     }
 
-        rideDTO.setTotalCost(ride.getTotalCost());
-        rideDTO.setDriver(new RideDriverDTO(ride.getDriver()));
-        rideDTO.setPassengers(ride.getPassengers().stream().map(p -> new RidePassengerDTO(p)).toList());
-        rideDTO.setEstimatedTimeInMinutes(ride.getEstimatedTimeInMinutes());
-        rideDTO.setBabyTransport(ride.getBabyTransport());
-        rideDTO.setPetTransport(ride.getPetTransport());
-        rideDTO.setVehicleType(ride.getVehicleType().getName());
+    //     rideDTO.setTotalCost(ride.getTotalCost());
+    //     rideDTO.setDriver(new RideDriverDTO(ride.getDriver()));
+    //     rideDTO.setPassengers(ride.getPassengers().stream().map(p -> new RidePassengerDTO(p)).toList());
+    //     rideDTO.setEstimatedTimeInMinutes(ride.getEstimatedTimeInMinutes());
+    //     rideDTO.setBabyTransport(ride.getBabyTransport());
+    //     rideDTO.setPetTransport(ride.getPetTransport());
+    //     rideDTO.setVehicleType(ride.getVehicleType().getName());
 
-        if (ride.getRejection() != null) {
-            rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
-        }
+    //     if (ride.getRejection() != null) {
+    //         rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
+    //     }
 
-        rideDTO.setStatus(ride.getStatus());
+    //     rideDTO.setStatus(ride.getStatus());
 
-        List<RouteDTO> locationsDTO = new ArrayList<>();
-        List<Location> ls = ride.getLocations();
-        for (int i = 0; i < ls.size(); i += 2) {
-            LocationDTO from = LocationDTO.from(ls.get(i));
-            LocationDTO to = LocationDTO.from(ls.get(i + 1));
+    //     List<RouteDTO> locationsDTO = new ArrayList<>();
+    //     List<Location> ls = ride.getLocations();
+    //     for (int i = 0; i < ls.size(); i += 2) {
+    //         LocationDTO from = LocationDTO.from(ls.get(i));
+    //         LocationDTO to = LocationDTO.from(ls.get(i + 1));
 
-            RouteDTO d = new RouteDTO(from, to);
-            locationsDTO.add(d);
-        }
-        rideDTO.setLocations(locationsDTO);
+    //         RouteDTO d = new RouteDTO(from, to);
+    //         locationsDTO.add(d);
+    //     }
+    //     rideDTO.setLocations(locationsDTO);
 
-        final Vehicle v = vehicleService.findByDriver(ride.getDriver());
-        rideDTO.setVehicle(VehicleDTO.from(v));
+    //     final Vehicle v = vehicleService.findByDriver(ride.getDriver());
+    //     rideDTO.setVehicle(VehicleDTO.from(v));
 
-        return rideDTO;
-    }
-
+    //     return rideDTO;
+    // }
 
     @MessageMapping("/ride/driver/{driverId}")
     public void driverFetchRide(@DestinationVariable Long driverId) {
@@ -225,7 +225,7 @@ public class RideController {
         }
 
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
-        template.convertAndSend(dest, toExt(ride));
+        template.convertAndSend(dest, to(ride));
     }
 
     @MessageMapping("/ride/passenger/{passengerId}")
@@ -246,7 +246,7 @@ public class RideController {
             template.convertAndSend(dest, (Void) null);
         }
 
-        template.convertAndSend(dest, toExt(ride));
+        template.convertAndSend(dest, to(ride));
     }
 
     public void notifyRideDriver(Ride ride) {
@@ -255,7 +255,7 @@ public class RideController {
 
         Long driverId = ride.getDriver().getId();
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
-        template.convertAndSend(dest, toExt(ride));
+        template.convertAndSend(dest, to(ride));
     }
 
     public void notifyRidePassengers(Ride ride) {
@@ -265,19 +265,25 @@ public class RideController {
         for (Passenger p : ride.getPassengers()) {
             Long passengerId = p.getId();
             final String dest = String.format("/ride/passenger/%d", passengerId.longValue());
-            template.convertAndSend(dest, toExt(ride));
+            template.convertAndSend(dest, to(ride));
         }
     }
 
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
         try {
-            final Driver driver = rideService.findMostSuitableDriver(createRideDTO);
+            final boolean forFuture = createRideDTO.getHour() != null && createRideDTO.getMinute() != null;
+            final Driver driver = rideService.findMostSuitableDriver(createRideDTO, forFuture);
             final Ride ride = from(createRideDTO, driver);
+
             rideService.createRide(ride);
-            driverService.setAvailable(driver, false);
-            notifyRideDriver(ride);
             notifyRidePassengers(ride);
+
+            if (driver != null) {
+                driverService.setAvailable(driver, false);
+                notifyRideDriver(ride);
+            }
+
             return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
         } catch (NoAvailableDriverException e) {
             return new ResponseEntity<RESTError>(new RESTError("No driver available!"), HttpStatus.BAD_REQUEST);

@@ -40,13 +40,21 @@ public class RideService implements IRideService {
 		return ride;
 	}
 
-    /**
-     * Heuristic method for finding a driver to take ride.
-     * @return A driver. Will never be null. 
-     * @throws NoAvailableDriverException If no driver can be found.
-     */
     @Override
-    public Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException {
+    public Driver findMostSuitableDriver(CreateRideDTO createRideDTO, boolean forFuture) throws NoAvailableDriverException {
+        if (forFuture) {
+            try {
+                return findMostSuitableDriver(createRideDTO);
+            } 
+            catch (NoAvailableDriverException e) {
+                return null;
+            }
+        } else {
+            return findMostSuitableDriver(createRideDTO);
+        }
+    }
+
+    private Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException {
 		final List<Driver> activeDrivers = driverRepository.findAllActive();
 		if (activeDrivers.size() == 0) {
             // No driver is logged in.
@@ -58,7 +66,6 @@ public class RideService implements IRideService {
         //                 x        -> Suitable (TODO: When to schedule?)
         //    x                     -> Not suitable (has future ride).
         //    x            x        -> Not suitable (busy and has future ride).
-        //
 
         final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream().filter(d -> !workedMoreThan8Hours(d)).toList();
         final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream().filter(d -> !workedMoreThan8Hours(d)).toList();
