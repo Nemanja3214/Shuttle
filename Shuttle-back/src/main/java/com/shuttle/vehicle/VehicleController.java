@@ -89,6 +89,7 @@ public class VehicleController {
         v.setId(vehicle.getId());
         v.setLocation(LocationDTO.from(vehicle.getCurrentLocation()));
         v.setAvailable(vehicle.getDriver().isAvailable());
+        v.setVehicleTypeId(vehicle.getVehicleType().getId());
         return v;
     }
 
