@@ -14,6 +14,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.location.Location;
@@ -102,7 +104,6 @@ public class VehicleService implements IVehicleService {
 		}
 		List<LocationDTO> response = this.driverService.getActiveDriversLocations();
 		template.convertAndSend("/active/vehicle/location", response);
-		
 	}
 	
 }
