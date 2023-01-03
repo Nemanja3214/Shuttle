@@ -16,8 +16,10 @@ import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
+import com.shuttle.vehicle.VehicleType;
 
 class NoAvailableDriverException extends Throwable {
 	private static final long serialVersionUID = -2718176046357707329L;
@@ -67,13 +69,15 @@ public class RideService implements IRideService {
         //    x                     -> Not suitable
         //    x            x        -> Not suitable
 
+        VehicleType vt = vehicleService.findVehicleTypeByName(createRideDTO.getVehicleType()).orElse(null);
+
         final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream()
             .filter(d -> !workedMoreThan8Hours(d))
-            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size()))
+            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
         final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream()
             .filter(d -> !workedMoreThan8Hours(d))
-            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size()))
+            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
 
         if (noPendingNoAccepted.size() > 0) {
@@ -89,7 +93,7 @@ public class RideService implements IRideService {
     }
 
     @Override
-    public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded) {
+    public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded, VehicleType vehicleType) {
         final Vehicle v = vehicleService.findByDriver(d);
         if (v == null) {
             return false;
@@ -101,6 +105,9 @@ public class RideService implements IRideService {
             return false;
         }
         if (v.getPassengerSeats() < seatsNeeded) {
+            return false;
+        }
+        if (!v.getVehicleType().equals(vehicleType)) {
             return false;
         }
         return true;

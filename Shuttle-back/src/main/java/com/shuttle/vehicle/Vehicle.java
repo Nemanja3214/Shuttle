@@ -4,7 +4,6 @@ import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data

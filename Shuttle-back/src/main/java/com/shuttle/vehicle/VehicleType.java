@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jdk.jfr.Enabled;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Entity

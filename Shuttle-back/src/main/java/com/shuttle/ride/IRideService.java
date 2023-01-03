@@ -7,6 +7,7 @@ import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.vehicle.VehicleType;
 
 public interface IRideService {
 	Ride save(Ride ride);
@@ -99,7 +100,8 @@ public interface IRideService {
      * @param baby True if the driver must be able to transport babies.
      * @param pet  True if the driver must be able to transport pets.
      * @param seatsNeeded Minumum number of passenger seats the driver's vehicle must have.
+     * @param vehicleType Requested vehicle type.
      * @return True if satisfies all criteria, false otherwise.
      */    
-    public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded);
+    public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded, VehicleType vehicleType);
 }
