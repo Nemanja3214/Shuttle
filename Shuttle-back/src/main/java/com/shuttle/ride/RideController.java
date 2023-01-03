@@ -319,8 +319,30 @@ public class RideController {
     }
 
     @PutMapping("/{id}/withdraw")
-    public ResponseEntity<RideDTO> withdrawRide(@PathVariable long id) {
-        return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+    public ResponseEntity<?> withdrawRide(@PathVariable Long id) {
+        if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+
+        Ride ride = rideService.findById(id);
+        if (ride == null) {
+            return new ResponseEntity<>(null, HttpStatus.OK);
+        }
+
+        if (ride.getStatus() != Status.Pending) {
+            return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't pending."), HttpStatus.BAD_REQUEST);
+        }
+
+        this.rideService.cancelRide(ride);
+
+        if (ride.getDriver() != null) {
+            driverService.setAvailable(ride.getDriver(), true);
+            notifyRideDriver(ride);
+        }
+
+        notifyRidePassengers(ride);
+
+        return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
     @PutMapping("/{id}/panic")
