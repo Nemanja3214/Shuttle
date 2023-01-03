@@ -71,7 +71,6 @@ public class RideController {
 	private ICancellationService cancellationService;
     @Autowired
     private SimpMessagingTemplate template;
-	// TODO: Everything that's injected as a repository should be a service, replace once we have the services!!!
 	
 	public Ride from(CreateRideDTO rideDTO, Driver driver) {
 		final Double distance = 0.5; // TODO: Where to get total distance from?

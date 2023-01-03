@@ -7,9 +7,15 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.location.Location;
@@ -75,10 +81,13 @@ public class VehicleService implements IVehicleService {
 			return false;
 		}		
 	}
+	@Autowired
+	private SimpMessagingTemplate template;
 	
 //	Simulation of driver moving
 	@Scheduled(initialDelay = 2000, fixedDelay = 2000)
 	public void simulateLocationChange() {
+		
 		List<Driver> activeDrivers = this.driverService.findByAvailableTrue();
 		for(Driver activeDriver : activeDrivers) {
 			Vehicle vehicle = vehicleRepository.findByDriver(activeDriver);
@@ -93,6 +102,8 @@ public class VehicleService implements IVehicleService {
 			changeCurrentLocation(activeDriver.getId(), LocationDTO.from(driverLocation)); 
 			
 		}
+		List<LocationDTO> response = this.driverService.getActiveDriversLocations();
+		template.convertAndSend("/active/vehicle/location", response);
 	}
 	
 }
