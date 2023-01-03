@@ -44,7 +44,7 @@ public class VehicleController {
     private void vehicleMovementSimulation() {
         // TODO: Batch update.
 
-        for (Vehicle v : vehicleService.findAllCurrentlyActive()) {
+        for (Vehicle v : vehicleService.findAllCurrentlyActiveWhoseDriverCanWork()) {
             if (v.getDriver().isAvailable()) {
                 // It doesn't make sense for a free car to roam around?
             } else {
@@ -108,7 +108,7 @@ public class VehicleController {
      * @return List of all active vehicle's id + locations + availability.
      */
     private List<VehicleLocationDTO> getAllActiveVehicleLocationsDTO() {
-        final List<Vehicle> vehicles = this.vehicleService.findAllCurrentlyActive();
+        final List<Vehicle> vehicles = this.vehicleService.findAllCurrentlyActiveWhoseDriverCanWork();
         final List<VehicleLocationDTO> result = vehicles.stream().map(v -> conv(v)).toList();
         return result;  
     }

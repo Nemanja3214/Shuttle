@@ -104,4 +104,5 @@ public interface IRideService {
      * @return True if satisfies all criteria, false otherwise.
      */    
     public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded, VehicleType vehicleType);
+
 }

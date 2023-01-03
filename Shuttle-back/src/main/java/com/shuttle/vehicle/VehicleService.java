@@ -48,7 +48,12 @@ public class VehicleService implements IVehicleService {
 	}
 
     @Override
-    public List<Vehicle> findAllCurrentlyActive() {
-        return vehicleRepository.findAllCurrentlyActive();
+    public List<Vehicle> findAllCurrentlyActiveWhoseDriverCanWork() {
+        return vehicleRepository.findAllCurrentlyActive()
+                .stream()
+                .filter(v -> {
+                    return !this.driverService.workedMoreThan8Hours(v.getDriver());
+                })
+                .toList();
     }
 }

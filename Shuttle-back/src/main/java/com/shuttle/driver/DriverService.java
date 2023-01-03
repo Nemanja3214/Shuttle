@@ -50,4 +50,10 @@ public class DriverService implements IDriverService {
 
         return totalWorked;
     }
+
+    @Override
+    public boolean workedMoreThan8Hours(Driver d) {
+        Duration dur = getDurationOfWorkInTheLast24Hours(d);
+        return (dur.compareTo(Duration.ofHours(8)) > 0);
+    }
 }

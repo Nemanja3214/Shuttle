@@ -72,11 +72,11 @@ public class RideService implements IRideService {
         VehicleType vt = vehicleService.findVehicleTypeByName(createRideDTO.getVehicleType()).orElse(null);
 
         final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream()
-            .filter(d -> !workedMoreThan8Hours(d))
+            .filter(d -> !driverService.workedMoreThan8Hours(d))
             .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
         final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream()
-            .filter(d -> !workedMoreThan8Hours(d))
+            .filter(d -> !driverService.workedMoreThan8Hours(d))
             .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
 
@@ -145,13 +145,6 @@ public class RideService implements IRideService {
     	return drivers;        
     }
 
-    /**
-     * Helper function to check whether the driver has worked more than 8 hours in the last 24 hours.
-     */
-    private boolean workedMoreThan8Hours(Driver d) {
-        Duration dur = driverService.getDurationOfWorkInTheLast24Hours(d);
-        return (dur.compareTo(Duration.ofHours(8)) > 0);
-    }
     
     /**
      * 

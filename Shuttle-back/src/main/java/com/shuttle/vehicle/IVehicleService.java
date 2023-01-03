@@ -18,5 +18,5 @@ public interface IVehicleService {
      * @return Vehicle v such that v.driver == driver. Null if none.
      */
 	public Vehicle findByDriver(Driver driver);
-    public List<Vehicle> findAllCurrentlyActive();
+    public List<Vehicle> findAllCurrentlyActiveWhoseDriverCanWork();
 }
