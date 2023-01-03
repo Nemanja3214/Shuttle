@@ -62,13 +62,19 @@ public class RideService implements IRideService {
 		}
 
         // PENDING      ACCEPTED
-        //                          -> Suitable (High priority)
-        //                 x        -> Suitable (TODO: When to schedule?)
-        //    x                     -> Not suitable (has future ride).
-        //    x            x        -> Not suitable (busy and has future ride).
+        //                          -> Suitable
+        //                 x        -> Suitable
+        //    x                     -> Not suitable
+        //    x            x        -> Not suitable
 
-        final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream().filter(d -> !workedMoreThan8Hours(d)).toList();
-        final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream().filter(d -> !workedMoreThan8Hours(d)).toList();
+        final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream()
+            .filter(d -> !workedMoreThan8Hours(d))
+            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size()))
+            .toList();
+        final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream()
+            .filter(d -> !workedMoreThan8Hours(d))
+            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size()))
+            .toList();
 
         if (noPendingNoAccepted.size() > 0) {
             // Find nearest one.
@@ -80,6 +86,32 @@ public class RideService implements IRideService {
             // All logged in drivers have a pending ride. They are busy with a future ride.
             throw new NoAvailableDriverException();
         }
+    }
+
+    /**
+     * Extracted predicate method for determining if the driver's vehicle is suitable for the
+     * given parameters.
+     * @param d The driver. Must not be null.
+     * @param baby True if the driver must be able to transport babies.
+     * @param pet  True if the driver must be able to transport pets.
+     * @param seatsNeeded Minumum number of passenger seats the driver's vehicle must have.
+     * @return True if satisfies all criteria, false otherwise.
+     */
+    private boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded) {
+        final Vehicle v = vehicleService.findByDriver(d);
+        if (v == null) {
+            return false;
+        }
+        if (!v.getBabyTransport() && baby) {
+            return false;
+        }
+        if (!v.getPetTransport() && pet) {
+            return false;
+        }
+        if (v.getPassengerSeats() < seatsNeeded) {
+            return false;
+        }
+        return true;
     }
 
     /**
