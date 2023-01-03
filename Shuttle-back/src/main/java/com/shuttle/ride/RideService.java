@@ -88,16 +88,8 @@ public class RideService implements IRideService {
         }
     }
 
-    /**
-     * Extracted predicate method for determining if the driver's vehicle is suitable for the
-     * given parameters.
-     * @param d The driver. Must not be null.
-     * @param baby True if the driver must be able to transport babies.
-     * @param pet  True if the driver must be able to transport pets.
-     * @param seatsNeeded Minumum number of passenger seats the driver's vehicle must have.
-     * @return True if satisfies all criteria, false otherwise.
-     */
-    private boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded) {
+    @Override
+    public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded) {
         final Vehicle v = vehicleService.findByDriver(d);
         if (v == null) {
             return false;

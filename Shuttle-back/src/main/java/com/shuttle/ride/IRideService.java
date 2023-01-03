@@ -91,4 +91,15 @@ public interface IRideService {
      * @return List of rides with null drivers. Can be empty.
      */
     List<Ride> findRidesWithNoDriver();
+
+        /**
+     * Extracted predicate method for determining if the driver's vehicle is suitable for the
+     * given parameters.
+     * @param d The driver. Must not be null.
+     * @param baby True if the driver must be able to transport babies.
+     * @param pet  True if the driver must be able to transport pets.
+     * @param seatsNeeded Minumum number of passenger seats the driver's vehicle must have.
+     * @return True if satisfies all criteria, false otherwise.
+     */    
+    public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded);
 }

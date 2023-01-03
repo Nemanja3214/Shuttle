@@ -187,8 +187,13 @@ public class RideController {
 
             if (r.isPresent()) {
                 ride = r.get();
-                ride.setDriver(driver);
-                rideService.save(ride);
+
+                if (rideService.requestParamsMatch(driver, ride.getBabyTransport(), ride.getPetTransport(), ride.getPassengers().size())) {
+                    ride.setDriver(driver);
+                    rideService.save(ride);
+                } else {
+                    return;
+                }
             } else {
                 return;
             }   
