@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,6 +46,7 @@ import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.user.GenericUser;
 import com.shuttle.user.dto.UserDTO;
 import com.shuttle.vehicle.IVehicleTypeRepository;
 import com.shuttle.vehicle.VehicleType;
@@ -51,6 +54,7 @@ import com.shuttle.vehicle.VehicleType;
 @RestController
 @RequestMapping("/api/ride")
 public class RideController {
+    private static final String GenericUser = null;
     @Autowired
     private IRideService rideService;
     @Autowired
@@ -229,7 +233,8 @@ public class RideController {
         final Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
         final String dest = String.format("/ride/passenger/%d", passengerId.longValue());
         if (ride == null) {
-            template.convertAndSend(dest, (Void) null);
+            return;
+            //template.convertAndSend(dest, (Void) null);
         }
 
         template.convertAndSend(dest, to(ride));
@@ -261,11 +266,11 @@ public class RideController {
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
         try {
+            //System.out.println(((GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getEmail());
             final boolean forFuture = createRideDTO.getHour() != null && createRideDTO.getMinute() != null;
             final Driver driver = rideService.findMostSuitableDriver(createRideDTO, forFuture);
             final Ride ride = from(createRideDTO, driver);
-
-        
+   
             if (forFuture) {
                 final int h = Integer.valueOf(createRideDTO.getHour());
                 final int m = Integer.valueOf(createRideDTO.getMinute());
@@ -350,6 +355,8 @@ public class RideController {
 
         this.rideService.cancelRide(ride);
 
+        // ride.getDriver() can be null if the ride is scheduled in the future, before a driver
+        // has been assigned.
         if (ride.getDriver() != null) {
             driverService.setAvailable(ride.getDriver(), true);
             notifyRideDriver(ride);
@@ -403,6 +410,7 @@ public class RideController {
         driverService.setAvailable(ride.getDriver(), false);
 
         notifyRidePassengers(ride);
+        notifyRideDriver(ride);
 
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
@@ -422,6 +430,7 @@ public class RideController {
         driverService.setAvailable(ride.getDriver(), true);
 
         notifyRidePassengers(ride);
+        notifyRideDriver(ride);
 
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
@@ -437,11 +446,12 @@ public class RideController {
             return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
         }
 
-        driverService.setAvailable(ride.getDriver(), true);
         final Cancellation cancellation = cancellationService.create(reason.getReason(), null); // TODO: Creator.
         rideService.rejectRide(ride, cancellation);
+        driverService.setAvailable(ride.getDriver(), true);
 
         notifyRidePassengers(ride);
+        notifyRideDriver(ride);
 
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
