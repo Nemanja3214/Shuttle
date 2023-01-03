@@ -200,6 +200,11 @@ public class RideController {
         }
 
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
+
+        if (ride.getDriver().isAvailable()) {
+            driverService.setAvailable(ride.getDriver(), false);
+        }
+        
         template.convertAndSend(dest, to(ride));
     }
 
@@ -291,7 +296,6 @@ public class RideController {
             if (ride == null) {
                 return new ResponseEntity<>(null, HttpStatus.OK);
             } else {
-                driverService.setAvailable(ride.getDriver(), false); // TODO: GET should not modify state.
                 return new ResponseEntity<>(to(ride), HttpStatus.OK);
             }
         }
