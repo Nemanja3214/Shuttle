@@ -162,6 +162,11 @@ public class RideController {
         return rideDTO;
     }
 
+    /**
+     * Send a Ride object to the driver with the given driverId.
+     * If invalid data, nothing is sent.
+     * If driver has no rides, nothing is sent.
+     */
     @MessageMapping("/ride/driver/{driverId}")
     public void driverFetchRide(@DestinationVariable Long driverId) {
         if (driverId == null) {
@@ -188,24 +193,26 @@ public class RideController {
             if (r.isPresent()) {
                 ride = r.get();
 
+                // Check if this driver has the appropriate vehicle for this ride.
                 if (rideService.requestParamsMatch(driver, ride.getBabyTransport(), ride.getPetTransport(), ride.getPassengers().size(), ride.getVehicleType())) {
                     ride.setDriver(driver);
                     rideService.save(ride);
                 } else {
-                    return;
+                    ride = null;
                 }
             } else {
-                return;
+                ride = null;
             }   
         }
 
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
 
-        if (ride.getDriver().isAvailable()) {
-            driverService.setAvailable(ride.getDriver(), false);
+        if (ride != null) {
+            if (ride.getDriver().isAvailable()) {
+                driverService.setAvailable(ride.getDriver(), false);
+            }    
+            template.convertAndSend(dest, to(ride));
         }
-        
-        template.convertAndSend(dest, to(ride));
     }
 
     @MessageMapping("/ride/passenger/{passengerId}")
@@ -218,7 +225,6 @@ public class RideController {
         if (passenger == null) {
             return;
         }
-        System.out.println(passenger);
 
         final Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
         final String dest = String.format("/ride/passenger/%d", passengerId.longValue());
@@ -365,17 +371,16 @@ public class RideController {
             return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
         }
 
+        rideService.cancelRide(ride);
+        driverService.setAvailable(ride.getDriver(), true);
+        
         Panic p = panicService.add(ride, null, reason);
-
         PanicDTO dto = new PanicDTO();
         dto.setReason(p.getReason());
         dto.setTime(p.getTime().toString());
         dto.setId(p.getId());
         dto.setRide(to(ride));
         dto.setUser(new UserDTO()); // TODO: User from JWT.
-
-        rideService.cancelRide(ride);
-        driverService.setAvailable(ride.getDriver(), true);
 
         notifyRideDriver(ride);
         notifyRidePassengers(ride);

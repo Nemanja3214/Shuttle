@@ -34,13 +34,24 @@ public class VehicleController {
      * Notify users (unregistered user home page + passenger home page) of the drivers' locations
      * and availability.
      */
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 2000)
     private void notifyVehicleLocations() {
         final String dest = "/vehicle/locations";
         template.convertAndSend(dest, getAllActiveVehicleLocationsDTO());
     }
 
-    @Scheduled(fixedDelay = 1000)
+    /**
+     * Notify each driver about his vehicle location and availability.
+     */
+    @Scheduled(fixedDelay = 3000)
+    private void notifyVehicleLocation() {
+        for (Vehicle v : getAllActiveVehicles()) {
+            final String dest = "/vehicle/locations/" + v.getDriver().getId();
+            template.convertAndSend(dest, conv(v));
+        }
+    }
+
+    @Scheduled(fixedDelay = 2000)
     private void vehicleMovementSimulation() {
         // TODO: Batch update.
 
@@ -111,5 +122,13 @@ public class VehicleController {
         final List<Vehicle> vehicles = this.vehicleService.findAllCurrentlyActiveWhoseDriverCanWork();
         final List<VehicleLocationDTO> result = vehicles.stream().map(v -> conv(v)).toList();
         return result;  
+    }
+
+    /**
+     * @return List of all active vehicles.
+     */
+    private List<Vehicle> getAllActiveVehicles() {
+        final List<Vehicle> vehicles = this.vehicleService.findAllCurrentlyActiveWhoseDriverCanWork();
+        return vehicles;  
     }
 }
