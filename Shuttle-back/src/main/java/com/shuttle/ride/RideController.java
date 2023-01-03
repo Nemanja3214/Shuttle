@@ -54,7 +54,6 @@ import com.shuttle.vehicle.VehicleType;
 @RestController
 @RequestMapping("/api/ride")
 public class RideController {
-    private static final String GenericUser = null;
     @Autowired
     private IRideService rideService;
     @Autowired
@@ -381,13 +380,18 @@ public class RideController {
         rideService.cancelRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
         
-        Panic p = panicService.add(ride, null, reason);
+        GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        Panic p = panicService.add(ride, user, reason);
         PanicDTO dto = new PanicDTO();
         dto.setReason(p.getReason());
         dto.setTime(p.getTime().toString());
         dto.setId(p.getId());
         dto.setRide(to(ride));
-        dto.setUser(new UserDTO()); // TODO: User from JWT.
+
+        //
+        //
+
+        dto.setUser(new UserDTO(p.getUser()));
 
         notifyRideDriver(ride);
         notifyRidePassengers(ride);
@@ -446,7 +450,11 @@ public class RideController {
             return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
         }
 
-        final Cancellation cancellation = cancellationService.create(reason.getReason(), null); // TODO: Creator.
+        //
+        GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        //
+
+        final Cancellation cancellation = cancellationService.create(reason.getReason(), user); 
         rideService.rejectRide(ride, cancellation);
         driverService.setAvailable(ride.getDriver(), true);
 
