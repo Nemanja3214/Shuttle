@@ -25,4 +25,7 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
      * @return List of Ride objects whose Driver is null.
      */
     public List<Ride> findByDriverNull();
+
+    @Query(value = "from Ride r where r.status = 0 and r.startTime > current_time")
+    public List<Ride> findPendingInTheFuture();
 }

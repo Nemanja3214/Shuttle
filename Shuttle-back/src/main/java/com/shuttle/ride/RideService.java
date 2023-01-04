@@ -277,4 +277,9 @@ public class RideService implements IRideService {
     public List<Ride> findRidesWithNoDriver() {
         return rideRepository.findByDriverNull();
     }
+
+    @Override
+    public List<Ride> findAllPendingInFuture() {
+        return rideRepository.findPendingInTheFuture();
+    }
 }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -224,6 +225,13 @@ public class RideController {
             if (shouldNotifyPassengersOfThisRideForAnyChanges) {
                 notifyRidePassengers(ride);
             }
+        }
+    }
+
+    @Scheduled(fixedDelay = 300000) // 300000 == 300 * 1000ms = (5 * 60) * 10000ms
+    public void notifyPassengerAboutFutureRide() {
+        for (Ride r : rideService.findAllPendingInFuture()) {
+            notifyRidePassengers(r);
         }
     }
 

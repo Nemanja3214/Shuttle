@@ -105,4 +105,10 @@ public interface IRideService {
      */    
     public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded, VehicleType vehicleType);
 
+    /**
+     * Get all pending rides scheduled in the future.
+     * @return List of such rides. Can be empty.
+     */
+    List<Ride> findAllPendingInFuture();
+
 }
