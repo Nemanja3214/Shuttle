@@ -7,7 +7,7 @@ import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
-import com.shuttle.vehicle.VehicleType;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 public interface IRideService {
 	Ride save(Ride ride);

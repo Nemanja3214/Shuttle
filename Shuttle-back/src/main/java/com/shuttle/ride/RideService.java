@@ -19,7 +19,7 @@ import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
-import com.shuttle.vehicle.VehicleType;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 class NoAvailableDriverException extends Throwable {
 	private static final long serialVersionUID = -2718176046357707329L;
