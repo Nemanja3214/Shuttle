@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -124,7 +125,8 @@ public class VehicleController {
 
 	@PutMapping("/{id}/location")
 	public ResponseEntity<Boolean>changeLocation(@PathVariable long id, @RequestBody LocationDTO location) {
-		return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+		boolean result = this.vehicleService.changeCurrentLocation(id, location);
+    	return new ResponseEntity<Boolean>(result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
 	}
 	
 	@PostMapping
@@ -149,4 +151,10 @@ public class VehicleController {
         final List<Vehicle> vehicles = this.vehicleService.findAllCurrentlyActiveWhoseDriverCanWork();
         return vehicles;  
     }
+	
+	@GetMapping("/vehicleTypes")
+	public ResponseEntity<List<String>> getVehicleTypes(){
+		List<String> names = vehicleService.getAllVehicleTypesNames();
+		return new ResponseEntity<List<String>>(names, HttpStatus.OK);
+	}
 }

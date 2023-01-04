@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shuttle.driver.Driver;
+import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 public interface IVehicleService {
 	public Vehicle add(Vehicle vehicle);
@@ -19,4 +21,6 @@ public interface IVehicleService {
      */
 	public Vehicle findByDriver(Driver driver);
     public List<Vehicle> findAllCurrentlyActiveWhoseDriverCanWork();
+	public List<String> getAllVehicleTypesNames();
+	public boolean changeCurrentLocation(long id, LocationDTO location);
 }

@@ -1,10 +1,14 @@
 package com.shuttle.driver;
 
+import java.util.List;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.vehicle.IVehicleRepository;
+import com.shuttle.vehicle.Vehicle;
 import com.shuttle.workhours.IWorkHoursService;
 import com.shuttle.workhours.WorkHours;
 
@@ -12,6 +16,8 @@ import com.shuttle.workhours.WorkHours;
 public class DriverService implements IDriverService {
     @Autowired
 	private IDriverRepository driverRepository;
+    @Autowired
+	private IVehicleRepository vehicleRepository;
     @Autowired
     private IWorkHoursService workHoursService;
 
@@ -33,6 +39,17 @@ public class DriverService implements IDriverService {
 		return driver;
 	}
 
+	@Override
+	public List<LocationDTO> getActiveDriversLocations() {
+		List<Driver> activeDrivers = driverRepository.findByAvailableTrue();
+		List<Vehicle> driversVehicles = vehicleRepository.findByDriverIn(activeDrivers);
+		return driversVehicles.stream().map(vehicle -> LocationDTO.from(vehicle.getCurrentLocation())).toList();
+	}
+
+	@Override
+	public List<Driver> findByAvailableTrue() {
+		return this.driverRepository.findByAvailableTrue();
+	}
     @Override
     public Duration getDurationOfWorkInTheLast24Hours(Driver driver) {
         final LocalDateTime now = LocalDateTime.now();

@@ -12,4 +12,5 @@ public interface IVehicleRepository extends JpaRepository<Vehicle, Long> {
 
     @Query("select v from Vehicle v join v.driver dr where v.driver.active = true")
     public List<Vehicle> findAllCurrentlyActive();
+	public List<Vehicle> findByDriverIn(List<Driver> activeDrivers);
 }
