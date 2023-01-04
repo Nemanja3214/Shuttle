@@ -2,10 +2,12 @@ package com.shuttle.passenger;
 
 import java.io.UnsupportedEncodingException;
 
-import org.springframework.messaging.MessagingException;
+import jakarta.mail.MessagingException;
 
 public interface IPassengerService {
 
-	void register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException, jakarta.mail.MessagingException;
+	void register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException;
+
+	boolean verify(String code);
 
 }

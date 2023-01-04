@@ -8,8 +8,7 @@ import jakarta.mail.MessagingException;
 
 public interface IEmailService {
 
-	void sendVerificationEmail(Passenger newPassenger, String string) throws UnsupportedEncodingException, org.springframework.messaging.MessagingException, MessagingException;
-
-	void sendDummyMessage() throws UnsupportedEncodingException, MessagingException;
+	void sendVerificationEmail(Passenger passenger, String url)
+			throws UnsupportedEncodingException, MessagingException;
 
 }

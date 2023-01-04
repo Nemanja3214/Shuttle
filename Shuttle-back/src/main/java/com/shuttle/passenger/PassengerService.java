@@ -1,31 +1,27 @@
 package com.shuttle.passenger;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Random;
+import java.util.List;
 import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.messaging.MessagingException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.security.IRoleRepository;
+import com.shuttle.security.Role;
+import com.shuttle.security.jwt.JwtTokenUtil;
 import com.shuttle.user.email.IEmailService;
+import com.shuttle.verificationToken.IVerificationRepository;
 import com.shuttle.verificationToken.VerificationToken;
 
-import jakarta.mail.Authenticator;
-import jakarta.mail.Message;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.Session;
-import jakarta.mail.Transport;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class PassengerService implements IPassengerService{
@@ -33,19 +29,48 @@ public class PassengerService implements IPassengerService{
     private PasswordEncoder passwordEncoder;
 	
 	@Autowired
-	IPassengerRepository passengerRepository;
+	private IPassengerRepository passengerRepository;
 	
 	@Autowired
-	IEmailService emailService;
+	private IEmailService emailService;
+	
+	@Autowired
+	private IVerificationRepository tokenRepository;
+	
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
+	
+	@Autowired
+	private IRoleRepository roleRepository;
 
 	@Override
-	public void register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException, jakarta.mail.MessagingException {
-		Passenger newPassenger = new Passenger();
-		VerificationToken token = new VerificationToken();
+	public void register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException {
+		Passenger newPassenger = PassengerDTO.from(passengerDTO);
+		newPassenger.setActive(false);
+		newPassenger.setBlocked(false);
+		newPassenger.setEnabled(false);
+		newPassenger.setFinance((double)0);
+		List<Role> passengerRole = roleRepository.findByName("passenger");
+		newPassenger.setRoles(passengerRole);
 		
+//		TODO: Check with teamate
 		String encodedPassword = passwordEncoder.encode(passengerDTO.password);
 		newPassenger.setPassword(encodedPassword);
 	     
+		VerificationToken token = createToken();
+	    
+	    newPassenger.setEnabled(false);
+	    token.setPassenger(newPassenger);
+	     
+	    passengerRepository.save(newPassenger);
+	    tokenRepository.save(token);
+	     
+	    emailService.sendVerificationEmail(newPassenger, "http://localhost:8080/api/passenger/verify?token=" + token.getToken());	
+		
+	}
+
+	private VerificationToken createToken() {
+		VerificationToken token = new VerificationToken();
 		
 	    String randomCode = makeRandomString(64);
 	    token.setToken(randomCode);
@@ -56,25 +81,36 @@ public class PassengerService implements IPassengerService{
         ZoneId zoneId = tz.toZoneId();
         LocalDateTime localDateTime = LocalDateTime.ofInstant(calendar.toInstant(), zoneId);
 	    token.setExpireDateTime(localDateTime);
-	    
-	    token.setUser(newPassenger);
-	    
-//	    newPassenger.setVerificationToken(token);
-	    newPassenger.setEnabled(false);
-	     
-	    passengerRepository.save(newPassenger);
-	     
-	    emailService.sendVerificationEmail(newPassenger, "www.nesto.com");	
-		
+	    return token;
+	   
 	}
 
 	private String makeRandomString(int i) {
-		byte[] array = new byte[i];
-	    new Random().nextBytes(array);
-	    String generatedString = new String(array, Charset.forName("UTF-8"));
-	    return generatedString;
+		SecureRandom random = new SecureRandom();
+	    byte bytes[] = new byte[128];
+	    random.nextBytes(bytes);
+	    Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+	    String token = encoder.encodeToString(bytes);
+	    return token;
 	}
-	
 
+	@Override
+	@Transactional
+	public boolean verify(String verificationCode) {
+	   VerificationToken token = tokenRepository.findByToken(verificationCode);
+	   Passenger passenger = token.getPassenger();
+	     
+	    if (passenger == null || passenger.isEnabled()) {
+	        return false;
+	    } else {
+	    	tokenRepository.deleteByPassenger(passenger);
+	        passenger.setToken(null);
+	        passenger.setEnabled(true);
+	    	passenger.setJwt(jwtTokenUtil.generateToken(passenger.getId(), passenger.getEmail(), null));
+	        passengerRepository.save(passenger);
+	         
+	        return true;
+	    }
+	}
 
 }

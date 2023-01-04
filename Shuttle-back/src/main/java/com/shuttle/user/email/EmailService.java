@@ -5,12 +5,11 @@ import java.util.Date;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
-import com.shuttle.MailConfig;
 import com.shuttle.passenger.Passenger;
 
 import jakarta.mail.Authenticator;
@@ -24,36 +23,52 @@ import jakarta.mail.internet.MimeMessage;
 @Service
 public class EmailService implements IEmailService{
 	
-	@Autowired
-    private JavaMailSender mailSender;
+	@Value("${spring.mail.host}")
+    private String host;
 	
-	@Override
-	public void sendDummyMessage() throws UnsupportedEncodingException, jakarta.mail.MessagingException {
-//		TODO change to user mail
-		String toAddress = "nemanja.majstorovic3214@gmail.com";
-	    String senderName = "Firma";
-	    
-	    String subject = "Please verify your registration";
-	    String content = "Dear [[name]],<br>"
-	            + "Please click the link below to verify your registration:<br>"
-	            + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
-	            + "Thank you,<br>"
-	            + "Your company name.";
-	    content = content.replace("[[name]]", "Pera");
-//	    TODO dodaj token
-	    content = content.replace("[[URL]]",  "token");
-//	     
-	    Session session = MailConfig.getSession();
-		
-		sendEmail(session, toAddress, subject, content);
-	}
+    @Value("${spring.mail.port}")
+    private Integer port;
+
+    @Value("${spring.mail.username}")
+    private String user;
+
+    @Value("${spring.mail.password}")
+    private String password;
+    
+    @Value("${spring.mail.properties.mail.smtp.auth}")
+    private boolean auth;
+
+    @Value("${spring.mail.properties.mail.smtp.starttls.enable}")
+    private boolean starttls;
+
+    private Properties getMailProperties(){
+    	Properties props = new Properties();
+		props.put("mail.smtp.host", host); //SMTP Host
+		props.put("mail.smtp.port", port); //TLS Port
+		props.put("mail.smtp.auth", auth); //enable authentication
+		props.put("mail.smtp.starttls.enable", starttls); //enable STARTTLS
+		props.setProperty("mail.user", user);
+		props.setProperty("mail.password", password);
+		return props;
+    }
+    
+    private Session getSession() {
+    	Properties props = getMailProperties();
+    	Authenticator auth = new Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+			
+				return new PasswordAuthentication(props.getProperty("mail.user"), props.getProperty("mail.password"));
+			}
+		};
+		return Session.getInstance(props, auth);
+    }
+
 
 	@Override
 	public void sendVerificationEmail(Passenger passenger, String url) throws UnsupportedEncodingException, MessagingException, jakarta.mail.MessagingException {
 		String toAddress = passenger.getEmail();
-//		TODO
-	    String fromAddress = "shuttle.mailing.service2023@gmail.com";
-	    String senderName = "Firma";
+	    String fromAddress = getMailProperties().getProperty("mail.user");
+	    String senderName = "Shuttle";
 	    
 	    
 	    String subject = "Please verify your registration";
@@ -63,11 +78,10 @@ public class EmailService implements IEmailService{
 	            + "Thank you,<br>"
 	            + "Your company name.";
 	    
-	    content.replace("[[name]]", passenger.getName());
-//	    TODO dodaj token
-	    content.replace("[[URL]]", url + "token");
+	    content = content.replace("[[name]]", passenger.getName());
+	    content = content.replace("[[URL]]", url);
 	     
-		Session session = MailConfig.getSession();
+		Session session = getSession();
 		
 		sendEmail(session, toAddress, subject, content);
 		
@@ -75,8 +89,8 @@ public class EmailService implements IEmailService{
 	
 	private void sendEmail(Session session, String toEmail, String subject, String body) throws jakarta.mail.MessagingException, UnsupportedEncodingException{
 	      MimeMessage msg = new MimeMessage(session);
-	      Properties props = MailConfig.getMailProperties();
-	      //set message headers
+	      Properties props = getMailProperties();
+
 	      msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
 	      msg.addHeader("format", "flowed");
 	      msg.addHeader("Content-Transfer-Encoding", "8bit");
@@ -86,8 +100,8 @@ public class EmailService implements IEmailService{
 	      msg.setReplyTo(InternetAddress.parse("no_reply@example.com", false));
 
 	      msg.setSubject(subject, "UTF-8");
-
-	      msg.setText(body, "UTF-8");
+	      
+	      msg.setContent(body, "text/html");
 
 	      msg.setSentDate(new Date());
 
@@ -95,7 +109,7 @@ public class EmailService implements IEmailService{
 	      System.out.println("Message is ready");
     	  Transport.send(msg);  
 
-	      System.out.println("EMail Sent Successfully!!");
+	      System.out.println("Email Sent Successfully!!");
 	}
 
 }

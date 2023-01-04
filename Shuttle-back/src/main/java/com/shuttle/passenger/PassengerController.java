@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
@@ -26,25 +29,49 @@ public class PassengerController {
 	@Autowired
 	IEmailService emailService;
 	
+	@Autowired
+	IPassengerService passengerService;
+	
 	@PostMapping("/api/passenger")
-	public ResponseEntity<PassengerDTO> create(@RequestBody Passenger passenger) {
-		passenger.setId(Long.valueOf(123));
-		return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
+	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
+		try {
+			passengerService.register(dto);
+		} catch (UnsupportedEncodingException e) {
+			return ResponseEntity.badRequest().body("Bad encoding");
+		} catch (MessagingException e) {
+			return ResponseEntity.badRequest().body("Failed to send mail");
+		}
+		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
 	
 //	TODO delete
 	@GetMapping("/api/passenger/send")
-	public ResponseEntity<Void> create() {
+	public ResponseEntity<?> create() {
 		try {
-			emailService.sendDummyMessage();
+			PassengerDTO dto = new PassengerDTO();
+			dto.setEmail("nemanja.majstorovic3214@gmail.com");
+			dto.setName("Nemanja");
+			dto.setPassword("asd");
+			passengerService.register(dto);
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return ResponseEntity.badRequest().body("Bad encoding");
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return ResponseEntity.badRequest().body("Failed to send mail");
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
+
+	@GetMapping("/api/passenger/verify")
+	public RedirectView verifyUser(@RequestParam("token") String code) {
+		RedirectView redirectView = new RedirectView();
+	    if (passengerService.verify(code)) {
+		    redirectView.setUrl("http://localhost:8080/index.html");
+		    return redirectView;
+	    } else {
+	    	redirectView.setUrl("http://localhost:8080/bad-request.html");
+		    return redirectView;
+	    }
 	}
 
 	@GetMapping("/api/passenger")

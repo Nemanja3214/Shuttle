@@ -8,7 +8,7 @@ import java.util.List;
 @Service
 public class RoleServiceImpl implements RoleService {
     @Autowired
-    private RoleRepository roleRepository;
+    private IRoleRepository roleRepository;
 
     @Override
     public Role findById(Long id) {

@@ -14,8 +14,11 @@ public class ShuttleBackApplication {
 		SpringApplication.run(ShuttleBackApplication.class, args);
 	}
 	
+//	TODO
+	
 	@GetMapping("/hello")
 	@CrossOrigin
+//	@CrossOrigin(origins = "http://localhost:4200")
 	public String helloWorld() {
 		return "Hello from Spring Boot";
 	}

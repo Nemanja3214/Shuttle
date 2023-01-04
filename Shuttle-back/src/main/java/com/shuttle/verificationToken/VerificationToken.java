@@ -2,7 +2,7 @@ package com.shuttle.verificationToken;
 
 import java.time.LocalDateTime;
 
-import com.shuttle.user.GenericUser;
+import com.shuttle.passenger.Passenger;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -27,7 +27,7 @@ public class VerificationToken {
     private String token;
     private LocalDateTime expireDateTime;
 
-    @OneToOne(targetEntity = GenericUser.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "user_id")
-    private GenericUser user;
+    @OneToOne(targetEntity = Passenger.class, fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false, name = "passenger_id")
+    private Passenger passenger;
 }
