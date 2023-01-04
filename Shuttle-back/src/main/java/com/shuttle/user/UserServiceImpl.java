@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -101,4 +103,15 @@ public class UserServiceImpl implements UserService {
 	public boolean getActive(GenericUser user) {
 		return user.getActive();
 	}
+
+    @Override
+    public List<GenericUser> findByRole(String role) {
+        List<Role> roles = roleService.findByName(role);
+        if (roles.size() == 0) {
+            return new ArrayList<GenericUser>();
+        }
+        Role r = roles.get(0);
+
+        return userRepository.findByRoles(r);
+    }
 }

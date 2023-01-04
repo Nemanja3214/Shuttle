@@ -1,5 +1,6 @@
 package com.shuttle.user;
 
+import com.shuttle.security.Role;
 import com.shuttle.user.dto.BasicUserInfoDTO;
 import com.shuttle.user.dto.UserDTO;
 
@@ -14,4 +15,11 @@ public interface UserService {
     GenericUser encodeUserPassword(GenericUser user, String password);
 	GenericUser setActive(GenericUser user, boolean b);
 	boolean getActive(GenericUser user);
+
+    /**
+     * Fetch all GenericUser instances which have the given role (as string).
+     * @param role Role name. Case sensistive: ('admin', 'driver', 'passenger').
+     * @return List of users. Can be empty.
+     */
+    List<GenericUser> findByRole(String role);
 }

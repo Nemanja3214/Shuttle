@@ -3,6 +3,7 @@ package com.shuttle.user;
 import com.shuttle.security.jwt.JwtTokenUtil;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.aspectj.apache.bcel.classfile.ExceptionTable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,6 @@ public class UserController {
     private IMessageService messageService;
     @Autowired
     private IRideService rideService;
-
 
     @GetMapping("/{id}/ride")
     public ResponseEntity<ListDTO<String>> getUserRides(
@@ -127,7 +127,10 @@ public class UserController {
         
         GenericUser reciever = null;
         if (recieverId == -1) {
-            reciever = sender; // TODO: Fetch admin
+            final List<GenericUser> admins = userService.findByRole("admin");
+            if (admins.size() != 0) {
+                reciever = admins.get(0);
+            }
         } else {
             reciever = userService.findById(recieverId);
         }
