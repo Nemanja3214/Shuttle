@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.Ride.Status;
@@ -51,6 +52,13 @@ public class VehicleController {
         }
     }
 
+    private void notifyPassengersVehicleArrived(Ride r) {
+        for (Passenger p : r.getPassengers()) {
+            final String dest = "/vehicle/arrived/" + p.getId();
+            template.convertAndSend(dest, "true");
+        }
+    }
+
     @Scheduled(fixedDelay = 2000)
     private void vehicleMovementSimulation() {
         // TODO: Batch update.
@@ -71,11 +79,14 @@ public class VehicleController {
 
                 final Double x2 = target.getLongitude();
                 final Double y2 = target.getLatitude();
-                Double x1 = v.getCurrentLocation().getLongitude();
-                Double y1 = v.getCurrentLocation().getLatitude();
+                final Double currentX1 = v.getCurrentLocation().getLongitude();
+                final Double currentY1 = v.getCurrentLocation().getLatitude();
+                Double x1 = currentX1;
+                Double y1 = currentY1;
                 final Double dx = 60.0 * 0.00003;
                 final Double dy = 60.0 * 0.00003;
 
+  
                 x1 += dx * Math.signum(x2 - x1);
                 y1 += dy * Math.signum(y2 - y1);
 
@@ -84,6 +95,13 @@ public class VehicleController {
                 }
                 if (Math.abs(y2 - y1) <= dy) {
                     y1 = y2;
+                }
+
+                if (Math.abs(x2 - x1) <= dx
+                && Math.abs(y2 - y1) <= dy
+                && (Math.abs(currentX1 - x1) > dx
+                || Math.abs(currentY1 - y1) > dy)) {
+                    notifyPassengersVehicleArrived(r);
                 }
 
                 v.getCurrentLocation().setLongitude(x1);
