@@ -8,6 +8,7 @@ public class PassengerDTO {
 	public String telephoneNumber;
 	public String email;
 	public String address;
+	public String password;
 	
 	public PassengerDTO(Passenger p) {
 		this.id = p.getId();
@@ -17,5 +18,6 @@ public class PassengerDTO {
 		this.telephoneNumber = p.getTelephoneNumber();
 		this.email = p.getEmail();
 		this.address = p.getAddress();
+		this.password = p.getPassword();
 	}
 }

@@ -1,10 +1,10 @@
 package com.shuttle.passenger;
 
-import java.time.LocalDateTime;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,22 +14,37 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.shuttle.driver.Driver;
-import com.shuttle.location.Location;
-import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
-import com.shuttle.vehicle.vehicleType.VehicleType;
-import com.shuttle.location.Route;
+import com.shuttle.user.email.IEmailService;
 
+import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
 
 @RestController
 public class PassengerController {
+	@Autowired
+	IEmailService emailService;
+	
 	@PostMapping("/api/passenger")
 	public ResponseEntity<PassengerDTO> create(@RequestBody Passenger passenger) {
 		passenger.setId(Long.valueOf(123));
 		return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
+	}
+	
+//	TODO delete
+	@GetMapping("/api/passenger/send")
+	public ResponseEntity<Void> create() {
+		try {
+			emailService.sendDummyMessage();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@GetMapping("/api/passenger")
