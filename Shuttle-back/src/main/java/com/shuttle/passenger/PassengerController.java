@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
 import com.shuttle.user.email.IEmailService;
@@ -35,11 +36,13 @@ public class PassengerController {
 	@PostMapping("/api/passenger")
 	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
 		try {
-			passengerService.register(dto);
+			dto = passengerService.register(dto);
 		} catch (UnsupportedEncodingException e) {
 			return ResponseEntity.badRequest().body("Bad encoding");
 		} catch (MessagingException e) {
 			return ResponseEntity.badRequest().body("Failed to send mail");
+		} catch (EmailAlreadyUsedException e) {
+			return ResponseEntity.badRequest().body("Email is already used");
 		}
 		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
@@ -57,6 +60,8 @@ public class PassengerController {
 			return ResponseEntity.badRequest().body("Bad encoding");
 		} catch (MessagingException e) {
 			return ResponseEntity.badRequest().body("Failed to send mail");
+		} catch (EmailAlreadyUsedException e) {
+			return ResponseEntity.badRequest().body("Email is already used");
 		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

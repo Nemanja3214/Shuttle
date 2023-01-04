@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.security.IRoleRepository;
 import com.shuttle.security.Role;
 import com.shuttle.security.jwt.JwtTokenUtil;
@@ -45,7 +46,12 @@ public class PassengerService implements IPassengerService{
 	private IRoleRepository roleRepository;
 	
 	@Override
-	public void register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException {
+	public PassengerDTO register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException, EmailAlreadyUsedException {
+		Boolean b = passengerRepository.existsByEmail(passengerDTO.email);
+		if(passengerRepository.existsByEmail(passengerDTO.email)) {
+			throw new EmailAlreadyUsedException();
+		}
+		
 		Passenger newPassenger = PassengerDTO.from(passengerDTO);
 		newPassenger.setActive(false);
 		newPassenger.setBlocked(false);
@@ -62,10 +68,11 @@ public class PassengerService implements IPassengerService{
 	    newPassenger.setEnabled(false);
 	    token.setPassenger(newPassenger);
 	     
-	    passengerRepository.save(newPassenger);
+	    newPassenger = passengerRepository.save(newPassenger);
 	    tokenRepository.save(token);
 	     
 	    emailService.sendVerificationEmail(newPassenger, "http://localhost:8080/api/passenger/verify?token=" + token.getToken());	
+	    return new PassengerDTO(newPassenger);
 		
 	}
 
