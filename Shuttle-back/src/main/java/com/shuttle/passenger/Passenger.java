@@ -24,6 +24,6 @@ public class Passenger extends GenericUser {
     private Set<Route> favoriteRoutes;
     Double finance;
     Boolean currentlyRiding;
-    @OneToOne(mappedBy = "passenger", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "passenger", cascade = CascadeType.ALL, orphanRemoval=true)
     private VerificationToken token;
 }

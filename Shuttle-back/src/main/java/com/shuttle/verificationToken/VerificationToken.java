@@ -2,6 +2,9 @@ package com.shuttle.verificationToken;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.shuttle.passenger.Passenger;
 
 import jakarta.persistence.Entity;
@@ -29,5 +32,6 @@ public class VerificationToken {
 
     @OneToOne(targetEntity = Passenger.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "passenger_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Passenger passenger;
 }

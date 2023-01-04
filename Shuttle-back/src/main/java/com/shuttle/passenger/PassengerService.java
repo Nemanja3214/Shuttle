@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.shuttle.security.IRoleRepository;
 import com.shuttle.security.Role;
@@ -21,7 +23,6 @@ import com.shuttle.verificationToken.IVerificationRepository;
 import com.shuttle.verificationToken.VerificationToken;
 
 import jakarta.mail.MessagingException;
-import jakarta.transaction.Transactional;
 
 @Service
 public class PassengerService implements IPassengerService{
@@ -42,7 +43,7 @@ public class PassengerService implements IPassengerService{
 	
 	@Autowired
 	private IRoleRepository roleRepository;
-
+	
 	@Override
 	public void register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException {
 		Passenger newPassenger = PassengerDTO.from(passengerDTO);
@@ -53,7 +54,6 @@ public class PassengerService implements IPassengerService{
 		List<Role> passengerRole = roleRepository.findByName("passenger");
 		newPassenger.setRoles(passengerRole);
 		
-//		TODO: Check with teamate
 		String encodedPassword = passwordEncoder.encode(passengerDTO.password);
 		newPassenger.setPassword(encodedPassword);
 	     
@@ -112,5 +112,14 @@ public class PassengerService implements IPassengerService{
 	        return true;
 	    }
 	}
+	
+	@Scheduled(fixedDelay = 1000 * 60 * 60)
+	@Transactional
+	public void deleteUnverified() {
+		System.out.println("Num of users" + passengerRepository.findAll().size());
+		passengerRepository.deleteByExpiredToken();
+		System.out.println("Num of users" + passengerRepository.findAll().size());;
+	}
+
 
 }
