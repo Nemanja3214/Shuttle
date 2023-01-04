@@ -181,6 +181,10 @@ public class RideController {
             return;
         }
 
+        // Ride has no driver, ride finds driver -> notify passengers.
+        boolean shouldNotifyPassengersOfThisRideForAnyChanges = false;
+
+
         Ride ride = rideService.findCurrentRideByDriver(driver);
         if (ride == null) {
             // Try to find a ride scheduled in the future that isn't assigned to anybody.
@@ -200,6 +204,7 @@ public class RideController {
                 if (rideService.requestParamsMatch(driver, ride.getBabyTransport(), ride.getPetTransport(), ride.getPassengers().size(), ride.getVehicleType())) {
                     ride.setDriver(driver);
                     rideService.save(ride);
+                    shouldNotifyPassengersOfThisRideForAnyChanges = true;
                 } else {
                     ride = null;
                 }
@@ -213,8 +218,12 @@ public class RideController {
         if (ride != null) {
             if (ride.getDriver().isAvailable()) {
                 driverService.setAvailable(ride.getDriver(), false);
-            }    
+            }
             template.convertAndSend(dest, to(ride));
+
+            if (shouldNotifyPassengersOfThisRideForAnyChanges) {
+                notifyRidePassengers(ride);
+            }
         }
     }
 
