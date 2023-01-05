@@ -25,16 +25,12 @@ import com.shuttle.vehicle.vehicleType.VehicleType;
 
 @Service
 public class VehicleService implements IVehicleService {
+    @Autowired
 	private IVehicleRepository vehicleRepository;
+    @Autowired
 	private IDriverService driverService;
+    @Autowired
 	private IVehicleTypeRepository vehicleTypeRepository;
-	
-	@Autowired
-	public VehicleService(IVehicleRepository vehicleRepository, IDriverService driverService, IVehicleTypeRepository vehicleTypeRepository) {
-		this.vehicleRepository = vehicleRepository;
-		this.driverService = driverService; 
-		this.vehicleTypeRepository = vehicleTypeRepository;
-	}
 	
 	@Override
 	public Vehicle add(VehicleDTO vehicleDTO) throws NoSuchElementException {
@@ -64,6 +60,15 @@ public class VehicleService implements IVehicleService {
 		return vehicleRepository.findByDriver(driver);
 	}
 
+    @Override
+    public List<Vehicle> findAllCurrentlyActiveWhoseDriverCanWork() {
+        return vehicleRepository.findAllCurrentlyActive()
+                .stream()
+                .filter(v -> {
+                    return !this.driverService.workedMoreThan8Hours(v.getDriver());
+                })
+                .toList();
+    }
 	@Override
 	public List<String> getAllVehicleTypesNames() {
 		return vehicleTypeRepository.findAll().stream().map(x -> x.getName()).collect(Collectors.toList());

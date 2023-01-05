@@ -1,6 +1,5 @@
 package com.shuttle.driver;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,27 +15,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
+import com.shuttle.common.RESTError;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
-import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
-import com.shuttle.ride.dto.RideDTO;
 import org.springframework.data.domain.Page;
+
+import com.shuttle.vehicle.IVehicleService;
+import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.WorkHours;
 
 import jakarta.websocket.server.PathParam;
 import com.shuttle.workhours.*;
 import com.shuttle.workhours.dto.WorkHoursNoDriverDTO;
-import jakarta.websocket.server.PathParam;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -45,17 +42,16 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
 
 @CrossOrigin
 @RestController
 public class DriverController {
-
     @Autowired
     private IDriverService driverService;
     @Autowired
-    public IRideRepository rideRepository;
+    private IRideRepository rideRepository;
+    @Autowired
+    private IVehicleService vehicleService;
 
 	@Autowired
 	private IWorkHoursService workHoursService;
@@ -109,9 +105,23 @@ public class DriverController {
 
 
     @GetMapping("/api/driver/{id}/vehicle")
-    public ResponseEntity<VehicleDTO> getVehicle(@PathVariable(value = "id") Long id) {
-        VehicleDTO vehicleDTO = new DriverControllerMockProvider().getDriverVehicleDTO(id);
-        return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
+    public ResponseEntity<?> getVehicle(@PathVariable(value = "id") Long id) {
+        if (id == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
+        }
+        
+        final Driver driver = driverService.get(id);
+
+        if (driver == null) {
+            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+        }
+
+        Vehicle vehicle = vehicleService.findByDriver(driver);
+        if (vehicle == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Vehicle is not assigned."), HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
     }
 
     @PostMapping("/api/driver/{id}/vehicle")
@@ -194,12 +204,5 @@ public class DriverController {
         return new ResponseEntity<>(rideListDTO, HttpStatus.OK);
 
     }
-    
-    @GetMapping("/api/driver/active")
-    public ResponseEntity<List<LocationDTO>> getActiveDriversLocations(){
-    	List<LocationDTO> activeDriversLocations = driverService.getActiveDriversLocations();
-    	return new ResponseEntity<List<LocationDTO>>(activeDriversLocations, HttpStatus.OK);
-    }
-
 }
 

@@ -1,6 +1,11 @@
 package com.shuttle.user;
 
 import com.shuttle.security.jwt.JwtTokenUtil;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.aspectj.apache.bcel.classfile.ExceptionTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +28,12 @@ import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
 import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
+import com.shuttle.message.IMessageService;
+import com.shuttle.message.Message;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
+import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.RideDTO;
@@ -36,16 +44,16 @@ import jakarta.websocket.server.PathParam;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-
     @Autowired
     private AuthenticationManager authenticationManager;
-
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private IMessageService messageService;
+    @Autowired
+    private IRideService rideService;
 
     @GetMapping("/{id}/ride")
     public ResponseEntity<ListDTO<String>> getUserRides(
@@ -77,8 +85,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(),
-                credentialsDTO.getPassword());
+        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(), credentialsDTO.getPassword());
         Authentication auth = authenticationManager.authenticate(authReq);
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
@@ -101,14 +108,51 @@ public class UserController {
 
         ListDTO<MessageDTO> messages = new ListDTO<>();
         messages.setTotalCount(243);
-        messages.getResults().add(MessageDTO.getMock());
+        messages.getResults().add(new MessageDTO());
 
         return new ResponseEntity<>(messages, HttpStatus.OK);
     }
 
-    @PostMapping("/{id}/message")
-    public ResponseEntity<MessageDTO> sendMessage(@RequestBody CreateMessageDTO messageDTO) {
-        return new ResponseEntity<MessageDTO>(MessageDTO.getMock(), HttpStatus.OK);
+    @PostMapping("/{recieverId}/message")
+    public ResponseEntity<?> sendMessage(@PathVariable Long recieverId, @RequestBody CreateMessageDTO messageDTO) {
+        if (recieverId == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+
+        GenericUser sender = null;
+        
+        try {
+            sender = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        } catch (Exception e) {}
+        
+        GenericUser reciever = null;
+        if (recieverId == -1) {
+            final List<GenericUser> admins = userService.findByRole("admin");
+            if (admins.size() != 0) {
+                reciever = admins.get(0);
+            }
+        } else {
+            reciever = userService.findById(recieverId);
+        }
+
+        Ride ride = rideService.findById(messageDTO.getRideId());
+
+		if (sender == null || reciever == null || ride == null) {
+			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		}
+        
+        Message m = new Message(
+            null,
+            sender,
+            reciever,
+            messageDTO.getMessage(),
+            LocalDateTime.now(),
+            ride,
+            messageDTO.getType()
+        );
+        m = messageService.save(m);
+
+        return new ResponseEntity<MessageDTO>(new MessageDTO(m), HttpStatus.OK);
     }
 
     @PutMapping("/{id}/block")

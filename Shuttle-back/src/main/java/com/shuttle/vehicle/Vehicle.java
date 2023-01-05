@@ -6,7 +6,6 @@ import com.shuttle.vehicle.vehicleType.VehicleType;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data

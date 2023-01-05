@@ -1,11 +1,7 @@
 package com.shuttle.ride.dto;
 
 import java.util.List;
-import java.util.Set;
-
 import com.shuttle.location.dto.RouteDTO;
-import com.shuttle.passenger.Passenger;
-import com.shuttle.ride.Ride;
 import com.shuttle.user.dto.BasicUserInfoDTO;
 
 import lombok.AllArgsConstructor;
@@ -21,4 +17,6 @@ public class CreateRideDTO {
 	private String vehicleType;
 	private boolean babyTransport;
 	private boolean petTransport;
+    private String hour;
+    private String minute;
 }

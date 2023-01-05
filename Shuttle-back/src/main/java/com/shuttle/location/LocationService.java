@@ -1,7 +1,6 @@
 package com.shuttle.location;
 
-import java.util.Optional;
-
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +13,9 @@ public class LocationService implements ILocationService {
 	
 	@Override
 	public Location findOrAdd(LocationDTO locationDTO) {
-		final Optional<Location> ol = locationRepository.findByLatitudeAndLongitude(locationDTO.getLatitude(), locationDTO.getLongitude());
+		final List<Location> li = locationRepository.findByLatitudeAndLongitude(locationDTO.getLatitude(), locationDTO.getLongitude());
 		
-		if (ol.isEmpty()) {
+		if (li.isEmpty()) {
 			Location l = new Location();
 			l.setAddress(locationDTO.getAddress());
 			l.setLatitude(locationDTO.getLatitude());
@@ -24,7 +23,7 @@ public class LocationService implements ILocationService {
 			locationRepository.save(l);
 			return l;
 		} else {
-			return ol.get();
+			return li.get(0);
 		}
 	}
 }
