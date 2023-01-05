@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -141,6 +142,7 @@ public class DriverController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/api/driver/{id}/ride")
     public ResponseEntity<ListDTO<Ride>> getRideHistory(@PathVariable(value = "id") Long id,
                                                            @PathParam("page") int page, @PathParam("size") int size,

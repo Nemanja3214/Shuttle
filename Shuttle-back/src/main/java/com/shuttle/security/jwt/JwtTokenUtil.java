@@ -20,12 +20,15 @@ public class JwtTokenUtil {
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
     @Value("${jwt.secret}")
     private String secret;
-    @Value("1800000")
-    private int EXPIRES_IN;
+    @Value("${jwt.expirationDateInMs}")
+    private int JWT_EXPIRATION;
 
     // Naziv headera kroz koji ce se prosledjivati JWT u komunikaciji server-klijent
     @Value("Authorization")
     private String AUTH_HEADER;
+
+    @Value("${jwt.refreshExpirationDateInMs}")
+    private int REFRESH_EXPIRATION;
 
     //	private static final String AUDIENCE_UNKNOWN = "unknown";
     //	private static final String AUDIENCE_MOBILE = "mobile";
@@ -52,9 +55,23 @@ public class JwtTokenUtil {
                 .setSubject(email)
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
-                .setExpiration(generateExpirationDate())
+                .setExpiration(generateJWTExpirationDate())
                 .claim("id", id)
                 .claim("role", authorities)
+                .signWith(SIGNATURE_ALGORITHM, secret).compact();
+
+
+    }
+
+    public String generateRefreshToken(Long id,String email) {
+
+        return Jwts.builder()
+                .setIssuer(APP_NAME)
+                .setSubject(email)
+                .setAudience(generateAudience())
+                .setIssuedAt(new Date())
+                .setExpiration(generateRefreshExpirationDate())
+                .claim("id", id)
                 .signWith(SIGNATURE_ALGORITHM, secret).compact();
 
 
@@ -82,8 +99,11 @@ public class JwtTokenUtil {
     /**
      * @return date until valid
      */
-    private Date generateExpirationDate() {
-        return new Date(new Date().getTime() + EXPIRES_IN);
+    private Date generateJWTExpirationDate() {
+        return new Date(new Date().getTime() + JWT_EXPIRATION);
+    }
+    private Date generateRefreshExpirationDate() {
+        return new Date(new Date().getTime() + REFRESH_EXPIRATION);
     }
 
     /**
@@ -106,7 +126,7 @@ public class JwtTokenUtil {
      * @param token JWT token.
      * @return username or null
      */
-    public String getUsernameFromToken(String token) {
+    public String getEmailFromToken(String token) {
         String username;
 
         try {
@@ -202,7 +222,7 @@ public class JwtTokenUtil {
      */
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
+        final String username = getEmailFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 //    public Boolean validateToken(String token, UserDetails userDetails) {
@@ -222,7 +242,7 @@ public class JwtTokenUtil {
 
 
     public int getExpiredIn() {
-        return EXPIRES_IN;
+        return JWT_EXPIRATION;
     }
 
 

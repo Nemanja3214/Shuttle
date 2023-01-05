@@ -23,7 +23,7 @@ public class SwaggerController {
             userService.encodeUserPassword(user, user.getPassword());
             userService.save(user);
         }
-
+        System.out.println("Pw set");
     }
 
 }

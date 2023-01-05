@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,9 +25,6 @@ import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
-import com.shuttle.ride.Ride;
-import com.shuttle.ride.cancellation.Cancellation;
-import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.dto.UserDTO;
 
 import jakarta.websocket.server.PathParam;
@@ -42,7 +38,7 @@ public class UserController {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-    
+
     @Autowired
     private UserService userService;
 
@@ -82,18 +78,29 @@ public class UserController {
         Authentication auth = authenticationManager.authenticate(authReq);
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
-        String token = jwtTokenUtil.generateToken
-                (((GenericUser) auth.getPrincipal()).getId(), credentialsDTO.getEmail(), auth.getAuthorities());
-        TokenDTO tokens = new TokenDTO(token, token);
-        //TODO add refresh token
-        
+        long id = ((GenericUser) auth.getPrincipal()).getId();
+        String token = jwtTokenUtil.generateToken(id, credentialsDTO.getEmail(), auth.getAuthorities());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(id, credentialsDTO.getEmail());
+        TokenDTO tokens = new TokenDTO(token, refreshToken);
         GenericUser user = userService.findByEmail(credentialsDTO.getEmail());
         if (user != null) {
-        	userService.setActive(user, true);
+            userService.setActive(user, true);
         }
-        
-        
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/refreshtoken")
+    public ResponseEntity<String> refreshtoken(@RequestBody String refreshToken) throws Exception {
+        // From the HttpRequest get the claims
+        String email = jwtTokenUtil.getEmailFromToken(refreshToken);
+        GenericUser user = userService.findByEmail(email);
+
+        if (jwtTokenUtil.validateToken(refreshToken, user)) {
+            String token = jwtTokenUtil.generateToken(user.getId(), user.getEmail(), user.getAuthorities());
+            return new ResponseEntity<String>(token, HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @GetMapping("/{id}/message")
@@ -120,44 +127,44 @@ public class UserController {
     public ResponseEntity<Boolean> unblock(@PathVariable long id) {
         return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
     }
-    
+
     @GetMapping("/{id}/active")
     public ResponseEntity<?> getActive(@PathVariable Long id) {
-		if (id == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
-		}	
-		GenericUser user = userService.findById(id);
-		if (user == null) {
-			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
-		}
-		boolean isActive = userService.getActive(user);
-		return new ResponseEntity<Boolean>(isActive, HttpStatus.OK);
+        if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+        GenericUser user = userService.findById(id);
+        if (user == null) {
+            return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
+        }
+        boolean isActive = userService.getActive(user);
+        return new ResponseEntity<Boolean>(isActive, HttpStatus.OK);
     }
-    
+
     @PutMapping("/{id}/active")
     public ResponseEntity<?> active(@PathVariable Long id) {
-		if (id == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
-		}	
-		GenericUser user = userService.findById(id);
-		if (user == null) {
-			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
-		}
-		user = userService.setActive(user, true);
-		return new ResponseEntity<Boolean>(user.getActive(), HttpStatus.OK);
+        if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+        GenericUser user = userService.findById(id);
+        if (user == null) {
+            return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
+        }
+        user = userService.setActive(user, true);
+        return new ResponseEntity<Boolean>(user.getActive(), HttpStatus.OK);
     }
 
     @PutMapping("/{id}/inactive")
     public ResponseEntity<?> inactive(@PathVariable Long id) {
-		if (id == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
-		}	
-		GenericUser user = userService.findById(id);
-		if (user == null) {
-			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
-		}
-		user = userService.setActive(user, false);
-		return new ResponseEntity<Boolean>(user.getActive(), HttpStatus.OK);
+        if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+        GenericUser user = userService.findById(id);
+        if (user == null) {
+            return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
+        }
+        user = userService.setActive(user, false);
+        return new ResponseEntity<Boolean>(user.getActive(), HttpStatus.OK);
     }
 
     @PostMapping("/{id}/note")
@@ -177,4 +184,6 @@ public class UserController {
 
         return new ResponseEntity<>(notes, HttpStatus.OK);
     }
+
+
 }
