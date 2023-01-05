@@ -22,4 +22,13 @@ public interface UserService {
      * @return List of users. Can be empty.
      */
     List<GenericUser> findByRole(String role);
+
+    public static final String ROLE_ADMIN = "admin";
+    public static final String ROLE_PASSENGER = "passenger";
+    public static final String ROLE_DRIVER = "driver";
+
+
+    boolean isAdmin(GenericUser user);
+    boolean isPassenger(GenericUser user);
+    boolean isDriver(GenericUser user);
 }

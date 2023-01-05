@@ -48,6 +48,7 @@ import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.GenericUser;
+import com.shuttle.user.UserService;
 import com.shuttle.user.dto.UserDTO;
 import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
 import com.shuttle.vehicle.vehicleType.VehicleType;
@@ -73,6 +74,8 @@ public class RideController {
     private IPassengerService passengerService;
     @Autowired
     private IPanicService panicService;
+    @Autowired
+    private UserService userService;
 
     /**
      * DTO Mapper function.
@@ -334,7 +337,7 @@ public class RideController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('passenger')")
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger')")
     @GetMapping("/passenger/{passengerId}/active")
     public ResponseEntity<?> getActiveRideByPassenger(@PathVariable Long passengerId) {
         if (passengerId == null) {
@@ -346,14 +349,21 @@ public class RideController {
             return new ResponseEntity<RESTError>(new RESTError("Passenger not found."), HttpStatus.NOT_FOUND);
         }
 
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        if (userService.isAdmin(user)) {
+	    } else if (userService.isPassenger(user)) {
+            if (user.getId() != passengerId) {
+                return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+
         Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
         if (ride == null) {
             return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
-        } else {
-            return new ResponseEntity<>(to(ride), HttpStatus.OK);
         }
-
-        // return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+        
+        return new ResponseEntity<>(to(ride), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
