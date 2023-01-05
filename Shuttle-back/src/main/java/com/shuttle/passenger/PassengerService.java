@@ -72,8 +72,7 @@ public class PassengerService implements IPassengerService{
 	    newPassenger = passengerRepository.save(newPassenger);
 	    tokenRepository.save(token);
 	    
-		String uploadDir = "user-photos/";
-        FileUploadUtil.saveFile(uploadDir, newPassenger.getProfilePictureName(), passengerDTO.getProfilePicture());
+        FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, newPassenger.getProfilePictureName(), passengerDTO.getProfilePicture());
         
 	    emailService.sendVerificationEmail(newPassenger, "http://localhost:8080/api/passenger/verify?token=" + token.getToken());	
 	    return new PassengerDTO(newPassenger);
@@ -127,9 +126,9 @@ public class PassengerService implements IPassengerService{
 	@Scheduled(fixedDelay = 1000 * 60 * 60)
 	@Transactional
 	public void deleteUnverified() {
-		System.out.println("Num of users" + passengerRepository.findAll().size());
+		System.out.println("Num of users previuos" + passengerRepository.findAll().size());
 		passengerRepository.deleteByExpiredToken();
-		System.out.println("Num of users" + passengerRepository.findAll().size());;
+		System.out.println("Num of users afterwards" + passengerRepository.findAll().size());;
 	}
 
 

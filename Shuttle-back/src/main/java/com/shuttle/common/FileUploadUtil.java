@@ -14,6 +14,8 @@ import javax.imageio.ImageIO;
 import com.shuttle.common.exception.InvalidBase64Exception;
 
 public class FileUploadUtil {
+	public final static String profilePictureUploadDir = "user-photos/";
+	
 	public static void saveFile(String uploadDir, String fileName, String imageBase64) throws IOException , InvalidBase64Exception{
         Path uploadPath = Paths.get(uploadDir);
          
@@ -41,6 +43,10 @@ public class FileUploadUtil {
           .encodeToString(fileContent);
 
 		return base64;
+	}
+	
+	public static String getDefaultImageBase64() throws IOException {
+		return getImageBase64(profilePictureUploadDir, "default.png");
 	}
 
 }
