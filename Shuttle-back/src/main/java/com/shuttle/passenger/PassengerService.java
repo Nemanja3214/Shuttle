@@ -1,5 +1,5 @@
 package com.shuttle.passenger;
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,7 +14,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.security.IRoleRepository;
 import com.shuttle.security.Role;
@@ -46,12 +48,10 @@ public class PassengerService implements IPassengerService{
 	private IRoleRepository roleRepository;
 	
 	@Override
-	public PassengerDTO register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException, EmailAlreadyUsedException {
-		Boolean b = passengerRepository.existsByEmail(passengerDTO.email);
+	public PassengerDTO register(PassengerDTO passengerDTO, MultipartFile picture) throws MessagingException, EmailAlreadyUsedException, IOException {
 		if(passengerRepository.existsByEmail(passengerDTO.email)) {
 			throw new EmailAlreadyUsedException();
 		}
-		
 		Passenger newPassenger = PassengerDTO.from(passengerDTO);
 		newPassenger.setActive(false);
 		newPassenger.setBlocked(false);
@@ -70,6 +70,9 @@ public class PassengerService implements IPassengerService{
 	     
 	    newPassenger = passengerRepository.save(newPassenger);
 	    tokenRepository.save(token);
+	    
+		String uploadDir = "user-photos/" + newPassenger.getId();
+        FileUploadUtil.saveFile(uploadDir, passengerDTO.getProfilePicture(), picture);
 	     
 	    emailService.sendVerificationEmail(newPassenger, "http://localhost:8080/api/passenger/verify?token=" + token.getToken());	
 	    return new PassengerDTO(newPassenger);

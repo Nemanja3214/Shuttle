@@ -1,20 +1,26 @@
 package com.shuttle.passenger;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.shuttle.common.exception.EmailAlreadyUsedException;
@@ -25,6 +31,11 @@ import com.shuttle.user.email.IEmailService;
 import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
 
+class Desc{
+	public String desc;
+	public String title;
+}
+
 @RestController
 public class PassengerController {
 	@Autowired
@@ -33,39 +44,27 @@ public class PassengerController {
 	@Autowired
 	IPassengerService passengerService;
 	
-	@PostMapping("/api/passenger")
-	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
+	@RequestMapping(value = "/api/passenger",method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+	public ResponseEntity<?> create(@RequestPart("passengerDTO") PassengerDTO dto, @RequestPart("picture") MultipartFile picture) {
 		try {
-			dto = passengerService.register(dto);
+			dto = passengerService.register(dto, picture);
 		} catch (UnsupportedEncodingException e) {
 			return ResponseEntity.badRequest().body("Bad encoding");
 		} catch (MessagingException e) {
 			return ResponseEntity.badRequest().body("Failed to send mail");
 		} catch (EmailAlreadyUsedException e) {
 			return ResponseEntity.badRequest().body("Email is already used");
+		} catch (IOException e) {
+			return ResponseEntity.internalServerError().body("Couldn't save image");
 		}
 		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
 	
-//	TODO delete
-	@GetMapping("/api/passenger/send")
-	public ResponseEntity<?> create() {
-		try {
-			PassengerDTO dto = new PassengerDTO();
-			dto.setEmail("nemanja.majstorovic3214@gmail.com");
-			dto.setName("Nemanja");
-			dto.setPassword("asd");
-			passengerService.register(dto);
-		} catch (UnsupportedEncodingException e) {
-			return ResponseEntity.badRequest().body("Bad encoding");
-		} catch (MessagingException e) {
-			return ResponseEntity.badRequest().body("Failed to send mail");
-		} catch (EmailAlreadyUsedException e) {
-			return ResponseEntity.badRequest().body("Email is already used");
-		}
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-	
+//
+//	@RequestMapping(value = "/api/passenger1",method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+//	public ResponseEntity<?> dummy(@RequestPart MultipartFile picture, @RequestPart Desc desc) {
+//		return new ResponseEntity<>("proslo", HttpStatus.OK);
+//	}
 
 	@GetMapping("/api/passenger/verify")
 	public RedirectView verifyUser(@RequestParam("token") String code) {
