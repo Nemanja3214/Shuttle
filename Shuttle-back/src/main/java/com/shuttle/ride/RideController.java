@@ -465,7 +465,6 @@ public class RideController {
                 return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
             }	
 	    } else if (userService.isDriver(user)) {
-	    	System.out.println(ride.getDriver().getId() + " " + user.getId());
             if (!ride.getDriver().getId().equals(user.getId())) {
             	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
             }
@@ -488,6 +487,40 @@ public class RideController {
         return new ResponseEntity<PanicDTO>(dto, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver')")
+    @PutMapping("/{id}/start")
+    public ResponseEntity<?> startRide(@PathVariable Long id) {
+    	if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+
+        Ride ride = rideService.findById(id);
+        if (ride == null) {
+        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        if (ride.getStatus() != Ride.Status.Accepted) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status ACCEPTED!"), HttpStatus.BAD_REQUEST);
+        }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isDriver(user)) {
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+
+        // TODO: What's the purpose of this endpoint?
+        //rideService.acceptRide(ride);
+        //driverService.setAvailable(ride.getDriver(), false);
+        //notifyRidePassengers(ride);
+        //notifyRideDriver(ride);
+        
+        RideDTO dto = to(ride);
+        dto.setStatus(Ride.Status.Started);
+        return new ResponseEntity<RideDTO>(dto, HttpStatus.OK);
+    }
+    
     @PutMapping("/{id}/accept")
     public ResponseEntity<?> acceptRide(@PathVariable Long id) {
         if (id == null) {

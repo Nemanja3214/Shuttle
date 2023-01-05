@@ -121,12 +121,6 @@ public class UserServiceImpl implements UserService {
     			return true;
     	}
     	return false;
-//        List<Role> roles = roleService.findByName(ROLE_ADMIN);
-//        if (roles.size() == 0) {
-//            return false;
-//        }
-//        Role r = roles.get(0);
-//        return (user.getRoles().contains(r));
     }
 
     @Override
@@ -136,12 +130,6 @@ public class UserServiceImpl implements UserService {
     			return true;
     	}
     	return false;
-//        List<Role> roles = roleService.findByName(ROLE_PASSENGER);
-//        if (roles.size() == 0) {
-//            return false;
-//        }
-//        Role r = roles.get(0);
-//        return (user.getRoles().contains(r));
     }
 
     @Override
@@ -151,11 +139,5 @@ public class UserServiceImpl implements UserService {
     			return true;
     	}
     	return false;
-//        List<Role> roles = roleService.findByName(ROLE_DRIVER);
-//        if (roles.size() == 0) {
-//            return false;
-//        }
-//        Role r = roles.get(0);
-//        return (user.getRoles().contains(r));
     }
 }
