@@ -410,6 +410,7 @@ public class RideController {
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @PutMapping("/{id}/withdraw")
     public ResponseEntity<?> withdrawRide(@PathVariable Long id) {
         if (id == null) {
@@ -418,8 +419,16 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
         }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        if (userService.isPassenger(user)) {
+	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }	
+	    }
 
         if (ride.getStatus() != Status.Pending) {
             return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't pending."), HttpStatus.BAD_REQUEST);
@@ -427,8 +436,7 @@ public class RideController {
 
         this.rideService.cancelRide(ride);
 
-        // ride.getDriver() can be null if the ride is scheduled in the future, before a driver
-        // has been assigned.
+        // ride.getDriver() can be null if the ride is scheduled in the future, before a driver has been assigned.
         if (ride.getDriver() != null) {
             driverService.setAvailable(ride.getDriver(), true);
             notifyRideDriver(ride);
