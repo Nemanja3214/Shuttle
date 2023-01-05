@@ -116,31 +116,46 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isAdmin(GenericUser user) {
-        List<Role> roles = roleService.findByName(ROLE_ADMIN);
-        if (roles.size() == 0) {
-            return false;
-        }
-        Role r = roles.get(0);
-        return (user.getRoles().contains(r));
+    	for (Role r : user.getRoles()) {
+    		if (r.getName().equalsIgnoreCase(ROLE_ADMIN))
+    			return true;
+    	}
+    	return false;
+//        List<Role> roles = roleService.findByName(ROLE_ADMIN);
+//        if (roles.size() == 0) {
+//            return false;
+//        }
+//        Role r = roles.get(0);
+//        return (user.getRoles().contains(r));
     }
 
     @Override
     public boolean isPassenger(GenericUser user) {
-        List<Role> roles = roleService.findByName(ROLE_ADMIN);
-        if (roles.size() == 0) {
-            return false;
-        }
-        Role r = roles.get(0);
-        return (user.getRoles().contains(r));
+    	for (Role r : user.getRoles()) {
+    		if (r.getName().equalsIgnoreCase(ROLE_PASSENGER))
+    			return true;
+    	}
+    	return false;
+//        List<Role> roles = roleService.findByName(ROLE_PASSENGER);
+//        if (roles.size() == 0) {
+//            return false;
+//        }
+//        Role r = roles.get(0);
+//        return (user.getRoles().contains(r));
     }
 
     @Override
     public boolean isDriver(GenericUser user) {
-        List<Role> roles = roleService.findByName(ROLE_ADMIN);
-        if (roles.size() == 0) {
-            return false;
-        }
-        Role r = roles.get(0);
-        return (user.getRoles().contains(r));
+    	for (Role r : user.getRoles()) {
+    		if (r.getName().equalsIgnoreCase(ROLE_DRIVER))
+    			return true;
+    	}
+    	return false;
+//        List<Role> roles = roleService.findByName(ROLE_DRIVER);
+//        if (roles.size() == 0) {
+//            return false;
+//        }
+//        Role r = roles.get(0);
+//        return (user.getRoles().contains(r));
     }
 }

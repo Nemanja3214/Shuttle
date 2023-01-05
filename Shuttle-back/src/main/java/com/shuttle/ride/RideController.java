@@ -47,6 +47,7 @@ import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.security.Role;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
 import com.shuttle.user.dto.UserDTO;
@@ -356,13 +357,13 @@ public class RideController {
         if (passengerId == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         final Passenger passenger = passengerService.findById(passengerId);
         if (passenger == null) {
             return new ResponseEntity<RESTError>(new RESTError("Passenger not found."), HttpStatus.NOT_FOUND);
         }
-
-        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         if (userService.isAdmin(user)) {
 	    } else if (userService.isPassenger(user)) {
@@ -379,9 +380,34 @@ public class RideController {
         return new ResponseEntity<>(to(ride), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RideDTO> getRide(@PathVariable long id) {
-        return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    @GetMapping("/{rideId}")
+    public ResponseEntity<?> getRide(@PathVariable Long rideId) {
+    	System.out.println("AAAAAAAAAAAAAAAAAAAAAAA");
+    	if (rideId == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+
+        final Ride ride = rideService.findById(rideId);
+        if (ride == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        if (userService.isAdmin(user)) {	
+	    } else if (userService.isPassenger(user)) {
+	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }	
+	    } else if (userService.isDriver(user)) {
+	    	System.out.println(ride.getDriver().getId() + " " + user.getId());
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+       
+        return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
     @PutMapping("/{id}/withdraw")
