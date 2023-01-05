@@ -320,21 +320,34 @@ public class RideController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @GetMapping("/driver/{driverId}/active")
-    public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId) {
+    public ResponseEntity<?> getActiveRideByDriver(@PathVariable Long driverId) {
+    	if (driverId == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+    	
         final Driver driver = driverService.get(driverId);
 
         if (driver == null) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        } else {
-            Ride ride = rideService.findCurrentRideByDriver(driver);
+            return new ResponseEntity<>(new RESTError("Driver not found."), HttpStatus.NOT_FOUND);
+        } 
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
-            if (ride == null) {
-                return new ResponseEntity<>(null, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(to(ride), HttpStatus.OK);
+        if (userService.isAdmin(user)) {
+	    } else if (userService.isDriver(user)) {
+            if (user.getId() != driverId) {
+                return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
             }
         }
+            
+       Ride ride = rideService.findCurrentRideByDriver(driver);
+       if (ride == null) {
+           return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+       }
+       
+       return new ResponseEntity<>(to(ride), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('admin', 'passenger')")
