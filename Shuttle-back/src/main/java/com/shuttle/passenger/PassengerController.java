@@ -52,7 +52,7 @@ public class PassengerController {
 		} catch (EmailAlreadyUsedException e) {
 			return ResponseEntity.badRequest().body("Email is already used");
 		} catch (IOException e) {
-			return ResponseEntity.internalServerError().body("Couldn't save image");
+			return ResponseEntity.internalServerError().body("Couldn't save image, using default image instead");
 		} catch (InvalidBase64Exception e) {
 			return ResponseEntity.badRequest().body("Invalid base64 provided");
 		}
