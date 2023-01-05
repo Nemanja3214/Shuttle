@@ -14,13 +14,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.common.exception.InvalidBase64Exception;
-import com.shuttle.security.IRoleRepository;
 import com.shuttle.security.Role;
+import com.shuttle.security.RoleService;
 import com.shuttle.security.jwt.JwtTokenUtil;
 import com.shuttle.user.email.IEmailService;
 import com.shuttle.verificationToken.IVerificationRepository;
@@ -46,27 +45,17 @@ public class PassengerService implements IPassengerService{
 	private JwtTokenUtil jwtTokenUtil;
 	
 	@Autowired
-	private IRoleRepository roleRepository;
+	private RoleService roleService;
 	
 	@Override
 	public PassengerDTO register(PassengerDTO passengerDTO) throws MessagingException, EmailAlreadyUsedException, IOException, InvalidBase64Exception {
 		if(passengerRepository.existsByEmail(passengerDTO.email)) {
 			throw new EmailAlreadyUsedException();
 		}
-		Passenger newPassenger = PassengerDTO.from(passengerDTO);
-		newPassenger.setActive(false);
-		newPassenger.setBlocked(false);
-		newPassenger.setEnabled(false);
-		newPassenger.setFinance((double)0);
-		List<Role> passengerRole = roleRepository.findByName("passenger");
-		newPassenger.setRoles(passengerRole);
-		
-		String encodedPassword = passwordEncoder.encode(passengerDTO.password);
-		newPassenger.setPassword(encodedPassword);
+		Passenger newPassenger = createNewPassenger(passengerDTO);
 	     
-		VerificationToken token = createToken();
+		VerificationToken token = generateToken();
 	    
-	    newPassenger.setEnabled(false);
 	    token.setPassenger(newPassenger);
 	     
 	    newPassenger = passengerRepository.save(newPassenger);
@@ -79,7 +68,22 @@ public class PassengerService implements IPassengerService{
 	}
 
 
-	private VerificationToken createToken() {
+	private Passenger createNewPassenger(PassengerDTO passengerDTO) {
+		Passenger newPassenger = PassengerDTO.from(passengerDTO);
+		newPassenger.setActive(false);
+		newPassenger.setBlocked(false);
+		newPassenger.setEnabled(false);
+		newPassenger.setFinance((double)0);
+		List<Role> passengerRole = roleService.findByName("passenger");
+		newPassenger.setRoles(passengerRole);
+		
+		String encodedPassword = passwordEncoder.encode(passengerDTO.password);
+		newPassenger.setPassword(encodedPassword);
+		return newPassenger;
+	}
+
+
+	private VerificationToken generateToken() {
 		VerificationToken token = new VerificationToken();
 		
 	    String randomCode = makeRandomString(64);
@@ -126,9 +130,9 @@ public class PassengerService implements IPassengerService{
 	@Scheduled(fixedDelay = 1000 * 60 * 60)
 	@Transactional
 	public void deleteUnverified() {
-		System.out.println("Num of users previuos" + passengerRepository.findAll().size());
+		System.out.println("Num of users previuos: " + passengerRepository.findAll().size());
 		passengerRepository.deleteByExpiredToken();
-		System.out.println("Num of users afterwards" + passengerRepository.findAll().size());;
+		System.out.println("Num of users afterwards: " + passengerRepository.findAll().size());;
 	}
 
 
