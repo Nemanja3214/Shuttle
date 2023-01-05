@@ -37,7 +37,12 @@ public class FileUploadUtil {
 	public static String getImageBase64(String uploadDir,String pictureName) throws IOException {
 		File inputFile = new File(uploadDir + pictureName);
 		
-		byte[] fileContent = Files.readAllBytes(Paths.get(inputFile.getPath()));
+		byte[] fileContent;
+		try {
+			fileContent = Files.readAllBytes(Paths.get(inputFile.getPath()));
+		} catch (IOException e) {
+			return getDefaultImageBase64();
+		}
         String base64 = Base64
           .getEncoder()
           .encodeToString(fileContent);
