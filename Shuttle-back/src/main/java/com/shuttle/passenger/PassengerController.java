@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
@@ -37,6 +40,7 @@ class Desc{
 }
 
 @RestController
+@RequestMapping("/api/passenger")
 public class PassengerController {
 	@Autowired
 	IEmailService emailService;
@@ -44,7 +48,7 @@ public class PassengerController {
 	@Autowired
 	IPassengerService passengerService;
 	
-	@RequestMapping(value = "/api/passenger",method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+	@RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
 	public ResponseEntity<?> create(@RequestPart("passengerDTO") PassengerDTO dto, @RequestPart("picture") MultipartFile picture) {
 		try {
 			dto = passengerService.register(dto, picture);
@@ -65,8 +69,13 @@ public class PassengerController {
 //	public ResponseEntity<?> dummy(@RequestPart MultipartFile picture, @RequestPart Desc desc) {
 //		return new ResponseEntity<>("proslo", HttpStatus.OK);
 //	}
+	
+	@RequestMapping(value = "/dummy",method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+	public ResponseEntity<?> dummy(@RequestPart("passengerDTO") PassengerDTO stringDTO) {
+		return new ResponseEntity<>("proslo", HttpStatus.OK);
+	}
 
-	@GetMapping("/api/passenger/verify")
+	@GetMapping("/verify")
 	public RedirectView verifyUser(@RequestParam("token") String code) {
 		RedirectView redirectView = new RedirectView();
 	    if (passengerService.verify(code)) {
@@ -78,7 +87,7 @@ public class PassengerController {
 	    }
 	}
 
-	@GetMapping("/api/passenger")
+	@GetMapping
 	public ResponseEntity<PassengerPageDTO> getPaginated(@PathParam("page") int page, @PathParam("size") int size) {
 		List<Passenger> passengersMock = new ArrayList<>();
 //		Passenger p = new Passenger();
@@ -95,7 +104,7 @@ public class PassengerController {
 		return new ResponseEntity<>(new PassengerPageDTO(passengersMock), HttpStatus.OK);
 	}
 
-	@GetMapping("/api/passenger/{id}")
+	@GetMapping("/{id}")
 	public ResponseEntity<PassengerDTO> getDetails(@PathVariable("id") Long id) {
 		Passenger p = new Passenger();
 //		p.setId(Long.valueOf(0));
@@ -110,12 +119,12 @@ public class PassengerController {
 		return new ResponseEntity<>(new PassengerDTO(p), HttpStatus.OK);
 	}
 
-	@GetMapping("/api/passenger/activate/{activationId}")
+	@GetMapping("/activate/{activationId}")
 	public ResponseEntity<Void> activate(@PathVariable("activationId") Long activationId) {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	@PutMapping("/api/passenger/{id}")
+	@PutMapping("/{id}")
 	public ResponseEntity<PassengerDTO> update(@RequestBody Passenger newData, @PathVariable("id") Long id) {
 		Passenger passengerFromDb = new Passenger();
 //		passengerFromDb.setId(id);
@@ -145,7 +154,7 @@ public class PassengerController {
 		return new ResponseEntity<PassengerDTO>(new PassengerDTO(passengerFromDb), HttpStatus.OK);
 	}
 
-	@GetMapping("/api/passenger/{id}/ride")
+	@GetMapping("/{id}/ride")
 	public ResponseEntity<RidePageDTO> getRides(@PathVariable("id") Long passengerId, @PathParam("page") int page,
 			@PathParam("size") int size, @PathParam("sort") String sort, @PathParam("from") String from,
 			@PathParam("to") String to) {
