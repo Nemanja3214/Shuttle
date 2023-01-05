@@ -358,13 +358,13 @@ public class RideController {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
         
-        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         final Passenger passenger = passengerService.findById(passengerId);
         if (passenger == null) {
             return new ResponseEntity<RESTError>(new RESTError("Passenger not found."), HttpStatus.NOT_FOUND);
         }
 
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isAdmin(user)) {
 	    } else if (userService.isPassenger(user)) {
             if (user.getId() != passengerId) {
@@ -447,6 +447,7 @@ public class RideController {
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping("/{id}/panic")
     public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody String reason) {   
         if (id == null) {
@@ -457,21 +458,28 @@ public class RideController {
         if (ride == null) {
             return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
         }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isPassenger(user)) {
+	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }	
+	    } else if (userService.isDriver(user)) {
+	    	System.out.println(ride.getDriver().getId() + " " + user.getId());
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
 
         rideService.cancelRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
         
-        GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         Panic p = panicService.add(ride, user, reason);
         PanicDTO dto = new PanicDTO();
         dto.setReason(p.getReason());
         dto.setTime(p.getTime().toString());
         dto.setId(p.getId());
         dto.setRide(to(ride));
-
-        //
-        //
-
         dto.setUser(new UserDTO(p.getUser()));
 
         notifyRideDriver(ride);
