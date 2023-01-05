@@ -66,9 +66,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refreshtoken")) {
                 allowForRefreshToken(ex, request,authToken);
             }
-
-            chain.doFilter(request, response);
         }
+        chain.doFilter(request, response);
     }
         private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request,String authToken) {
 
