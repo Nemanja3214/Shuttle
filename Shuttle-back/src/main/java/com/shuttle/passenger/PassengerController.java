@@ -60,10 +60,10 @@ public class PassengerController {
 	public RedirectView verifyUser(@RequestParam("token") String code) {
 		RedirectView redirectView = new RedirectView();
 	    if (passengerService.verify(code)) {
-		    redirectView.setUrl("http://localhost:8080/index.html");
+		    redirectView.setUrl("http://localhost:4200/login");
 		    return redirectView;
 	    } else {
-	    	redirectView.setUrl("http://localhost:8080/bad-request.html");
+	    	redirectView.setUrl("http://localhost:4200/bad-request");
 		    return redirectView;
 	    }
 	}
