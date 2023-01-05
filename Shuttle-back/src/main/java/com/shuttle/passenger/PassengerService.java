@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
+import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.security.IRoleRepository;
 import com.shuttle.security.Role;
 import com.shuttle.security.jwt.JwtTokenUtil;
@@ -48,7 +49,7 @@ public class PassengerService implements IPassengerService{
 	private IRoleRepository roleRepository;
 	
 	@Override
-	public PassengerDTO register(PassengerDTO passengerDTO, MultipartFile picture) throws MessagingException, EmailAlreadyUsedException, IOException {
+	public PassengerDTO register(PassengerDTO passengerDTO) throws MessagingException, EmailAlreadyUsedException, IOException, InvalidBase64Exception {
 		if(passengerRepository.existsByEmail(passengerDTO.email)) {
 			throw new EmailAlreadyUsedException();
 		}
@@ -71,13 +72,13 @@ public class PassengerService implements IPassengerService{
 	    newPassenger = passengerRepository.save(newPassenger);
 	    tokenRepository.save(token);
 	    
-		String uploadDir = "user-photos/" + newPassenger.getId();
-        FileUploadUtil.saveFile(uploadDir, passengerDTO.getProfilePicture(), picture);
-	     
+		String uploadDir = "user-photos/";
+        FileUploadUtil.saveFile(uploadDir, newPassenger.getProfilePictureName(), passengerDTO.getProfilePicture());
+        
 	    emailService.sendVerificationEmail(newPassenger, "http://localhost:8080/api/passenger/verify?token=" + token.getToken());	
 	    return new PassengerDTO(newPassenger);
-		
 	}
+
 
 	private VerificationToken createToken() {
 		VerificationToken token = new VerificationToken();

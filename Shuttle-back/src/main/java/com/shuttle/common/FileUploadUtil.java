@@ -1,28 +1,46 @@
 package com.shuttle.common;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 
-import org.springframework.web.multipart.MultipartFile;
+import javax.imageio.ImageIO;
+
+import com.shuttle.common.exception.InvalidBase64Exception;
 
 public class FileUploadUtil {
-	public static void saveFile(String uploadDir, String fileName, MultipartFile multipartFile) throws IOException {
+	public static void saveFile(String uploadDir, String fileName, String imageBase64) throws IOException , InvalidBase64Exception{
         Path uploadPath = Paths.get(uploadDir);
          
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
          
-        try (InputStream inputStream = multipartFile.getInputStream()) {
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException ioe) {        
-            throw new IOException("Could not save image file: " + fileName, ioe);
-        }      
+        BufferedImage image = null;
+        byte[] imageByte = Base64.getDecoder().decode(imageBase64);
+        image = ImageIO.read(new ByteArrayInputStream(imageByte));
+        
+        File outputfile = new File(uploadDir + fileName);
+        if(image == null) {
+        	throw new InvalidBase64Exception();
+        }
+        ImageIO.write(image, "png", outputfile);
     }
+
+	public static String getImageBase64(String uploadDir,String pictureName) throws IOException {
+		File inputFile = new File(uploadDir + pictureName);
+		
+		byte[] fileContent = Files.readAllBytes(Paths.get(inputFile.getPath()));
+        String base64 = Base64
+          .getEncoder()
+          .encodeToString(fileContent);
+
+		return base64;
+	}
 
 }

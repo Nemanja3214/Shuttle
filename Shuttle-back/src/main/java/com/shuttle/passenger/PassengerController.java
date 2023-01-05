@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
+import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
 import com.shuttle.user.email.IEmailService;
@@ -48,10 +49,10 @@ public class PassengerController {
 	@Autowired
 	IPassengerService passengerService;
 	
-	@RequestMapping(method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public ResponseEntity<?> create(@RequestPart("passengerDTO") PassengerDTO dto, @RequestPart("picture") MultipartFile picture) {
+	@PostMapping
+	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
 		try {
-			dto = passengerService.register(dto, picture);
+			dto = passengerService.register(dto);
 		} catch (UnsupportedEncodingException e) {
 			return ResponseEntity.badRequest().body("Bad encoding");
 		} catch (MessagingException e) {
@@ -60,15 +61,11 @@ public class PassengerController {
 			return ResponseEntity.badRequest().body("Email is already used");
 		} catch (IOException e) {
 			return ResponseEntity.internalServerError().body("Couldn't save image");
+		} catch (InvalidBase64Exception e) {
+			return ResponseEntity.badRequest().body("Invalid base64 provided");
 		}
 		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
-	
-//
-//	@RequestMapping(value = "/api/passenger1",method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-//	public ResponseEntity<?> dummy(@RequestPart MultipartFile picture, @RequestPart Desc desc) {
-//		return new ResponseEntity<>("proslo", HttpStatus.OK);
-//	}
 	
 	@RequestMapping(value = "/dummy",method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
 	public ResponseEntity<?> dummy(@RequestPart("passengerDTO") PassengerDTO stringDTO) {

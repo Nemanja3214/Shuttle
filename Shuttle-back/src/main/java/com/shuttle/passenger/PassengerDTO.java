@@ -31,7 +31,7 @@ public class PassengerDTO {
 		p.setId(dto.getId());
 		p.setName(dto.getName());
 		p.setSurname(dto.getSurname());
-		p.setProfilePicture(dto.getProfilePicture());
+		p.setProfilePicture(p.getProfilePicture());
 		p.setTelephoneNumber(dto.getTelephoneNumber());
 		p.setEmail(dto.getEmail());
 		p.setAddress(dto.getAddress());
