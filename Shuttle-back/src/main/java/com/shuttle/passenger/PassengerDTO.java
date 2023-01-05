@@ -1,5 +1,8 @@
 package com.shuttle.passenger;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -38,4 +41,34 @@ public class PassengerDTO {
 		p.setPassword(dto.getPassword());
 		return p;
 	}
+	
+	public boolean isInvalid() {
+		return !isEmailValid() || hasEmptyField();
+	}
+	
+	public boolean hasEmptyField() {
+		return this.name.equals("") || 
+				this.surname.equals("") ||
+				this.telephoneNumber.equals("") ||
+				this.email.equals("") ||
+				this.address.equals("") ||
+				this.password.equals("");
+	}
+	
+	private boolean isEmailValid() {
+		String regex = "^[A-Za-z0-9+_.-]+@(.+)$";  
+		Pattern pattern = Pattern.compile(regex);  	
+		Matcher matcher = pattern.matcher(email);  
+		return matcher.matches();
+	}
+	
+//	private boolean isPhoneValid() {
+//		String regex = "^\\+(?:[0-9] ?){6,14}[0-9]$";
+//		Pattern pattern = Pattern.compile(regex);  	
+//		Matcher matcher = pattern.matcher(email);  
+//		return matcher.matches();
+//	}
+	
+	
+	
 }

@@ -42,6 +42,10 @@ public class PassengerController {
 	
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
+		if(dto.isInvalid()) {
+			return ResponseEntity.badRequest().body("Invalid user data sent");
+		}
+		
 		try {
 			dto = passengerService.register(dto);
 		} catch (UnsupportedEncodingException e) {
