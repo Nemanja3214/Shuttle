@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
-import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.security.Role;
 import com.shuttle.security.RoleService;
 import com.shuttle.security.jwt.JwtTokenUtil;
@@ -48,7 +47,7 @@ public class PassengerService implements IPassengerService{
 	private RoleService roleService;
 	
 	@Override
-	public PassengerDTO register(PassengerDTO passengerDTO) throws MessagingException, EmailAlreadyUsedException, IOException, InvalidBase64Exception {
+	public PassengerDTO register(PassengerDTO passengerDTO) throws MessagingException, EmailAlreadyUsedException, IOException{
 		if(passengerRepository.existsByEmail(passengerDTO.email)) {
 			throw new EmailAlreadyUsedException();
 		}

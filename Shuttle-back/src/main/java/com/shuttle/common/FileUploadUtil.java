@@ -11,12 +11,10 @@ import java.util.Base64;
 
 import javax.imageio.ImageIO;
 
-import com.shuttle.common.exception.InvalidBase64Exception;
-
 public class FileUploadUtil {
 	public final static String profilePictureUploadDir = "user-photos/";
 	
-	public static void saveFile(String uploadDir, String fileName, String imageBase64) throws IOException , InvalidBase64Exception{
+	public static void saveFile(String uploadDir, String fileName, String imageBase64) throws IOException {
         Path uploadPath = Paths.get(uploadDir);
          
         if (!Files.exists(uploadPath)) {
@@ -29,7 +27,7 @@ public class FileUploadUtil {
         
         File outputfile = new File(uploadDir + fileName);
         if(image == null) {
-        	throw new InvalidBase64Exception();
+        	return;
         }
         ImageIO.write(image, "png", outputfile);
     }

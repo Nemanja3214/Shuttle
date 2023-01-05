@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.shuttle.common.exception.EmailAlreadyUsedException;
-import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
 import com.shuttle.user.email.IEmailService;
@@ -53,8 +52,6 @@ public class PassengerController {
 			return ResponseEntity.badRequest().body("Email is already used");
 		} catch (IOException e) {
 			return ResponseEntity.internalServerError().body("Couldn't save image, using default image instead");
-		} catch (InvalidBase64Exception e) {
-			return ResponseEntity.badRequest().body("Invalid base64 provided");
 		}
 		return new ResponseEntity<>(dto, HttpStatus.OK);
 	}
