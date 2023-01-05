@@ -279,10 +279,16 @@ public class RideController {
         }
     }
 
+    @PreAuthorize("hasRole('passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
         try {
-            //System.out.println(((GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getEmail());
+            final Passenger p = (Passenger)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+            if (rideService.findActiveOrPendingByPassenger(p) != null) {
+                return new ResponseEntity<RESTError>(new RESTError("Cannot create a ride while you have one already pending!"), HttpStatus.BAD_REQUEST);
+            }
+
             final boolean forFuture = createRideDTO.getHour() != null && createRideDTO.getMinute() != null;
             final Driver driver = rideService.findMostSuitableDriver(createRideDTO, forFuture);
             final Ride ride = from(createRideDTO, driver);
@@ -328,6 +334,7 @@ public class RideController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @GetMapping("/passenger/{passengerId}/active")
     public ResponseEntity<?> getActiveRideByPassenger(@PathVariable Long passengerId) {
         if (passengerId == null) {
@@ -341,7 +348,7 @@ public class RideController {
 
         Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
         if (ride == null) {
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(to(ride), HttpStatus.OK);
         }
