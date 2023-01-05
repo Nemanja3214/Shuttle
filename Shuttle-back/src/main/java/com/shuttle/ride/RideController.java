@@ -282,7 +282,7 @@ public class RideController {
         }
     }
 
-    @PreAuthorize("hasRole('passenger')")
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
         try {
