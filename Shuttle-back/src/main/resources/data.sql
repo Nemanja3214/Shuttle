@@ -14,17 +14,17 @@ insert into role(name) values('admin');
 
 -- Elementary user data
 
-insert into generic_user(email, password, enabled, blocked, active) values ('bob@gmail.com', 'bob123', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('john@gmail.com', 'john123', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('troy@gmail.com', 'troy123', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('admin@gmail.com', 'admin', true, false, false);
+insert into generic_user(email, password, enabled, blocked, active, name) values ('bob@gmail.com', 'bob123', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', 'john123', true, false, false, 'John');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'troy123', true, false, false, 'Troy');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', 'admin', true, false, false, 'Admin');
 
-insert into generic_user(email, password, enabled, blocked, active) values ('driver1@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver2@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver3@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver4@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver5@gmail.com', '1234', true, false, false);
-insert into generic_user(email, password, enabled, blocked, active) values ('driver6@gmail.com', '1234', true, false, false);
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver1@gmail.com', '1234', true, false, false, 'DriverName_1');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver2@gmail.com', '1234', true, false, false, 'DriverName_2');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver3@gmail.com', '1234', true, false, false, 'DriverName_3');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver4@gmail.com', '1234', true, false, false, 'DriverName_4');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver5@gmail.com', '1234', true, false, false, 'DriverName_5');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver6@gmail.com', '1234', true, false, false, 'DriverName_6');
 
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);

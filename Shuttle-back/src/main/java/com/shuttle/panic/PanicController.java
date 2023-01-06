@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
+import com.shuttle.ride.RideController;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.dto.UserDTO;
+import com.shuttle.user.dto.UserDTONoPassword;
 
 
 @RestController
@@ -22,10 +24,11 @@ public class PanicController {
 	private IPanicService panicService;
 	
 	private PanicDTO from(Panic p) {
+		//System.out.println("[4][][]" + p.getUser());
 	    PanicDTO dto = new PanicDTO();
 	    dto.setId(p.getId());
-	    dto.setUser(new UserDTO(p.getUser()));
-	  	dto.setRide(new RideDTO()); // TODO: convert
+	    dto.setUser(new UserDTONoPassword(p.getUser()));
+	  	dto.setRide(RideController.to(p.getRide())); // TODO: convert
 	    dto.setTime(p.getTime().toString());
 	    dto.setReason(p.getReason());
 	    
