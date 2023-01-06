@@ -1,5 +1,7 @@
 package com.shuttle.user;
 
+
+import java.io.IOException;
 import com.shuttle.security.jwt.JwtTokenUtil;
 
 import java.time.LocalDateTime;
@@ -12,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.message.IMessageService;
@@ -33,6 +35,7 @@ import com.shuttle.message.Message;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
+import com.shuttle.security.jwt.JwtTokenUtil;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.cancellation.Cancellation;
@@ -221,4 +224,16 @@ public class UserController {
 
         return new ResponseEntity<>(notes, HttpStatus.OK);
     }
+    
+	@GetMapping("/img/{id}")
+	public ResponseEntity<?> getProfilePicture(@PathVariable int id){
+		try {
+			String picture = this.userService.getProfilePicture(id);
+			return new ResponseEntity<String>(picture, HttpStatus.OK);
+		} catch (NonExistantUserException e) {
+			return ResponseEntity.badRequest().body("User picture cannot be found");
+		} catch (IOException e) {
+			return ResponseEntity.internalServerError().body("Error saving picture");
+		}
+	}
 }

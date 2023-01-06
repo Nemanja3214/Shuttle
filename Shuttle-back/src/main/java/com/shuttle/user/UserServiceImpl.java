@@ -1,10 +1,8 @@
 package com.shuttle.user;
 
-import com.shuttle.security.RoleService;
-import com.shuttle.driver.Driver;
-import com.shuttle.security.Role;
-import com.shuttle.user.dto.UserDTO;
-import com.shuttle.workhours.IWorkHoursService;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,6 +10,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.common.FileUploadUtil;
+import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.driver.Driver;
+import com.shuttle.security.Role;
+import com.shuttle.security.RoleService;
+import com.shuttle.user.dto.UserDTO;
+import com.shuttle.workhours.IWorkHoursService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -104,6 +109,16 @@ public class UserServiceImpl implements UserService {
 		return user.getActive();
 	}
 
+	@Override
+	public String getProfilePicture(long id) throws NonExistantUserException, IOException {
+		Optional<GenericUser> user = this.userRepository.findById(id);
+		if(user.isEmpty()) {
+			throw new NonExistantUserException();
+		}
+		String result = FileUploadUtil.getImageBase64(FileUploadUtil.profilePictureUploadDir, user.get().getProfilePictureName());
+		return result;
+	}
+  
     @Override
     public List<GenericUser> findByRole(String role) {
         List<Role> roles = roleService.findByName(role);

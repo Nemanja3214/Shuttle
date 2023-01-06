@@ -33,6 +33,7 @@ public class GenericUser implements UserDetails {
     private List<Role> roles;
     private String name;
     private String surname;
+    @Transient
     private String profilePicture;
     private String telephoneNumber;
     @OneToMany(fetch = FetchType.EAGER)
@@ -52,12 +53,16 @@ public class GenericUser implements UserDetails {
     private String email;
     private String password;
     @Transient
-    private String jwt;
+    private String jwt;    
 
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles;
+    }
+    
+    public String getProfilePictureName() {
+    	return this.getId() == null ? null: Long.toString(this.id) + ".png";
     }
 
     @Override
