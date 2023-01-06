@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -42,7 +43,7 @@ public class DriverController {
 	@Autowired
 	private IWorkHoursService workHoursService;
 
-    @ExceptionHandler({ ExpiredJwtException.class })
+    @ExceptionHandler({ ExpiredJwtException.class, AuthenticationCredentialsNotFoundException.class })
     public ResponseEntity<?> handleException() {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }

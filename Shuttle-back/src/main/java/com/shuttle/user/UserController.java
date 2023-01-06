@@ -92,14 +92,22 @@ public class UserController {
 
     @PermitAll
     @PostMapping(value = "/refreshtoken")
-    public ResponseEntity<String> refreshtoken(@RequestBody String refreshToken) throws Exception {
+    public ResponseEntity<TokenDTO> refreshtoken(@RequestBody String refreshToken) throws Exception {
         // From the HttpRequest get the claims
+        refreshToken = refreshToken.replace("\"","");
+        refreshToken = refreshToken.replace("{","");
+        refreshToken = refreshToken.replace("}","");
+        refreshToken = refreshToken.substring(13).strip();
+        refreshToken = refreshToken.replace("\\","");
         String email = jwtTokenUtil.getEmailFromToken(refreshToken);
         GenericUser user = userService.findByEmail(email);
 
         if (jwtTokenUtil.validateToken(refreshToken, user)) {
             String token = jwtTokenUtil.generateToken(user.getId(), user.getEmail(), user.getAuthorities());
-            return new ResponseEntity<String>(token, HttpStatus.OK);
+            System.out.println("Refreshed token");
+            TokenDTO tokenDTO = new TokenDTO(token,refreshToken);
+            return new ResponseEntity<>(tokenDTO, HttpStatus.OK);
+
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
