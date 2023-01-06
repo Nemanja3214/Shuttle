@@ -161,6 +161,6 @@ public class PassengerService implements IPassengerService{
 	public void deleteUnverified() {
 		System.out.println("Num of users previuos: " + passengerRepository.findAll().size());
 		passengerRepository.deleteByExpiredToken();
-		System.out.println("Num of users afterwards: " + passengerRepository.findAll().size());;
+		System.out.println("Num of users afterwards: " + passengerRepository.findAll().size());
 	}
-
+}
