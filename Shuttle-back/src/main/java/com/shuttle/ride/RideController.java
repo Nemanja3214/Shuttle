@@ -47,7 +47,9 @@ import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.security.Role;
 import com.shuttle.user.GenericUser;
+import com.shuttle.user.UserService;
 import com.shuttle.user.dto.UserDTO;
 import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
 import com.shuttle.vehicle.vehicleType.VehicleType;
@@ -73,6 +75,8 @@ public class RideController {
     private IPassengerService passengerService;
     @Autowired
     private IPanicService panicService;
+    @Autowired
+    private UserService userService;
 
     /**
      * DTO Mapper function.
@@ -279,10 +283,16 @@ public class RideController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
         try {
-            //System.out.println(((GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal())).getEmail());
+            final Passenger p = (Passenger)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+            if (rideService.findActiveOrPendingByPassenger(p) != null) {
+                return new ResponseEntity<RESTError>(new RESTError("Cannot create a ride while you have one already pending!"), HttpStatus.BAD_REQUEST);
+            }
+
             final boolean forFuture = createRideDTO.getHour() != null && createRideDTO.getMinute() != null;
             final Driver driver = rideService.findMostSuitableDriver(createRideDTO, forFuture);
             final Ride ride = from(createRideDTO, driver);
@@ -311,49 +321,96 @@ public class RideController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @GetMapping("/driver/{driverId}/active")
-    public ResponseEntity<RideDTO> getActiveRideByDriver(@PathVariable long driverId) {
+    public ResponseEntity<?> getActiveRideByDriver(@PathVariable Long driverId) {
+    	if (driverId == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+    	
         final Driver driver = driverService.get(driverId);
 
         if (driver == null) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        } else {
-            Ride ride = rideService.findCurrentRideByDriver(driver);
+            return new ResponseEntity<>(new RESTError("Driver not found."), HttpStatus.NOT_FOUND);
+        } 
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
-            if (ride == null) {
-                return new ResponseEntity<>(null, HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(to(ride), HttpStatus.OK);
+        if (userService.isAdmin(user)) {
+	    } else if (userService.isDriver(user)) {
+            if (user.getId() != driverId) {
+                return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
             }
         }
+            
+       Ride ride = rideService.findCurrentRideByDriver(driver);
+       if (ride == null) {
+           return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+       }
+       
+       return new ResponseEntity<>(to(ride), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger')")
     @GetMapping("/passenger/{passengerId}/active")
     public ResponseEntity<?> getActiveRideByPassenger(@PathVariable Long passengerId) {
         if (passengerId == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
+        
 
         final Passenger passenger = passengerService.findById(passengerId);
         if (passenger == null) {
             return new ResponseEntity<RESTError>(new RESTError("Passenger not found."), HttpStatus.NOT_FOUND);
         }
 
-        Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
-        if (ride == null) {
-            return new ResponseEntity<>(null, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(to(ride), HttpStatus.OK);
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isAdmin(user)) {
+	    } else if (userService.isPassenger(user)) {
+            if (user.getId() != passengerId) {
+                return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
         }
 
-        // return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+        Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
+        if (ride == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        return new ResponseEntity<>(to(ride), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RideDTO> getRide(@PathVariable long id) {
-        return new ResponseEntity<RideDTO>(new RideDTO(), HttpStatus.OK);
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    @GetMapping("/{rideId}")
+    public ResponseEntity<?> getRide(@PathVariable Long rideId) {
+    	System.out.println("AAAAAAAAAAAAAAAAAAAAAAA");
+    	if (rideId == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+
+        final Ride ride = rideService.findById(rideId);
+        if (ride == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        if (userService.isAdmin(user)) {	
+	    } else if (userService.isPassenger(user)) {
+	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }	
+	    } else if (userService.isDriver(user)) {
+	    	System.out.println(ride.getDriver().getId() + " " + user.getId());
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+       
+        return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @PutMapping("/{id}/withdraw")
     public ResponseEntity<?> withdrawRide(@PathVariable Long id) {
         if (id == null) {
@@ -362,8 +419,16 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
         }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        if (userService.isPassenger(user)) {
+	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }	
+	    }
 
         if (ride.getStatus() != Status.Pending) {
             return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't pending."), HttpStatus.BAD_REQUEST);
@@ -371,8 +436,7 @@ public class RideController {
 
         this.rideService.cancelRide(ride);
 
-        // ride.getDriver() can be null if the ride is scheduled in the future, before a driver
-        // has been assigned.
+        // ride.getDriver() can be null if the ride is scheduled in the future, before a driver has been assigned.
         if (ride.getDriver() != null) {
             driverService.setAvailable(ride.getDriver(), true);
             notifyRideDriver(ride);
@@ -383,6 +447,7 @@ public class RideController {
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping("/{id}/panic")
     public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody String reason) {   
         if (id == null) {
@@ -393,21 +458,27 @@ public class RideController {
         if (ride == null) {
             return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
         }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isPassenger(user)) {
+	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }	
+	    } else if (userService.isDriver(user)) {
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
 
         rideService.cancelRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
         
-        GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         Panic p = panicService.add(ride, user, reason);
         PanicDTO dto = new PanicDTO();
         dto.setReason(p.getReason());
         dto.setTime(p.getTime().toString());
         dto.setId(p.getId());
         dto.setRide(to(ride));
-
-        //
-        //
-
         dto.setUser(new UserDTO(p.getUser()));
 
         notifyRideDriver(ride);
@@ -416,6 +487,41 @@ public class RideController {
         return new ResponseEntity<PanicDTO>(dto, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver')")
+    @PutMapping("/{id}/start")
+    public ResponseEntity<?> startRide(@PathVariable Long id) {
+    	if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+
+        Ride ride = rideService.findById(id);
+        if (ride == null) {
+        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isDriver(user)) {
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+        
+        if (ride.getStatus() != Ride.Status.Accepted) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status ACCEPTED!"), HttpStatus.BAD_REQUEST);
+        }
+
+        // TODO: What's the purpose of this endpoint?
+        //rideService.acceptRide(ride);
+        //driverService.setAvailable(ride.getDriver(), false);
+        //notifyRidePassengers(ride);
+        //notifyRideDriver(ride);
+        
+        RideDTO dto = to(ride);
+        dto.setStatus(Ride.Status.Started);
+        return new ResponseEntity<RideDTO>(dto, HttpStatus.OK);
+    }
+    
+    @PreAuthorize("hasAnyAuthority('driver')")
     @PutMapping("/{id}/accept")
     public ResponseEntity<?> acceptRide(@PathVariable Long id) {
         if (id == null) {
@@ -424,7 +530,18 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-            return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isDriver(user)) {
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+        
+        if (ride.getStatus() != Ride.Status.Pending) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status PENDING!"), HttpStatus.BAD_REQUEST);
         }
 
         rideService.acceptRide(ride);
@@ -436,6 +553,7 @@ public class RideController {
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver')")
     @PutMapping("/{id}/end")
     public ResponseEntity<?> endRide(@PathVariable Long id) {
         if (id == null) {
@@ -444,7 +562,18 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-            return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isDriver(user)) {
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+        
+        if (ride.getStatus() != Ride.Status.Accepted && ride.getStatus() != Ride.Status.Started) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status STARTED!"), HttpStatus.BAD_REQUEST);
         }
 
         rideService.finishRide(ride);
@@ -456,6 +585,7 @@ public class RideController {
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver')")
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
         if (id == null) {
@@ -464,12 +594,19 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-            return new ResponseEntity<Void>((Void) null, HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
         }
-
-        //
-        GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        //
+        
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isDriver(user)) {
+            if (!ride.getDriver().getId().equals(user.getId())) {
+            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            }
+        }
+        
+        if (ride.getStatus() != Ride.Status.Pending) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status PENDING!"), HttpStatus.BAD_REQUEST);
+        }
 
         final Cancellation cancellation = cancellationService.create(reason.getReason(), user); 
         rideService.rejectRide(ride, cancellation);
@@ -480,5 +617,4 @@ public class RideController {
 
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
-
 }

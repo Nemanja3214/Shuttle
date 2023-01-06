@@ -43,7 +43,9 @@ public class Ride {
     private Status status;
 
     public enum Status {
-        Pending, Accepted, Rejected, Canceled, Finished
+        Pending, Accepted, Rejected, Canceled, Finished, Started
+        // TODO: Started - why?! For now it's mock-added as a response.
+        // Don't use the /start end-point.
     }
 
     public List<Location> getLocations() {
