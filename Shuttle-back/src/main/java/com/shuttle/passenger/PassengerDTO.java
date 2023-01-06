@@ -43,7 +43,7 @@ public class PassengerDTO {
 	}
 	
 	public boolean isInvalid() {
-		return !isEmailValid() || !isPhoneValid() || hasEmptyField();
+		return !isEmailValid() || !isPhoneValid() || !isPasswordValid() || hasEmptyField();
 	}
 	
 	public boolean hasEmptyField() {
@@ -68,6 +68,15 @@ public class PassengerDTO {
 		Matcher matcher = pattern.matcher(telephoneNumber);  
 		return matcher.matches();
 	}
+	
+	private boolean isPasswordValid() {
+		String regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+		Pattern pattern = Pattern.compile(regex);  	
+		Matcher matcher = pattern.matcher(password);  
+		return matcher.matches();
+	}
+	
+	
 	
 	
 	
