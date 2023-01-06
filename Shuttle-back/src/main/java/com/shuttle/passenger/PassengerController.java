@@ -66,8 +66,6 @@ public class PassengerController {
 
 	@GetMapping("/verify")
 	public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {
-		
-		
 		boolean verified = false;
 		try {
 			verified = passengerService.verify(code);
@@ -76,7 +74,6 @@ public class PassengerController {
 		} catch (NonExistantUserException e) {
 			return new ResponseEntity<>("Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
 		}
-		
 		
 		URI yahoo = null;
 		HttpHeaders httpHeaders = new HttpHeaders();
@@ -146,7 +143,6 @@ public class PassengerController {
 		} catch (NonExistantUserException e) {
 			return new ResponseEntity<>("Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
 		}
-		
 		
 		URI yahoo = null;
 		HttpHeaders httpHeaders = new HttpHeaders();
