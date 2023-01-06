@@ -2,10 +2,13 @@ package com.shuttle.passenger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.view.RedirectView;
 
 import com.shuttle.common.exception.EmailAlreadyUsedException;
+import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.common.exception.TokenExpiredException;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
 import com.shuttle.user.email.IEmailService;
@@ -61,14 +65,42 @@ public class PassengerController {
 	}
 
 	@GetMapping("/verify")
-	public RedirectView verifyUser(@RequestParam("token") String code) {
-		RedirectView redirectView = new RedirectView();
-	    if (passengerService.verify(code)) {
-		    redirectView.setUrl("http://localhost:4200/login");
-		    return redirectView;
+	public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {
+		
+		
+		boolean verified = false;
+		try {
+			verified = passengerService.verify(code);
+		} catch (TokenExpiredException e) {
+			return new ResponseEntity<>("Activation expired. Register again!", HttpStatus.BAD_REQUEST);	
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<>("Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
+		}
+		
+		
+		URI yahoo = null;
+		HttpHeaders httpHeaders = new HttpHeaders();
+	    if (verified) {
+	    	
+			try {
+				yahoo = new URI("http://localhost:4200/login");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+		    
+		    httpHeaders.setLocation(yahoo);
+		    return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+		    
 	    } else {
-	    	redirectView.setUrl("http://localhost:4200/bad-request");
-		    return redirectView;
+	    	
+			try {
+				yahoo = new URI("http://localhost:4200/bad-request");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+			
+		    httpHeaders.setLocation(yahoo);
+		    return new ResponseEntity<>(httpHeaders, HttpStatus.NOT_ACCEPTABLE);
 	    }
 	}
 
@@ -105,8 +137,41 @@ public class PassengerController {
 	}
 
 	@GetMapping("/activate/{activationId}")
-	public ResponseEntity<Void> activate(@PathVariable("activationId") Long activationId) {
-		return new ResponseEntity<Void>(HttpStatus.OK);
+	public ResponseEntity<?> activate(@PathVariable("activationId") Long activationId) {
+		boolean verified = false;
+		try {
+			verified = passengerService.activate(activationId);
+		} catch (TokenExpiredException e) {
+			return new ResponseEntity<>("Activation expired. Register again!", HttpStatus.BAD_REQUEST);	
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<>("Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
+		}
+		
+		
+		URI yahoo = null;
+		HttpHeaders httpHeaders = new HttpHeaders();
+	    if (verified) {
+	    	
+			try {
+				yahoo = new URI("http://localhost:4200/login");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+		    
+		    httpHeaders.setLocation(yahoo);
+		    return new ResponseEntity<>("Successful account activation!", httpHeaders,  HttpStatus.OK);
+		    
+	    } else {
+	    	
+			try {
+				yahoo = new URI("http://localhost:4200/bad-request");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+			
+		    httpHeaders.setLocation(yahoo);
+		    return new ResponseEntity<>(httpHeaders, HttpStatus.NOT_ACCEPTABLE);
+	    }
 	}
 
 	@PutMapping("/{id}")

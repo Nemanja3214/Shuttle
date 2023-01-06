@@ -34,4 +34,8 @@ public class VerificationToken {
     @JoinColumn(nullable = false, name = "passenger_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Passenger passenger;
+
+	public boolean isExpired() {
+		return this.expireDateTime.isBefore(LocalDateTime.now());
+	}
 }

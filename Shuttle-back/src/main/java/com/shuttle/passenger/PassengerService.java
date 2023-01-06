@@ -7,6 +7,7 @@ import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
+import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.common.exception.TokenExpiredException;
 import com.shuttle.security.Role;
 import com.shuttle.security.RoleService;
 import com.shuttle.security.jwt.JwtTokenUtil;
@@ -109,22 +112,39 @@ public class PassengerService implements IPassengerService{
 
 	@Override
 	@Transactional
-	public boolean verify(String verificationCode) {
+	public boolean verify(String verificationCode) throws TokenExpiredException, NonExistantUserException {
 	   VerificationToken token = tokenRepository.findByToken(verificationCode);
 	   Passenger passenger = token.getPassenger();
-	     
-	    if (passenger == null || passenger.isEnabled()) {
-	        return false;
-	    } else {
-	    	tokenRepository.deleteByPassenger(passenger);
-	        passenger.setToken(null);
-	        passenger.setEnabled(true);
-	    	passenger.setJwt(jwtTokenUtil.generateToken(passenger.getId(), passenger.getEmail(), null));
-	        passengerRepository.save(passenger);
-	         
-	        return true;
-	    }
+	   return activate(passenger.getId());
 	}
+	
+	@Override
+	@Transactional
+	public boolean activate(Long activationId) throws NonExistantUserException, TokenExpiredException {
+		Optional<Passenger> passengerM = this.passengerRepository.findById(activationId);
+		if(passengerM.isEmpty()) {
+			   throw new NonExistantUserException();
+		   }
+		
+		Passenger passenger = passengerM.get();
+	   
+	    if (passenger.isEnabled()) {
+	        return false;
+	    }
+	    
+	    if(passenger.getToken().isExpired()) {
+	    	throw new TokenExpiredException();
+	    }
+		tokenRepository.deleteByPassenger(passenger);
+	    passenger.setToken(null);
+	    passenger.setEnabled(true);
+		passenger.setJwt(jwtTokenUtil.generateToken(passenger.getId(), passenger.getEmail(), null));
+	    passengerRepository.save(passenger);
+	     
+	    return true;
+	}
+
+	
 	
 	@Scheduled(fixedDelay = 1000 * 60 * 60)
 	@Transactional
@@ -133,6 +153,8 @@ public class PassengerService implements IPassengerService{
 		passengerRepository.deleteByExpiredToken();
 		System.out.println("Num of users afterwards: " + passengerRepository.findAll().size());;
 	}
+
+
 
 
 }
