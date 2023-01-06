@@ -64,21 +64,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             String requestURL = request.getRequestURL().toString();
             // allow for Refresh Token creation if following conditions are true.
             if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refreshtoken")) {
-                allowForRefreshToken(ex, request,authToken);
+                allowForRefreshToken(ex, request, authToken);
             }
         }
         chain.doFilter(request, response);
     }
-        private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request,String authToken) {
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtil.getEmailFromToken(authToken));
-            // create a UsernamePasswordAuthenticationToken with null values.
-            TokenBasedAuthentication authentication = new TokenBasedAuthentication(userDetails);
-            authentication.setToken(authToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            // Set the claims so that in controller we will be using it to create
-            // new JWT
-            request.setAttribute("claims", ex.getClaims());
+    private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request, String authToken) {
 
-        }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtil.getEmailFromToken(authToken));
+        // create a UsernamePasswordAuthenticationToken with null values.
+        TokenBasedAuthentication authentication = new TokenBasedAuthentication(userDetails);
+        authentication.setToken(authToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Set the claims so that in controller we will be using it to create
+        // new JWT
+        request.setAttribute("claims", ex.getClaims());
+
+    }
 }

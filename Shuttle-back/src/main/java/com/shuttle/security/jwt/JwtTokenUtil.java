@@ -1,5 +1,6 @@
 package com.shuttle.security.jwt;
 
+import com.shuttle.user.GenericUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -221,20 +222,21 @@ public class JwtTokenUtil {
      * @return is it valid or not
      */
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getEmailFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
 //    public Boolean validateToken(String token, UserDetails userDetails) {
-//        GenericUser user = (GenericUser) userDetails;
-//        final String username = getUsernameFromToken(token);
-//        final Date created = getIssuedAtDateFromToken(token);
-//
-//
-//        return (username != null
-//                && username.equals(userDetails.getUsername())
-//                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
+//        final String username = getEmailFromToken(token);
+//        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+//    }
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        GenericUser user = (GenericUser) userDetails;
+        final String username = getUsernameFromToken(token);
+        final Date created = getIssuedAtDateFromToken(token);
 
+
+        return (username != null
+                && username.equals(userDetails.getUsername())
+                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
+
+    }
 
     private Boolean isCreatedBeforeLastPasswordReset(Date created, Date lastPasswordReset) {
         return (lastPasswordReset != null && created.before(lastPasswordReset));
@@ -248,6 +250,20 @@ public class JwtTokenUtil {
 
     public String getAuthHeaderFromHeader(HttpServletRequest request) {
         return request.getHeader(AUTH_HEADER);
+    }
+    public String getUsernameFromToken(String token) {
+        String username;
+
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            username = claims.getSubject();
+        } catch (ExpiredJwtException ex) {
+            throw ex;
+        } catch (Exception e) {
+            username = null;
+        }
+
+        return username;
     }
 
 }

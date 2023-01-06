@@ -1,6 +1,7 @@
 package com.shuttle.user;
 
 import com.shuttle.security.jwt.JwtTokenUtil;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,7 +90,8 @@ public class UserController {
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
     }
 
-    @PutMapping(value = "/refreshtoken")
+    @PermitAll
+    @PostMapping(value = "/refreshtoken")
     public ResponseEntity<String> refreshtoken(@RequestBody String refreshToken) throws Exception {
         // From the HttpRequest get the claims
         String email = jwtTokenUtil.getEmailFromToken(refreshToken);

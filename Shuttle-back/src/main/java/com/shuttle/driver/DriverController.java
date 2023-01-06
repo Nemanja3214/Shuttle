@@ -7,6 +7,7 @@ import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RideDTO;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.data.domain.Page;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.*;
@@ -40,6 +41,11 @@ public class DriverController {
 
 	@Autowired
 	private IWorkHoursService workHoursService;
+
+    @ExceptionHandler({ ExpiredJwtException.class })
+    public ResponseEntity<?> handleException() {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 
     private ListDTO<WorkHoursNoDriverDTO> from(List<WorkHours> workHours) {
         return new ListDTO<>(workHours.stream().map(w -> new WorkHoursNoDriverDTO(w)).toList());
