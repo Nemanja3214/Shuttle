@@ -23,4 +23,5 @@ public interface IVehicleService {
     public List<Vehicle> findAllCurrentlyActiveWhoseDriverCanWork();
 	public List<String> getAllVehicleTypesNames();
 	public boolean changeCurrentLocation(long id, LocationDTO location);
+	public Vehicle findById(Long id);
 }

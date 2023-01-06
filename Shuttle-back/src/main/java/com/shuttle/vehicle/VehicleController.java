@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,12 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shuttle.common.RESTError;
+import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.Ride.Status;
+import com.shuttle.user.GenericUser;
+import com.shuttle.user.UserService;
 
 @RestController
 @RequestMapping("/api/vehicle")
@@ -31,6 +36,8 @@ public class VehicleController {
 	private IVehicleService vehicleService;
     @Autowired
     private IRideService rideService;
+    @Autowired
+    private UserService userService; 
 
     /**
      * Notify users (unregistered user home page + passenger home page) of the drivers' locations
@@ -124,9 +131,27 @@ public class VehicleController {
     }
 
 	@PutMapping("/{id}/location")
-	public ResponseEntity<Boolean>changeLocation(@PathVariable long id, @RequestBody LocationDTO location) {
-		boolean result = this.vehicleService.changeCurrentLocation(id, location);
-    	return new ResponseEntity<Boolean>(result ? HttpStatus.NO_CONTENT : HttpStatus.NOT_FOUND);
+	public ResponseEntity<?> changeLocation(@PathVariable Long id, @RequestBody LocationDTO location) {
+		if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+        }
+		
+		Vehicle v = vehicleService.findById(id);
+    	
+		if (v == null) {
+			return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		this.vehicleService.changeCurrentLocation(id, location);
+		
+		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isDriver(user)) {
+			if (user.getId() != v.getDriver().getId()) {
+				return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+			}
+		}
+
+    	return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 	
 	@PostMapping
