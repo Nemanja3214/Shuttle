@@ -43,7 +43,7 @@ public class PassengerDTO {
 	}
 	
 	public boolean isInvalid() {
-		return !isEmailValid() || hasEmptyField();
+		return !isEmailValid() || !isPhoneValid() || hasEmptyField();
 	}
 	
 	public boolean hasEmptyField() {
@@ -62,12 +62,12 @@ public class PassengerDTO {
 		return matcher.matches();
 	}
 	
-//	private boolean isPhoneValid() {
-//		String regex = "^\\+(?:[0-9] ?){6,14}[0-9]$";
-//		Pattern pattern = Pattern.compile(regex);  	
-//		Matcher matcher = pattern.matcher(email);  
-//		return matcher.matches();
-//	}
+	private boolean isPhoneValid() {
+		String regex = "^[\\+]?[0-9]+$";
+		Pattern pattern = Pattern.compile(regex);  	
+		Matcher matcher = pattern.matcher(telephoneNumber);  
+		return matcher.matches();
+	}
 	
 	
 	
