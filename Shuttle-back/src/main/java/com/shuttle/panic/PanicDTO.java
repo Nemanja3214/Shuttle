@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PanicDTO {
-    private long id;
+    private Long id;
     private UserDTO user;
     private RideDTO ride;
     private String time;

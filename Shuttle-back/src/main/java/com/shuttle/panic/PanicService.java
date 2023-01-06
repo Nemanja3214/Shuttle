@@ -1,6 +1,7 @@
 package com.shuttle.panic;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,6 @@ public class PanicService implements IPanicService {
     @Autowired
     private IPanicRepository panicRepository;
 
-
     @Override
     public Panic add(Ride ride, GenericUser user, String message) {
         Panic p = new Panic();
@@ -24,4 +24,10 @@ public class PanicService implements IPanicService {
         p = panicRepository.save(p);
         return p;
     }
+
+
+	@Override
+	public List<Panic> getAll() {
+		return panicRepository.findAll();
+	}
 }
