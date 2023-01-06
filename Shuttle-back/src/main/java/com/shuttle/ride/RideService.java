@@ -3,19 +3,23 @@ package com.shuttle.ride;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.driver.Driver;
-import com.shuttle.driver.DriverService;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
-import com.shuttle.location.ILocationService;
+import com.shuttle.location.Location;
+import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
+import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.vehicle.IVehicleService;
+import com.shuttle.vehicle.Vehicle;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 class NoAvailableDriverException extends Throwable {
 	private static final long serialVersionUID = -2718176046357707329L;
@@ -29,83 +33,162 @@ public class RideService implements IRideService {
 	private IDriverRepository driverRepository; // TODO: Remove, we have driverService now.
     @Autowired
     private IDriverService driverService;
-	
+    @Autowired
+    private IVehicleService vehicleService;
+
 	@Override
-	public Ride createRide(Ride ride) {
+	public Ride save(Ride ride) {
 		rideRepository.save(ride);	
 		return ride;
 	}
-	
-	@Override
-	public Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException {
-		final List<Driver> potentialDrivers = findPotentialDrivers();
-		final Driver driver = pickBestDriver(potentialDrivers, createRideDTO);
-		return driver;
-	}
 
-	/**
-	 * @return List of all Drivers that are currently logged in and which can potentially perform the requested ride.
-	 * @throws NoAvailableDriverException If no driver is currently active or all are busy in the future.
-	 */
-	private List<Driver> findPotentialDrivers() throws NoAvailableDriverException {
-		List<Driver> potentialDrivers = new ArrayList<>();
-		
-		final List<Driver> loggedIn = driverRepository.findAllActive();
-		if (loggedIn.size() == 0) {
+    @Override
+    public Driver findMostSuitableDriver(CreateRideDTO createRideDTO, boolean forFuture) throws NoAvailableDriverException {
+        if (forFuture) {
+            try {
+                return findMostSuitableDriver(createRideDTO);
+            } 
+            catch (NoAvailableDriverException e) {
+                return null;
+            }
+        } else {
+            return findMostSuitableDriver(createRideDTO);
+        }
+    }
+
+    private Driver findMostSuitableDriver(CreateRideDTO createRideDTO) throws NoAvailableDriverException {
+		final List<Driver> activeDrivers = driverRepository.findAllActive();
+		if (activeDrivers.size() == 0) {
+            // No driver is logged in.
 			throw new NoAvailableDriverException();
 		}
-		
-		final List<Driver> availableDrivers = driverRepository.findAllActiveAvailable();
-		
-		if (availableDrivers.size() == 0) {
-			List<Driver> driversWithoutScheduledRide = driverRepository.findAllActiveNotAvailable();	
-			// TODO: Check if the driver has no future rides scheduled.
-			
-			if (driversWithoutScheduledRide.size() == 0) {
-				throw new NoAvailableDriverException();
-			} else {
-				potentialDrivers = driversWithoutScheduledRide;
-			}
-		} else {
-			potentialDrivers = availableDrivers;
-		}
-		
-		potentialDrivers = potentialDrivers.stream().filter(d -> !workedMoreThan8Hours(d)).toList();
-		return potentialDrivers;
-	}
+
+        // PENDING      ACCEPTED
+        //                          -> Suitable
+        //                 x        -> Suitable
+        //    x                     -> Not suitable
+        //    x            x        -> Not suitable
+
+        VehicleType vt = vehicleService.findVehicleTypeByName(createRideDTO.getVehicleType()).orElse(null);
+
+        final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream()
+            .filter(d -> !driverService.workedMoreThan8Hours(d))
+            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
+            .toList();
+        final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream()
+            .filter(d -> !driverService.workedMoreThan8Hours(d))
+            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
+            .toList();
+
+        if (noPendingNoAccepted.size() > 0) {
+            // Find nearest one.
+            return findNearestDriver(noPendingNoAccepted, createRideDTO.getLocations().get(0).getDeparture());
+        } else if (noPendingYesAccepted.size() > 0) {
+            // Find the one that'll finish soon.
+            return findDriverAvailableMostSoon(noPendingYesAccepted);
+        } else {
+            // All logged in drivers have a pending ride. They are busy with a future ride.
+            throw new NoAvailableDriverException();
+        }
+    }
+
+    @Override
+    public boolean requestParamsMatch(Driver d, boolean baby, boolean pet, int seatsNeeded, VehicleType vehicleType) {
+        final Vehicle v = vehicleService.findByDriver(d);
+        if (v == null) {
+            return false;
+        }
+        if (!v.getBabyTransport() && baby) {
+            return false;
+        }
+        if (!v.getPetTransport() && pet) {
+            return false;
+        }
+        if (v.getPassengerSeats() < seatsNeeded) {
+            return false;
+        }
+        if (!v.getVehicleType().equals(vehicleType)) {
+            return false;
+        }
+        return true;
+    }
 
     /**
-     * Helper function to check whether the driver has worked more than enough today.
+     * @return Logged-in drivers with no pending rides and no accepted rides.  
      */
-    private boolean workedMoreThan8Hours(Driver d) {
-        Duration dur = driverService.getDurationOfWorkInTheLast24Hours(d);
-        return (dur.compareTo(Duration.ofHours(8)) > 0);
+    private List<Driver> findDriversWithNoPendingNoAccepted() {
+        List<Driver> drivers = new ArrayList<>();
+
+        for (Driver d : driverRepository.findAllActive()) {
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+
+            if (pending.size() == 0 && accepted.size() == 0)
+            drivers.add(d);
+        }	
+    	return drivers;        
     }
-	
-	/**
-	 * @param potentialDrivers List of all potential drivers from which the result is picked.
-	 * @param createRideDTO The ride whose driver we're picking.
-	 * @return Most suitable driver for this ride (based on variables like distance etc.).
-	 */
-	private Driver pickBestDriver(List<Driver> potentialDrivers, CreateRideDTO createRideDTO) {
-		// Precondition: potentialDrivers.size() != 0.
-		
-		List<Driver> closestFreeDrivers = potentialDrivers.stream().filter(d -> d.isAvailable()).toList();
-		
-		if (closestFreeDrivers.size() > 0) {
-			// Find closest one.
-			
-			return closestFreeDrivers.get(0);
-		} else {
-			// Find one who's most likely to finish soon.
-			
-			return potentialDrivers.stream().sorted((d1, d2) -> {
-				final LocalDateTime ldt1 = findCurrentRideByDriverInProgress(d1).getEstimatedEndTime();
-				final LocalDateTime ldt2 = findCurrentRideByDriverInProgress(d2).getEstimatedEndTime();
-				return ldt1.compareTo(ldt2);
-			}).findFirst().get();
-		}
-	}
+
+    /**
+     * @return Logged-in drivers with no pending rides but with accepted rides.  
+     */
+    private List<Driver> findDriversWithNoPendingYesAccepted() {
+        List<Driver> drivers = new ArrayList<>();
+        
+        for (Driver d : driverRepository.findAllActive()) {
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+
+            if (pending.size() == 0 && accepted.size() > 0)
+            drivers.add(d);
+        }	
+    	return drivers;        
+    }
+
+    
+    /**
+     * 
+     * @param drivers List of drivers from which to pick.
+     * @return Nearest driver (Euclidean distance).
+     */
+    private Driver findNearestDriver(List<Driver> drivers, LocationDTO point) {
+        final List<Vehicle> vehicles = drivers
+            .stream()
+            .map(d -> vehicleService.findByDriver(d))
+            .filter(v -> v != null)
+            .toList();
+
+        return vehicles.stream().sorted((v1, v2) -> {
+            final Location l1 = v1.getCurrentLocation();
+            final Location l2 = v2.getCurrentLocation();
+
+            final Double dy1 = (l1.getLatitude() - point.getLatitude());
+            final Double dx1 = (l1.getLongitude() - point.getLongitude());
+
+            final Double dy2 = (l2.getLatitude() - point.getLatitude());
+            final Double dx2 = (l2.getLongitude() - point.getLongitude());
+
+            final Double d1 = (dy1 * dy1) + (dx1 * dx1);
+            final Double d2 = (dy2 * dy2) + (dx2 * dx2);
+
+            if (d1 > d2) return 1;
+            if (d1 < d2) return -1;
+            return 0;
+        }).findFirst().get().getDriver();
+    }
+
+    /**
+     * 
+     * @param drivers List of drivers from which to pick. They *must* all have an ACCEPTED ride.
+     * @return Driver who will finish the current ride the soonest.
+     */
+    private Driver findDriverAvailableMostSoon(List<Driver> drivers) {
+        return drivers.stream().sorted((d1, d2) -> {
+            final LocalDateTime ldt1 = findCurrentRideByDriverInProgress(d1).getEstimatedEndTime();
+            final LocalDateTime ldt2 = findCurrentRideByDriverInProgress(d2).getEstimatedEndTime();
+            return ldt1.compareTo(ldt2);
+        }).findFirst().get();
+    }
 
 	@Override
 	public Ride findById(Long id) {
@@ -113,8 +196,9 @@ public class RideService implements IRideService {
 	}
 
 	@Override
-	public Ride rejectRide(Ride ride) {
+	public Ride rejectRide(Ride ride, Cancellation cancellation) {
 		ride.setStatus(Status.Rejected);
+        ride.setRejection(cancellation);
 		
 		ride = rideRepository.save(ride);
 		return ride;
@@ -162,4 +246,40 @@ public class RideService implements IRideService {
 		ride = rideRepository.save(ride);
 		return ride;
 	}
+
+    @Override
+    public Ride findActiveOrPendingByPassenger(Passenger passenger) {
+        List<Ride> all = rideRepository.findActiveOrPendingByPassengerId(passenger.getId());
+        if (all.size() == 0) {
+            return null;
+        }
+        
+        Ride bestOne = all.get(0);
+        for (Ride r : all) {
+            if (r.getStatus() == Status.Accepted) {
+                bestOne = r;
+            }
+        }
+
+        return bestOne;
+    }
+
+    @Override
+    public Ride cancelRide(Ride ride) {
+		ride.setStatus(Status.Canceled);
+		ride.setEndTime(LocalDateTime.now());
+		
+		ride = rideRepository.save(ride);
+		return ride;
+    }
+
+    @Override
+    public List<Ride> findRidesWithNoDriver() {
+        return rideRepository.findByDriverNull();
+    }
+
+    @Override
+    public List<Ride> findAllPendingInFuture() {
+        return rideRepository.findPendingInTheFuture();
+    }
 }

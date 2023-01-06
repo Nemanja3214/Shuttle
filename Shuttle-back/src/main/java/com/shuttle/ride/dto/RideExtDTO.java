@@ -5,13 +5,16 @@ import java.util.List;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.cancellation.dto.CancellationDTO;
+import com.shuttle.vehicle.Vehicle;
+import com.shuttle.vehicle.VehicleDTO;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class RideDTO {
-	private Long id;
+public class RideExtDTO {
+    private Long id;
 	private List<RouteDTO> locations;
 	private String startTime;
 	private String endTime;
@@ -24,4 +27,5 @@ public class RideDTO {
 	private String vehicleType;
 	private CancellationDTO rejection;
 	private Ride.Status status;
+    private VehicleDTO vehicle;
 }

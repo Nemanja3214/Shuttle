@@ -6,6 +6,7 @@ import java.util.Set;
 import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.passenger.Passenger;
+import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 import com.shuttle.location.Route;
 
@@ -29,7 +30,7 @@ public class Ride {
     @OneToOne
     private Driver driver;
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Passenger> passengers;
+    private List<Passenger> passengers;
     @OneToOne(cascade = CascadeType.ALL)
     private Route route;
     private Integer estimatedTimeInMinutes;
@@ -37,6 +38,8 @@ public class Ride {
     private Boolean petTransport;
     @ManyToOne
     private VehicleType vehicleType;
+    @OneToOne
+    private Cancellation rejection;
     private Status status;
 
     public enum Status {

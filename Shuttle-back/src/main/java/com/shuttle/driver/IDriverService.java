@@ -26,4 +26,11 @@ public interface IDriverService {
      * @return Duration of worktime.
      */
     public Duration getDurationOfWorkInTheLast24Hours(Driver driver);
+        
+    /**
+     * Check if driver worked more than 8 hours in the last 24 hours.
+     * @param driver The driver
+     * @return True if so.
+     */
+    public boolean workedMoreThan8Hours(Driver d);
 }

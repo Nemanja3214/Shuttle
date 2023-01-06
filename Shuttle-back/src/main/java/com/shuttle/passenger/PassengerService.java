@@ -143,6 +143,16 @@ public class PassengerService implements IPassengerService{
 	     
 	    return true;
 	}
+  
+   @Override
+    public Passenger findByEmail(String email) {
+        return passengerRepository.findByEmail(email);
+    }
+
+    @Override
+    public Passenger findById(Long passengerId) {
+        return passengerRepository.findById(passengerId).orElse(null);
+    }
 
 	
 	
@@ -154,7 +164,3 @@ public class PassengerService implements IPassengerService{
 		System.out.println("Num of users afterwards: " + passengerRepository.findAll().size());;
 	}
 
-
-
-
-}

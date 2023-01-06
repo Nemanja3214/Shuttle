@@ -17,6 +17,9 @@ import com.shuttle.security.Role;
 import com.shuttle.security.RoleService;
 import com.shuttle.user.dto.UserDTO;
 import com.shuttle.workhours.IWorkHoursService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -115,4 +118,15 @@ public class UserServiceImpl implements UserService {
 		String result = FileUploadUtil.getImageBase64(FileUploadUtil.profilePictureUploadDir, user.get().getProfilePictureName());
 		return result;
 	}
+  
+    @Override
+    public List<GenericUser> findByRole(String role) {
+        List<Role> roles = roleService.findByName(role);
+        if (roles.size() == 0) {
+            return new ArrayList<GenericUser>();
+        }
+        Role r = roles.get(0);
+
+        return userRepository.findByRoles(r);
+    }
 }
