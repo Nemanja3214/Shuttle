@@ -46,8 +46,7 @@ public class ReviewService implements IReviewService {
 
 	@Override
 	public List<Review> findByDriver(Driver d) {
-		// TODO Auto-generated method stub
-		return null;
+		return reviewRepository.findByDriver(d.getId());
 	}
 
 	@Override

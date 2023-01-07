@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
+import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.review.dto.ReviewDTO;
@@ -130,26 +131,38 @@ public class ReviewController {
 		if (userService.isAdmin(user)) {
 		} else if (userService.isDriver(user)) {
 	    	if (!v.getDriver().getId().equals(user.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<RESTError>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
 	    	}
 	    }
 
 		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviews), HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasAnyAuthority('driver', 'admin')")
 	@GetMapping("/api/review/driver/{id}")
-	public ResponseEntity<ReviewListDTO> getDriverRatings(@PathVariable("id") Long vehicleId) {
-		List<Review> reviewsMock = new ArrayList<>();
-		Review r = new Review();
-		r.setPassenger(new Passenger());
-		r.setId(Long.valueOf(123));
-		r.setPassenger(new Passenger());
-		r.getPassenger().setId(Long.valueOf(213));
-		r.getPassenger().setEmail("dhskjdsh@hskjdhskj");
-		r.setRating(9);
-		r.setComment("fhekjfhewkjrhewjkr32hf");
-		reviewsMock.add(r);
-		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
+	public ResponseEntity<?> getDriverRatings(@PathVariable("id") Long driverId) {
+		if (driverId == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field driverId is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		Driver d = driverService.get(driverId);
+		
+		if (d == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		List<Review> reviews = reviewService.findByDriver(d);
+		
+		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+		if (userService.isAdmin(user)) {
+		} else if (userService.isDriver(user)) {
+	    	if (!d.getId().equals(user.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+
+		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviews), HttpStatus.OK);
 	}
 
 	@GetMapping("/api/review/{rideId}")
