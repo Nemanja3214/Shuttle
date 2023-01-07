@@ -10,7 +10,7 @@ import com.shuttle.ride.RideController;
 import com.shuttle.vehicle.Vehicle;
 
 public interface IReviewService {
-	Review save(ReviewMinimalDTO rDTO, Passenger creator, Ride ride);
+	Review save(ReviewMinimalDTO rDTO, Passenger creator, Ride ride, boolean forDriver);
 	Review save(Review r);
 	Review findById(Review id);
 	List<Review> findByVehicle(Vehicle v); 

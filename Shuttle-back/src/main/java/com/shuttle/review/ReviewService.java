@@ -22,12 +22,13 @@ public class ReviewService implements IReviewService {
 	}
 
 	@Override
-	public Review save(ReviewMinimalDTO rDTO, Passenger creator, Ride ride) {
+	public Review save(ReviewMinimalDTO rDTO, Passenger creator, Ride ride, boolean forDriver) {
 		Review review = new Review();
 		review.setComment(rDTO.getComment());
 		review.setRating(rDTO.getRating());
 		review.setRide(ride);
 		review.setPassenger(creator);
+		review.setForDriver(forDriver);
 		return save(review);
 	}
 

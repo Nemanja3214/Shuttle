@@ -73,16 +73,40 @@ public class ReviewController {
 	    	}
 	    }
         
-        final Review review = reviewService.save(reviewDTO, (Passenger)user, r);
+        final Review review = reviewService.save(reviewDTO, (Passenger)user, r, false);
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
-	@PostMapping("/api/review/{rideId}/driver/{id}")
-	public ResponseEntity<ReviewDTO> leaveDriverRating(@PathVariable("id") Long driverId, @PathVariable("rideId") Long rideId, @RequestBody Review review) {
-		review.setId(Long.valueOf(123));
-		review.setPassenger(new Passenger());
-		review.getPassenger().setId(Long.valueOf(213));
-		review.getPassenger().setEmail("dhskjdsh@hskjdhskj");
+	@PreAuthorize("hasAnyAuthority('passenger')")
+	@PostMapping("/api/review/{rideId}/driver")
+	public ResponseEntity<?> leaveDriverRating(@PathVariable("rideId") Long rideId, @RequestBody ReviewMinimalDTO reviewDTO) {
+		if (rideId == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field rideId is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		Ride r = rideService.findById(rideId);
+		
+		if (r == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		if (r.getDriver() == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		Vehicle v = vehicleService.findByDriver(r.getDriver());
+		
+		if (v == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isPassenger(user)) {
+	    	if (r.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+        
+        final Review review = reviewService.save(reviewDTO, (Passenger)user, r, true);
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
