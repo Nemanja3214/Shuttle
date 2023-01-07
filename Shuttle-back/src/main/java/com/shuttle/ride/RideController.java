@@ -97,7 +97,7 @@ public class RideController {
 
         final List<Passenger> passengers = rideDTO.getPassengers()
                 .stream()
-                .map(userInfo -> passengerRepository.findByEmail(userInfo.getEmail()))
+                .map(userInfo -> passengerService.findByEmail(userInfo.getEmail()))
                 .collect(Collectors.toList());
 
         final List<RouteDTO> routeDTO = rideDTO.getLocations();

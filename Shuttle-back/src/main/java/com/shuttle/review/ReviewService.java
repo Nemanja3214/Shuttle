@@ -50,8 +50,7 @@ public class ReviewService implements IReviewService {
 	}
 
 	@Override
-	public List<Review> findByRide(Ride d) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Review> findByRide(Ride r) {
+		return reviewRepository.findByRide(r);
 	}
 }

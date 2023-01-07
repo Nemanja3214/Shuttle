@@ -27,6 +27,7 @@ import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.TokenExpiredException;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RidePageDTO;
+import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.email.IEmailService;
 
 import jakarta.mail.MessagingException;
@@ -164,13 +165,14 @@ public class PassengerController {
     public ResponseEntity<?> getByEmail(@PathParam("email") String email) {
         Passenger p = passengerService.findByEmail(email);
         if (p == null) {
-            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
         } else {
-            return new ResponseEntity<PassengerDTO>(new PassengerDTO(p), HttpStatus.OK);
+        	RidePassengerDTO dto = new RidePassengerDTO(p);
+            return new ResponseEntity<RidePassengerDTO>(dto, HttpStatus.OK);
         }
     }
 
-		@GetMapping("/{id}/ride")
+	@GetMapping("/{id}/ride")
 	public ResponseEntity<RidePageDTO> getRides(@PathVariable("id") Long passengerId, @PathParam("page") int page,
 			@PathParam("size") int size, @PathParam("sort") String sort, @PathParam("from") String from,
 			@PathParam("to") String to) {

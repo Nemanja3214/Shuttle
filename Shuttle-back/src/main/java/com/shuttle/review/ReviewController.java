@@ -2,6 +2,9 @@ package com.shuttle.review;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import com.shuttle.common.RESTError;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.passenger.Passenger;
+import com.shuttle.passenger.PassengerService;
 import com.shuttle.review.dto.ReviewDTO;
 import com.shuttle.review.dto.ReviewListDTO;
 import com.shuttle.review.dto.ReviewMinimalDTO;
@@ -165,18 +169,82 @@ public class ReviewController {
 		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviews), HttpStatus.OK);
 	}
 
+	@PreAuthorize("hasAnyAuthority('driver', 'admin', 'passenger')")
 	@GetMapping("/api/review/{rideId}")
-	public ResponseEntity<ReviewRideDTO> getRideReview(@PathVariable("rideId") Long rideId) {
-		Ride r = new Ride();
-		Review vehicleReview = new Review();
-		vehicleReview.setPassenger(new Passenger());
-		vehicleReview.setId(Long.valueOf(123));
-		vehicleReview.setPassenger(new Passenger());
-		vehicleReview.getPassenger().setId(Long.valueOf(213));
-		vehicleReview.getPassenger().setEmail("dhskjdsh@hskjdhskj");
-		vehicleReview.setRating(9);
-		vehicleReview.setComment("fhekjfhewkjrhewjkr32hf");
-		Review driverReview = vehicleReview;
-		return new ResponseEntity<ReviewRideDTO>(new ReviewRideDTO(vehicleReview, driverReview), HttpStatus.OK);
+	public ResponseEntity<?> getRideReview(@PathVariable("rideId") Long rideId) {
+		if (rideId == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field rideId is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		Ride r = rideService.findById(rideId);
+		
+		if (r == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		List<Review> reviews = reviewService.findByRide(r);
+		//for (Review rrrr : reviews) {
+		//	System.out.println(rrrr.getId());
+		//	System.out.println(rrrr.getPassenger().getId());
+		//	System.out.println("");
+		//}
+		//System.out.println("-----------------");
+		
+		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+		if (userService.isAdmin(user)) {
+		} else if (userService.isDriver(user)) {
+	    	if (!r.getDriver().getId().equals(user.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    } else if (userService.isPassenger(user)) {
+	    	if (r.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		// The response JSON schema is garbage.
+		
+		List<Long> passengerIds = new ArrayList<>();
+		for (Review rr : reviews) {
+			if (!passengerIds.contains(rr.getPassenger().getId())) {
+				passengerIds.add(rr.getPassenger().getId());
+			}
+		}
+		
+		System.out.println("Passengers:");
+		//for (Long pid : passengerIds) {
+			//System.out.println(pid);
+		//}
+		//System.out.println("-------------");
+		
+
+		List<ReviewRideDTO> reviewsResult = new ArrayList<>();
+		for (Long pid : passengerIds) {
+			Passenger p = (Passenger)userService.findById(pid);
+			System.out.println(p.getEmail());
+			
+			Review vehicleReview = null;
+			Review driverReview  = null;
+			
+			for (Review rr : reviews) {
+				if (rr.getPassenger().getId().equals(p.getId())) {
+					if (rr.isForDriver() && driverReview == null) {
+						driverReview = rr;
+						//System.out.println("FoundD " + rr.getId());
+					} else if (!rr.isForDriver() && vehicleReview == null) {
+						vehicleReview = rr;
+						//System.out.println("FoundV " + rr.getId());
+					}
+				}
+			}
+			
+			final ReviewRideDTO rideReview = new ReviewRideDTO(vehicleReview, driverReview);
+			reviewsResult.add(rideReview);
+			
+			//System.out.println("-------------");
+		}
+		
+		return new ResponseEntity<>(reviewsResult, HttpStatus.OK);
 	}
 }

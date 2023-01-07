@@ -14,6 +14,9 @@ public class ReviewDTO {
 	private ReviewPassengerDTO passenger;
 	
 	public ReviewDTO(Review r) {
+		if (r == null) {
+			return;
+		}
 		this.id = r.getId();
 		this.rating = r.getRating();
 		this.comment = r.getComment();
