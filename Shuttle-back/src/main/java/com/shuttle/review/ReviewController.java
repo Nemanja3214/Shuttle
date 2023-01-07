@@ -110,19 +110,31 @@ public class ReviewController {
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
+	@PreAuthorize("hasAnyAuthority('driver', 'admin')")
 	@GetMapping("/api/review/vehicle/{id}")
-	public ResponseEntity<ReviewListDTO> getVehicleRatings(@PathVariable("id") Long vehicleId) {
-		List<Review> reviewsMock = new ArrayList<>();
-		Review r = new Review();
-		r.setPassenger(new Passenger());
-		r.setId(Long.valueOf(123));
-		r.setPassenger(new Passenger());
-		r.getPassenger().setId(Long.valueOf(213));
-		r.getPassenger().setEmail("dhskjdsh@hskjdhskj");
-		r.setRating(9);
-		r.setComment("fhekjfhewkjrhewjkr32hf");
-		reviewsMock.add(r);
-		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviewsMock), HttpStatus.OK);
+	public ResponseEntity<?> getVehicleRatings(@PathVariable("id") Long vehicleId) {
+		if (vehicleId == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field vehicleId is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		Vehicle v = vehicleService.findById(vehicleId);
+		
+		if (v == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		List<Review> reviews = reviewService.findByVehicle(v);
+		
+		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+		if (userService.isAdmin(user)) {
+		} else if (userService.isDriver(user)) {
+	    	if (!v.getDriver().getId().equals(user.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+
+		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviews), HttpStatus.OK);
 	}
 	
 	@GetMapping("/api/review/driver/{id}")

@@ -9,6 +9,7 @@ import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.review.dto.ReviewMinimalDTO;
 import com.shuttle.ride.Ride;
+import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.Vehicle;
 
 @Service
@@ -40,8 +41,7 @@ public class ReviewService implements IReviewService {
 
 	@Override
 	public List<Review> findByVehicle(Vehicle v) {
-		// TODO Auto-generated method stub
-		return null;
+		return reviewRepository.findByVehicle(v.getId());
 	}
 
 	@Override
