@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shuttle.common.RESTError;
 import com.shuttle.ride.dto.CreateRideEstimationDTO;
 import com.shuttle.ride.dto.EstimationDTO;
 
@@ -19,10 +20,13 @@ public class UnregisteredUserController {
 	private IUnregisteredUserService unregiteredUserService;
 	
 	@PostMapping
-	public ResponseEntity<EstimationDTO> getEstimatedRide(@RequestBody CreateRideEstimationDTO rideDTO) {
+	public ResponseEntity<?> getEstimatedRide(@RequestBody CreateRideEstimationDTO rideDTO) {
 		EstimationDTO estimation = unregiteredUserService.getEstimation(rideDTO);
-		if(estimation == null)
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		
+		if (estimation == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Could not create estimation."), HttpStatus.BAD_REQUEST);
+		}
+			
 		return new ResponseEntity<EstimationDTO>(estimation, HttpStatus.OK);
 	}
 }

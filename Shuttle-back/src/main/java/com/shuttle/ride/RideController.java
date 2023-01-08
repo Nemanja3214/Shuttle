@@ -51,6 +51,7 @@ import com.shuttle.security.Role;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
 import com.shuttle.user.dto.UserDTO;
+import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
@@ -96,7 +97,7 @@ public class RideController {
 
         final List<Passenger> passengers = rideDTO.getPassengers()
                 .stream()
-                .map(userInfo -> passengerRepository.findByEmail(userInfo.getEmail()))
+                .map(userInfo -> passengerService.findByEmail(userInfo.getEmail()))
                 .collect(Collectors.toList());
 
         final List<RouteDTO> routeDTO = rideDTO.getLocations();
@@ -130,7 +131,7 @@ public class RideController {
      * @param ride Model object.
      * @return DTO made from the ride.
      */
-    public RideDTO to(Ride ride) {
+    public static RideDTO to(Ride ride) {
         RideDTO rideDTO = new RideDTO();
         rideDTO.setId(ride.getId());
 
@@ -460,15 +461,24 @@ public class RideController {
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        //GenericUser userWithDetails = user;
         if (userService.isPassenger(user)) {
 	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
                 return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
-            }	
+            }
+	    	//Passenger p = passengerService.findById(user.getId());
+	    	//System.out.println("[0][][]" + p.getName());
 	    } else if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
             	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
             }
+            //Driver d = driverService.get(user.getId());
+            //System.out.println("[0][][]" + d.getName());
         }
+        
+
+        //System.out.println("[1][][]" + userWithDetails);
+        //System.out.println("[A][][]" + userWithDetails.getName());
 
         rideService.cancelRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
@@ -479,7 +489,10 @@ public class RideController {
         dto.setTime(p.getTime().toString());
         dto.setId(p.getId());
         dto.setRide(to(ride));
-        dto.setUser(new UserDTO(p.getUser()));
+        dto.setUser(new UserDTONoPassword(p.getUser()));
+        
+        //System.out.println("[2][][]" + p.getUser());
+        //System.out.println("[3][][]" + dto.getUser());
 
         notifyRideDriver(ride);
         notifyRidePassengers(ride);

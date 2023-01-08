@@ -17,5 +17,5 @@ public class Review {
 	private Ride ride;
 	@ManyToOne
 	private Passenger passenger;
-
+	boolean forDriver;
 }

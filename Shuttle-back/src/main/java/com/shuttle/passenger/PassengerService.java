@@ -144,9 +144,11 @@ public class PassengerService implements IPassengerService{
 	    return true;
 	}
   
-   @Override
+	@Override
     public Passenger findByEmail(String email) {
-        return passengerRepository.findByEmail(email);
+	   //System.out.println(passengerRepository.findAll().stream().filter(p -> p.getEmail().equals(email)).findFirst());
+	   //System.out.println(passengerRepository.findByEmail(email));
+	   return passengerRepository.findByEmail(email);
     }
 
     @Override

@@ -110,5 +110,10 @@ public class VehicleService implements IVehicleService {
 		List<LocationDTO> response = this.driverService.getActiveDriversLocations();
 		template.convertAndSend("/active/vehicle/location", response);
 	}
+
+	@Override
+	public Vehicle findById(Long id) {
+		return vehicleRepository.findById(id).orElse(null);
+	}
 	
 }

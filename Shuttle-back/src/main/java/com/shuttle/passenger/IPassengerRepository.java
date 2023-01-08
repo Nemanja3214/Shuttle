@@ -7,8 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 
 public interface IPassengerRepository extends JpaRepository<Passenger, Long> {
-	@Query("select p from Passenger p where p.email = ?1")
-	public Passenger findByEmail(String myemail);
+	@Query("select p from Passenger p where p.email = :email")
+	public Passenger findByEmail(String email);
 	
     @Modifying
     @Query(value="DELETE FROM Passenger p \n"
