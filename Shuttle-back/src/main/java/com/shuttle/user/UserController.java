@@ -6,6 +6,7 @@ import com.shuttle.security.jwt.JwtTokenUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.aspectj.apache.bcel.classfile.ExceptionTable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,14 @@ public class UserController {
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
+    	
+    	//if (Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", passwordDTO.getNew_password())) {
+    	//	return new ResponseEntity<RESTError>(new RESTError("Field (new_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
+    	//}
+    	
+    	//if (Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", passwordDTO.getNew_password())) {
+    	//	return new ResponseEntity<RESTError>(new RESTError("Field (old_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
+    	//}
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
@@ -94,7 +103,6 @@ public class UserController {
 		
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
-    
     
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/resetPassword")
@@ -132,6 +140,14 @@ public class UserController {
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
+    	
+    	//if (!Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", dto.getNew_password())) {
+    	//	return new ResponseEntity<RESTError>(new RESTError("Field (new_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
+    	//}
+    	
+    	if (!Pattern.matches("^[0-9]{1,6}$", dto.getCode())) {
+    		return new ResponseEntity<RESTError>(new RESTError("Field (code) format is not valid!!"), HttpStatus.BAD_REQUEST);
+    	}
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
