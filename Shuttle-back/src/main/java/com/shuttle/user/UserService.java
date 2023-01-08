@@ -8,6 +8,8 @@ import com.shuttle.user.dto.UserDTO;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+
 public interface UserService {
     GenericUser findById(Long id);
     GenericUser findByEmail(String email);
@@ -49,4 +51,7 @@ public interface UserService {
      * @return True if they match, false otherwise.
      */
     boolean hasPassword(GenericUser user, String password);
+    
+    
+	List<GenericUser> findAll(Pageable pageable);
 }

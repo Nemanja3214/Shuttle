@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -161,5 +162,10 @@ public class UserServiceImpl implements UserService {
 	public
 	boolean hasPassword(GenericUser user, String password) {
 		return passwordEncoder.matches(password, user.getPassword());
+	}
+
+	@Override
+	public List<GenericUser> findAll(Pageable pageable) {
+		return userRepository.findAll(pageable).toList();
 	}
 }

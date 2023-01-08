@@ -50,6 +50,7 @@ import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.dto.PasswordDTO;
 import com.shuttle.user.dto.UserDTO;
+import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.passwordReset.IPasswordResetService;
 import com.shuttle.user.passwordReset.PasswordResetCode;
 import com.shuttle.user.passwordReset.dto.PasswordResetCodeDTO;
@@ -228,16 +229,16 @@ public class UserController {
         return new ResponseEntity<>(ridesDTO, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @GetMapping
-    public ResponseEntity<ListDTO<UserDTO>> getUsers(
-            @RequestParam Long page,
-            @RequestParam Long size) {
-
-        ListDTO<UserDTO> users = new ListDTO<>();
-        users.setTotalCount(243);
-        users.getResults().add(UserDTO.getMock());
-
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    public ResponseEntity<?> getUsers(Pageable pageable) {
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		}
+		
+		List<GenericUser> users = userService.findAll(pageable);
+		ListDTO<UserDTONoPassword> usersDTO = new ListDTO<>(users.stream().map(u -> new UserDTONoPassword(u)).toList());
+        return new ResponseEntity<>(usersDTO, HttpStatus.OK);
     }
 
     @PostMapping("/login")
