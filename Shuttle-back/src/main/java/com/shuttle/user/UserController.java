@@ -43,6 +43,8 @@ import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.dto.PasswordDTO;
 import com.shuttle.user.dto.UserDTO;
+import com.shuttle.user.passwordReset.IPasswordResetService;
+import com.shuttle.user.passwordReset.PasswordResetCode;
 import com.shuttle.vehicle.Vehicle;
 
 import jakarta.websocket.server.PathParam;
@@ -60,6 +62,8 @@ public class UserController {
     private IMessageService messageService;
     @Autowired
     private IRideService rideService;
+    @Autowired
+    private IPasswordResetService passwordResetService;
     
     
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
@@ -69,31 +73,57 @@ public class UserController {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
 		
-		GenericUser u = userService.findById(id);
-		
+		GenericUser u = userService.findById(id);	
 		if (u == null) {
 			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
 		}
 		
-		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		if (userService.isAdmin(user)) {	
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
 		} else {
-	    	if (!u.getId().equals(user.getId())) {
+	    	if (!u.getId().equals(user____.getId())) {
                 return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
-		if (!userService.hasPassword(user, passwordDTO.getOld_password())) {
+		if (!userService.hasPassword(u, passwordDTO.getOld_password())) {
 			return new ResponseEntity<RESTError>(new RESTError("Current password is not matching!"), HttpStatus.BAD_REQUEST);
 		}
-		
-		userService.changePassword(user, passwordDTO.getNew_password());
+		userService.changePassword(u, passwordDTO.getNew_password());
 		
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
     
     
-    
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    @GetMapping("/{id}/resetPassword")
+    public ResponseEntity<?> resetPassword(@PathVariable Long id) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!u.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		if (passwordResetService.findByUser(u) != null) {
+			return new ResponseEntity<RESTError>(new RESTError("Active code already exists!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		PasswordResetCode prc = passwordResetService.create(u);
+		System.out.println("Sending email to " + u.getEmail() + " with code " + prc.getCode() + ". There's a time limit.");
+		
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT); 
+    }
     
     
     
