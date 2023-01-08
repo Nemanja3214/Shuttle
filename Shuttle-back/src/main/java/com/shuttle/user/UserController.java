@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -242,13 +243,19 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
+    public ResponseEntity<?> login(@RequestBody CredentialsDTO credentialsDTO) {
         UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(), credentialsDTO.getPassword());
-        Authentication auth = authenticationManager.authenticate(authReq);
+        
+        Authentication auth = null;
+        try {
+        	auth = authenticationManager.authenticate(authReq);
+        } catch (BadCredentialsException e) {
+        	return new ResponseEntity<RESTError>(new RESTError("Wrong username or password!"), HttpStatus.BAD_REQUEST);
+        }
+        
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
-        String token = jwtTokenUtil.generateToken
-                (((GenericUser) auth.getPrincipal()).getId(), credentialsDTO.getEmail(), auth.getAuthorities());
+        String token = jwtTokenUtil.generateToken(((GenericUser) auth.getPrincipal()).getId(), credentialsDTO.getEmail(), auth.getAuthorities());
         TokenDTO tokens = new TokenDTO(token, token);
         //TODO add refresh token
         
@@ -257,7 +264,7 @@ public class UserController {
         	userService.setActive(user, true);
         }
         
-        
+
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
     }
 
