@@ -43,6 +43,9 @@ import com.shuttle.message.Message;
 import com.shuttle.message.Message.Type;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
+import com.shuttle.note.INoteService;
+import com.shuttle.note.Note;
+import com.shuttle.note.NoteMessage;
 import com.shuttle.note.dto.NoteDTO;
 import com.shuttle.security.jwt.JwtTokenUtil;
 import com.shuttle.ride.IRideService;
@@ -75,6 +78,8 @@ public class UserController {
     private IRideService rideService;
     @Autowired
     private IPasswordResetService passwordResetService;
+    @Autowired
+    private INoteService noteService;
     
     
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
@@ -384,22 +389,39 @@ public class UserController {
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PostMapping("/{id}/note")
-    public ResponseEntity<NoteDTO> createNote(@PathVariable long id, @RequestBody String message) {
-        return new ResponseEntity<NoteDTO>(NoteDTO.getMock(), HttpStatus.OK);
+    public ResponseEntity<?> createNote(@PathVariable Long id, @RequestBody NoteMessage message) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser creator = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		Note n = noteService.create(u, creator, message.getMessage());
+	
+        return new ResponseEntity<NoteDTO>(new NoteDTO(n), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @GetMapping("/{id}/note")
-    public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(
-            @PathVariable long id,
-            @RequestParam long page,
-            @RequestParam long size) {
-
-        ListDTO<NoteDTO> notes = new ListDTO<>();
-        notes.setTotalCount(243);
-        notes.getResults().add(NoteDTO.getMock());
-
-        return new ResponseEntity<>(notes, HttpStatus.OK);
+    public ResponseEntity<?> getUserNotes(@PathVariable Long id, Pageable pageable) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		List<Note> notes = noteService.findAll(u, pageable);
+		ListDTO<NoteDTO> notesDTO = new ListDTO(notes.stream().map(n -> new NoteDTO(n)).toList());		
+        return new ResponseEntity<>(notesDTO, HttpStatus.OK);
     }
     
     //////////////////////////////////////////////////////////////////////////////////////////////////////
