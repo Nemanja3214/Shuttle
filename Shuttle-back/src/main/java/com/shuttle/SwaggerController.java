@@ -20,7 +20,7 @@ public class SwaggerController {
     public void index() {
         for (GenericUser user :
                 userService.findAll()) {
-            userService.encodeUserPassword(user, user.getPassword());
+            userService.changePassword(user, user.getPassword());
             userService.save(user);
         }
 

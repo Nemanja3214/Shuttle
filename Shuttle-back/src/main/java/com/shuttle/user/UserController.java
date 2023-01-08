@@ -11,6 +11,7 @@ import org.aspectj.apache.bcel.classfile.ExceptionTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,7 +41,9 @@ import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.user.dto.PasswordDTO;
 import com.shuttle.user.dto.UserDTO;
+import com.shuttle.vehicle.Vehicle;
 
 import jakarta.websocket.server.PathParam;
 
@@ -57,6 +60,43 @@ public class UserController {
     private IMessageService messageService;
     @Autowired
     private IRideService rideService;
+    
+    
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    @PutMapping("/{id}/changePassword")
+    public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody PasswordDTO passwordDTO) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);
+		
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user)) {	
+		} else {
+	    	if (!u.getId().equals(user.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		if (!userService.hasPassword(user, passwordDTO.getOld_password())) {
+			return new ResponseEntity<RESTError>(new RESTError("Current password is not matching!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		userService.changePassword(user, passwordDTO.getNew_password());
+		
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    }
+    
+    
+    
+    
+    
+    
 
     @GetMapping("/{id}/ride")
     public ResponseEntity<ListDTO<String>> getUserRides(

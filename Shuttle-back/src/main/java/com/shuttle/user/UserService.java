@@ -14,7 +14,6 @@ public interface UserService {
     List<GenericUser> findAll ();
     GenericUser save(UserDTO userDTO);
     GenericUser save(GenericUser user);
-    GenericUser encodeUserPassword(GenericUser user, String password);
 	GenericUser setActive(GenericUser user, boolean b);
 	boolean getActive(GenericUser user);
 	String getProfilePicture(long id) throws NonExistantUserException, IOException;
@@ -34,4 +33,20 @@ public interface UserService {
     boolean isAdmin(GenericUser user);
     boolean isPassenger(GenericUser user);
     boolean isDriver(GenericUser user);
+    
+    /**
+     * Change the current password of the given user.
+     * @param user The user.
+     * @param password New password as plain-text.
+     * @return The user with an updated password.
+     */
+    GenericUser changePassword(GenericUser user, String password);
+    
+    /**
+     * Compares the current password with the given password.
+     * @param user The user.
+     * @param password The password as plain-text.
+     * @return True if they match, false otherwise.
+     */
+    boolean hasPassword(GenericUser user, String password);
 }
