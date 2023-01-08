@@ -28,6 +28,6 @@ public class MessageDTO {
         this.receiverId = m.getReceiver().getId();
         this.message = m.getMessage();
         this.type = m.getType();
-        this.rideId = m.getRide().getId();
+        this.rideId = m.getRide() == null ? null : m.getRide().getId();
     }
 }

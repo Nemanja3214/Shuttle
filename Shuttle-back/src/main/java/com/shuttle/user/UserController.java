@@ -40,6 +40,7 @@ import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.message.IMessageService;
 import com.shuttle.message.Message;
+import com.shuttle.message.Message.Type;
 import com.shuttle.message.dto.CreateMessageDTO;
 import com.shuttle.message.dto.MessageDTO;
 import com.shuttle.note.dto.NoteDTO;
@@ -186,7 +187,6 @@ public class UserController {
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
     
-
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/ride")
     public ResponseEntity<?> getUserRides(@PathVariable Long id, Pageable pageable, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
@@ -268,27 +268,47 @@ public class UserController {
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
     }
 
+    ///////////
+    
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/message")
-    public ResponseEntity<ListDTO<MessageDTO>> getMessages(@PathVariable long id) {
-
-        ListDTO<MessageDTO> messages = new ListDTO<>();
-        messages.setTotalCount(243);
-        messages.getResults().add(new MessageDTO());
-
-        return new ResponseEntity<>(messages, HttpStatus.OK);
+    public ResponseEntity<?> getMessages(@PathVariable Long id) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!u.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+    	List<Message> messages = messageService.findByUser(u);
+        ListDTO<MessageDTO> messagesDTO = new ListDTO<>(messages.stream().map(m -> new MessageDTO(m)).toList());
+        return new ResponseEntity<>(messagesDTO, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PostMapping("/{recieverId}/message")
     public ResponseEntity<?> sendMessage(@PathVariable Long recieverId, @RequestBody CreateMessageDTO messageDTO) {
+    	// TODO: recieverId or messageDTO.receiverId ; one of these is redundant
+    	
         if (recieverId == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
 
-        GenericUser sender = null;
+        GenericUser sender = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         
-        try {
-            sender = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        } catch (Exception e) {}
+        if (sender == null) {
+        	return new ResponseEntity<RESTError>(new RESTError("User does not exist."), HttpStatus.NOT_FOUND);
+        }
         
         GenericUser reciever = null;
         if (recieverId == -1) {
@@ -299,12 +319,18 @@ public class UserController {
         } else {
             reciever = userService.findById(recieverId);
         }
+        
+        if (reciever == null) {
+        	return new ResponseEntity<RESTError>(new RESTError("Receiver does not exist."), HttpStatus.NOT_FOUND);
+        }
 
         Ride ride = rideService.findById(messageDTO.getRideId());
 
-		if (sender == null || reciever == null || ride == null) {
-			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+		if (ride == null && messageDTO.getType() != Type.SUPPORT) {
+			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist."), HttpStatus.NOT_FOUND);
 		}
+		
+		System.out.println(reciever.getEmail());
         
         Message m = new Message(
             null,

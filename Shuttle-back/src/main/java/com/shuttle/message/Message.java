@@ -24,7 +24,7 @@ public class Message {
     private String message;
     private LocalDateTime time;
     @ManyToOne
-    private Ride ride;
+    private Ride ride; // Can be null if SUPPORT.
     private Type type;
 
     public enum Type {
