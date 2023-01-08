@@ -1,22 +1,26 @@
 package com.shuttle.ride;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
 import com.shuttle.location.Location;
 import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
-import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.vehicleType.VehicleType;
@@ -35,6 +39,8 @@ public class RideService implements IRideService {
     private IDriverService driverService;
     @Autowired
     private IVehicleService vehicleService;
+    @Autowired
+    private IPassengerRepository passengerRepository;
 
 	@Override
 	public Ride save(Ride ride) {
@@ -282,4 +288,24 @@ public class RideService implements IRideService {
     public List<Ride> findAllPendingInFuture() {
         return rideRepository.findPendingInTheFuture();
     }
+
+	@Override
+	public List<Ride> findRidesByPassengerInDateRange(Long passengerId, String from, String to, Pageable pageable) throws NonExistantUserException {
+		Optional<Passenger> passengerO = this.passengerRepository.findById(passengerId);
+		if(passengerO.isEmpty()) {
+			throw new NonExistantUserException();
+		}
+		Passenger passenger = passengerO.get();
+		
+		ZonedDateTime zdt;
+		
+		zdt = ZonedDateTime.parse(from);
+		LocalDateTime fromTime = zdt.toLocalDateTime();
+		
+		zdt = ZonedDateTime.parse(to);
+		LocalDateTime toTime = zdt.toLocalDateTime();
+		
+		return this.rideRepository.getAllByPassengerAndBetweenDates(fromTime, toTime, passenger, pageable);
+	}
+
 }

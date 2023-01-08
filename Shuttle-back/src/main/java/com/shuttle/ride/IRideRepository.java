@@ -2,7 +2,6 @@ package com.shuttle.ride;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.shuttle.driver.Driver;
+import com.shuttle.passenger.Passenger;
 
 public interface IRideRepository extends JpaRepository<Ride, Long> {
     public List<Ride> findByDriverAndStatus(Driver driver, Ride.Status status);
@@ -28,4 +28,8 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
 
     @Query(value = "from Ride r where r.status = 0 and r.startTime > current_time")
     public List<Ride> findPendingInTheFuture();
+    
+    @Query(value = "from Ride r where (:passenger) IN elements(r.passengers) and ( r.endTime BETWEEN :startDate AND :endDate )")
+    public List<Ride> getAllByPassengerAndBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Passenger passenger, Pageable pageable);
+
 }

@@ -2,6 +2,9 @@ package com.shuttle.passenger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
 
 import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.common.exception.NonExistantUserException;
@@ -30,4 +33,9 @@ public interface IPassengerService {
      * @return The passenger with the provided ID or null if none found.
      */
     public Passenger findById(Long passengerId);
+
+	public List<Passenger> findAll(Pageable pageable);
+
+	public Passenger updatePassenger(Long id, PassengerUpdateDTO newData) throws NonExistantUserException, IOException;
+
 }

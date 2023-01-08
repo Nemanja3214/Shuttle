@@ -1,8 +1,12 @@
 package com.shuttle.ride;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
+
+import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.cancellation.Cancellation;
@@ -110,5 +114,7 @@ public interface IRideService {
      * @return List of such rides. Can be empty.
      */
     List<Ride> findAllPendingInFuture();
+
+	List<Ride> findRidesByPassengerInDateRange(Long passengerId, String from, String to, Pageable pageable) throws NonExistantUserException;
 
 }

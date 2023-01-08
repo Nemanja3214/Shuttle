@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,17 +23,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.shuttle.common.ListDTO;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.TokenExpiredException;
+import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
-import com.shuttle.ride.dto.RidePageDTO;
+import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.email.IEmailService;
 
 import jakarta.mail.MessagingException;
-import com.shuttle.ride.Ride;
-import com.shuttle.ride.dto.RidePageDTO;
 import jakarta.websocket.server.PathParam;
 
 class Desc{
@@ -48,6 +49,9 @@ public class PassengerController {
 	
 	@Autowired
 	IPassengerService passengerService;
+
+	@Autowired
+	IRideService rideService;
 	
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
@@ -107,15 +111,24 @@ public class PassengerController {
 	}
 
 	@GetMapping
-	public ResponseEntity<PassengerPageDTO> getPaginated(@PathParam("page") int page, @PathParam("size") int size) {
-		List<Passenger> passengersMock = new ArrayList<>();
-		return new ResponseEntity<>(new PassengerPageDTO(passengersMock), HttpStatus.OK);
+	public ResponseEntity<?>getPaginated(@PathParam("page") int page, @PathParam("size") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		List<Passenger> passengers = this.passengerService.findAll(pageable);
+		List<PassengerDTO> passengersDTO = passengers.stream().map(p -> new PassengerDTO(p)).toList();
+		ListDTO<PassengerDTO> result = new ListDTO<>(passengersDTO);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<PassengerDTO> getDetails(@PathVariable("id") Long id) {
-		Passenger p = new Passenger();
-		return new ResponseEntity<>(new PassengerDTO(p), HttpStatus.OK);
+	public ResponseEntity<?> getDetails(@PathVariable("id") Long id) {
+		Passenger passenger = this.passengerService.findById(id);
+		
+		if(passenger == null) {
+			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
+		}
+		else {
+			return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
+		}
 	}
 
 	@GetMapping("/activate/{activationId}")
@@ -156,9 +169,16 @@ public class PassengerController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<PassengerDTO> update(@RequestBody Passenger newData, @PathVariable("id") Long id) {
-		Passenger passengerFromDb = new Passenger();
-		return new ResponseEntity<PassengerDTO>(new PassengerDTO(passengerFromDb), HttpStatus.OK);
+	public ResponseEntity<?> update(@RequestBody PassengerUpdateDTO newData, @PathVariable("id") Long id) {
+		Passenger updatedPassenger;
+		try {
+			updatedPassenger = this.passengerService.updatePassenger(id, newData);
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
+		} catch (IOException e) {
+			return new ResponseEntity<>("Cannot save picture", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>(new PassengerDTO(updatedPassenger), HttpStatus.OK);
 	}
     
     @GetMapping("/email")
@@ -173,10 +193,19 @@ public class PassengerController {
     }
 
 	@GetMapping("/{id}/ride")
-	public ResponseEntity<RidePageDTO> getRides(@PathVariable("id") Long passengerId, @PathParam("page") int page,
+	public ResponseEntity<?> getRides(@PathVariable("id") Long passengerId, @PathParam("page") int page,
 			@PathParam("size") int size, @PathParam("sort") String sort, @PathParam("from") String from,
 			@PathParam("to") String to) {
-		List<Ride> ridesMock = new ArrayList<>();
-		return new ResponseEntity<RidePageDTO>(new RidePageDTO(ridesMock), HttpStatus.OK);
+		
+		Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+		List<Ride> rides;
+		try {
+			rides = this.rideService.findRidesByPassengerInDateRange(passengerId, from, to, pageable);
+			List<RideDTO> ridesDTO = rides.stream().map(ride -> new RideDTO(ride)).toList();
+			return new ResponseEntity<>(new ListDTO<RideDTO>(ridesDTO), HttpStatus.OK);
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
+		}
+		
 	}
 }
