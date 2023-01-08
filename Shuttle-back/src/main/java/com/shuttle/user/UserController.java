@@ -45,6 +45,7 @@ import com.shuttle.user.dto.PasswordDTO;
 import com.shuttle.user.dto.UserDTO;
 import com.shuttle.user.passwordReset.IPasswordResetService;
 import com.shuttle.user.passwordReset.PasswordResetCode;
+import com.shuttle.user.passwordReset.dto.PasswordResetCodeDTO;
 import com.shuttle.vehicle.Vehicle;
 
 import jakarta.websocket.server.PathParam;
@@ -97,7 +98,7 @@ public class UserController {
     
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/resetPassword")
-    public ResponseEntity<?> resetPassword(@PathVariable Long id) {
+    public ResponseEntity<?> resetPasswordSendEmail(@PathVariable Long id) {
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
@@ -125,7 +126,41 @@ public class UserController {
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT); 
     }
     
-    
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    @PutMapping("/{id}/resetPassword")
+    public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestBody PasswordResetCodeDTO dto) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!u.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		List<PasswordResetCode> requests = passwordResetService.findByUserMaybeExpired(u);
+		PasswordResetCode req = requests.stream().filter(r -> r.getCode().equals(dto.getCode())).findFirst().orElse(null);
+
+		if (req == null || !req.getActive() || req.getExpires().isBefore(LocalDateTime.now())) {
+			return new ResponseEntity<RESTError>(new RESTError("Code is expired or not correct!"), HttpStatus.NOT_FOUND);
+		}
+		
+		for (PasswordResetCode pr : requests) {
+			passwordResetService.invalidate(pr);
+		}
+		
+		userService.changePassword(u, dto.getNew_password());
+		
+		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    }
     
 
     @GetMapping("/{id}/ride")

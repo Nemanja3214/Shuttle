@@ -52,4 +52,10 @@ public class PasswordResetService implements IPasswordResetService {
 	public List<PasswordResetCode> findByUserMaybeExpired(GenericUser user) {
 		return repo.findByUserActiveMaybeExpired(user.getId());
 	}
+
+	@Override
+	public PasswordResetCode invalidate(PasswordResetCode pr) {
+		pr.setActive(false);
+		return repo.save(pr);
+	}
 }

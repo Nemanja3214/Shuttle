@@ -11,4 +11,5 @@ public interface IPasswordResetService {
 	PasswordResetCode findByCode(String code);
 	PasswordResetCode findByUser(GenericUser user);
 	List<PasswordResetCode> findByUserMaybeExpired(GenericUser user);
+	PasswordResetCode invalidate(PasswordResetCode pr);
 }
