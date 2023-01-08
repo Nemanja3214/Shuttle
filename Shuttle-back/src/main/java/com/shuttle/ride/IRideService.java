@@ -1,12 +1,16 @@
 package com.shuttle.ride;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Pageable;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
 public interface IRideService {
@@ -93,7 +97,7 @@ public interface IRideService {
      */
     List<Ride> findRidesWithNoDriver();
 
-        /**
+    /**
      * Extracted predicate method for determining if the driver's vehicle is suitable for the
      * given parameters.
      * @param d The driver. Must not be null.
@@ -110,5 +114,15 @@ public interface IRideService {
      * @return List of such rides. Can be empty.
      */
     List<Ride> findAllPendingInFuture();
+
+    /**
+     * Find list of rides for a given user.
+     * @param user User.
+     * @param pageable Pageable object got from the request param.
+     * @param from Datetime range from.
+     * @param to Datetime range to.
+     * @return List of rides.
+     */
+	List<Ride> findByUser(GenericUser user, Pageable pageable, LocalDateTime from, LocalDateTime to);
 
 }

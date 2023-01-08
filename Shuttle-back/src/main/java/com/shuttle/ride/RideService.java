@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.driver.Driver;
@@ -17,6 +18,7 @@ import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.vehicleType.VehicleType;
@@ -282,4 +284,13 @@ public class RideService implements IRideService {
     public List<Ride> findAllPendingInFuture() {
         return rideRepository.findPendingInTheFuture();
     }
+
+	@Override
+	public List<Ride> findByUser(GenericUser user, Pageable pageable, LocalDateTime from, LocalDateTime to) {
+		if (from != null && to != null) {
+			return rideRepository.findByUser(user.getId(), pageable, from, to);
+		} else {
+			return rideRepository.findByUser(user.getId(), pageable);
+		}
+	}
 }

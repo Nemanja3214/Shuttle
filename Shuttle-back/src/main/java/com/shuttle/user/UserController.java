@@ -4,12 +4,17 @@ package com.shuttle.user;
 import java.io.IOException;
 import com.shuttle.security.jwt.JwtTokenUtil;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import org.aspectj.apache.bcel.classfile.ExceptionTable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +45,7 @@ import com.shuttle.note.dto.NoteDTO;
 import com.shuttle.security.jwt.JwtTokenUtil;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
+import com.shuttle.ride.RideController;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.dto.PasswordDTO;
@@ -179,20 +185,47 @@ public class UserController {
     }
     
 
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/ride")
-    public ResponseEntity<ListDTO<String>> getUserRides(
-            @PathVariable long id,
-            @PathParam("page") long page,
-            @PathParam("size") long size,
-            @PathParam("sort") String sort,
-            @RequestParam String from,
-            @RequestParam String to) {
-
-        ListDTO<String> rides = new ListDTO<>();
-        rides.setTotalCount(243);
-        rides.getResults().add("string");
-
-        return new ResponseEntity<>(rides, HttpStatus.OK);
+    public ResponseEntity<?> getUserRides(@PathVariable Long id, Pageable pageable, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	LocalDateTime tFrom = null, tTo = null;
+    	if (from != null && to != null) {
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tFrom = LocalDateTime.parse(from, formatter);
+    			//tFrom = LocalDateTime.from(DateTimeFormatter.ISO_INSTANT.parse(from));
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tTo = LocalDateTime.parse(to, formatter);
+    			//tTo = LocalDateTime.from(DateTimeFormatter.ISO_INSTANT.parse(to));
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    	}
+    	
+    	GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!u.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		List<Ride> rides = rideService.findByUser(u, pageable, tFrom, tTo);
+		ListDTO<RideDTO> ridesDTO = new ListDTO<>(rides.stream().map(r -> RideController.to(r)).toList());
+        return new ResponseEntity<>(ridesDTO, HttpStatus.OK);
     }
 
     @GetMapping
