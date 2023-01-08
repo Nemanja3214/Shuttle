@@ -29,4 +29,10 @@ public class LocationDTO {
 	public static LocationDTO getMock() {
 		return new LocationDTO("Bulevar oslobodjenja 46", 45.267136, 19.833549);
 	}
+
+	public LocationDTO(Location location) {
+		this.setAddress(location.getAddress());
+		this.setLatitude(location.getLatitude());
+		this.setLongitude(location.getLongitude());
+	}
 }

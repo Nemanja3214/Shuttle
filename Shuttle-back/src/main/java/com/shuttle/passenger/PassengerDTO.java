@@ -3,6 +3,8 @@ package com.shuttle.passenger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -42,6 +44,7 @@ public class PassengerDTO {
 		return p;
 	}
 	
+	@JsonIgnore
 	public boolean isInvalid() {
 		return !isEmailValid() || !isPhoneValid() || !isPasswordValid() || hasEmptyField();
 	}
@@ -55,6 +58,7 @@ public class PassengerDTO {
 				this.password.equals("");
 	}
 	
+	@JsonIgnore
 	private boolean isEmailValid() {
 		String regex = "^[A-Za-z0-9+_.-]+@(.+)$";  
 		Pattern pattern = Pattern.compile(regex);  	
@@ -62,6 +66,7 @@ public class PassengerDTO {
 		return matcher.matches();
 	}
 	
+	@JsonIgnore
 	private boolean isPhoneValid() {
 		String regex = "^[\\+]?[0-9]+$";
 		Pattern pattern = Pattern.compile(regex);  	
@@ -69,6 +74,7 @@ public class PassengerDTO {
 		return matcher.matches();
 	}
 	
+	@JsonIgnore
 	private boolean isPasswordValid() {
 		String regex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
 		Pattern pattern = Pattern.compile(regex);  	

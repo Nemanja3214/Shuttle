@@ -52,4 +52,9 @@ public class FileUploadUtil {
 		return getImageBase64(profilePictureUploadDir, "default.png");
 	}
 
+	public static void deleteFile(String uploadDir, String fileName) {
+		 File pictureFile = new File(uploadDir + fileName);
+		 pictureFile.delete();
+	}
+
 }

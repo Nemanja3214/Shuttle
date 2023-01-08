@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -165,4 +166,41 @@ public class PassengerService implements IPassengerService{
 		passengerRepository.deleteByExpiredToken();
 		System.out.println("Num of users afterwards: " + passengerRepository.findAll().size());
 	}
+
+
+	@Override
+	public List<Passenger> findAll(Pageable pageable) {
+		List<Passenger> passengers = this.passengerRepository.findAll(pageable).getContent();
+		return passengers;
+	}
+
+
+	@Override
+	public Passenger updatePassenger(Long id, PassengerUpdateDTO newData) throws NonExistantUserException, IOException {
+		Optional<Passenger> passengerO = this.passengerRepository.findById(id);
+		if(passengerO.isEmpty()) {
+			throw new NonExistantUserException();
+		}
+		Passenger passenger = passengerO.get();
+		changePassenger(passenger, newData);
+		passenger = this.passengerRepository.save(passenger);
+		
+		FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName());
+		FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName(), newData.getProfilePicture());
+		
+		return passenger;
+		
+	}
+
+
+	private void changePassenger(Passenger passenger, PassengerUpdateDTO newData) {
+		passenger.setAddress(newData.getAddress());
+		passenger.setEmail(newData.getEmail());
+		passenger.setName(newData.getName());
+		passenger.setProfilePicture(newData.getProfilePicture());
+		passenger.setSurname(newData.getSurname());
+		passenger.setTelephoneNumber(newData.getTelephoneNumber());
+		
+	}
+
 }

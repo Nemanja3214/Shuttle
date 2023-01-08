@@ -14,4 +14,5 @@ public class Route {
 	Long id;
 	@ManyToMany(fetch = FetchType.EAGER)
 	List<Location> locations;
+	
 }
