@@ -54,4 +54,5 @@ public interface UserService {
     
     
 	List<GenericUser> findAll(Pageable pageable);
+	GenericUser setBlocked(GenericUser u, boolean b);
 }

@@ -168,4 +168,10 @@ public class UserServiceImpl implements UserService {
 	public List<GenericUser> findAll(Pageable pageable) {
 		return userRepository.findAll(pageable).toList();
 	}
+
+	@Override
+	public GenericUser setBlocked(GenericUser u, boolean b) {
+		u.setBlocked(b);
+		return userRepository.save(u);
+	}
 }

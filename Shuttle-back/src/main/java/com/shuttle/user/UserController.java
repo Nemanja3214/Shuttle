@@ -268,8 +268,6 @@ public class UserController {
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
     }
 
-    ///////////
-    
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/message")
     public ResponseEntity<?> getMessages(@PathVariable Long id) {
@@ -346,15 +344,66 @@ public class UserController {
         return new ResponseEntity<MessageDTO>(new MessageDTO(m), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/{id}/block")
-    public ResponseEntity<Boolean> block(@PathVariable long id) {
-        return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> block(@PathVariable Long id) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		if (u.getBlocked()) {
+			return new ResponseEntity<RESTError>(new RESTError("User is already blocked!"), HttpStatus.BAD_REQUEST);	
+		}
+		
+		u = userService.setBlocked(u, true);
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/{id}/unblock")
-    public ResponseEntity<Boolean> unblock(@PathVariable long id) {
-        return new ResponseEntity<Boolean>(true, HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> unblock(@PathVariable Long id) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser u = userService.findById(id);	
+		if (u == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+		
+		if (!u.getBlocked()) {
+			return new ResponseEntity<RESTError>(new RESTError("User is not blocked!"), HttpStatus.BAD_REQUEST);	
+		}
+		
+		u = userService.setBlocked(u, false);
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
+
+    @PostMapping("/{id}/note")
+    public ResponseEntity<NoteDTO> createNote(@PathVariable long id, @RequestBody String message) {
+        return new ResponseEntity<NoteDTO>(NoteDTO.getMock(), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/note")
+    public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(
+            @PathVariable long id,
+            @RequestParam long page,
+            @RequestParam long size) {
+
+        ListDTO<NoteDTO> notes = new ListDTO<>();
+        notes.setTotalCount(243);
+        notes.getResults().add(NoteDTO.getMock());
+
+        return new ResponseEntity<>(notes, HttpStatus.OK);
+    }
+    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     
     @GetMapping("/{id}/active")
     public ResponseEntity<?> getActive(@PathVariable Long id) {
@@ -393,24 +442,6 @@ public class UserController {
 		}
 		user = userService.setActive(user, false);
 		return new ResponseEntity<Boolean>(user.getActive(), HttpStatus.OK);
-    }
-
-    @PostMapping("/{id}/note")
-    public ResponseEntity<NoteDTO> createNote(@PathVariable long id, @RequestBody String message) {
-        return new ResponseEntity<NoteDTO>(NoteDTO.getMock(), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}/note")
-    public ResponseEntity<ListDTO<NoteDTO>> getUserNotes(
-            @PathVariable long id,
-            @RequestParam long page,
-            @RequestParam long size) {
-
-        ListDTO<NoteDTO> notes = new ListDTO<>();
-        notes.setTotalCount(243);
-        notes.getResults().add(NoteDTO.getMock());
-
-        return new ResponseEntity<>(notes, HttpStatus.OK);
     }
     
 	@GetMapping("/img/{id}")
