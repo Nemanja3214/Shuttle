@@ -1,4 +1,4 @@
-package com.shuttle.ride.cancellation;
+package com.shuttle.review.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CancellationBodyDTO {
-	private String reason;
+public class ReviewMinimalDTO {
+	private Integer rating;
+	private String comment;
 }

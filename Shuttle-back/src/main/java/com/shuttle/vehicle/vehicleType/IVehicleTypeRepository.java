@@ -1,4 +1,4 @@
-package com.shuttle.vehicle;
+package com.shuttle.vehicle.vehicleType;
 
 import java.util.Optional;
 

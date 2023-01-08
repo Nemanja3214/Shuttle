@@ -5,10 +5,14 @@ import java.time.LocalDateTime;
 import com.shuttle.ride.Ride;
 import com.shuttle.user.GenericUser;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +28,6 @@ public class Message {
     private Type type;
 
     public enum Type {
-        Support, Ride, Panic
+        SUPPORT, RIDE, PANIC
     }
 }
