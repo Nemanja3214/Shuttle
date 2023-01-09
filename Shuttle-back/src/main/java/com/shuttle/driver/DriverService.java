@@ -1,6 +1,8 @@
 package com.shuttle.driver;
 
 import java.util.List;
+import java.util.Optional;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +10,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.common.FileUploadUtil;
+import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.dto.DriverDTO;
+import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.passenger.PassengerDTO;
+import com.shuttle.passenger.PassengerUpdateDTO;
 import com.shuttle.security.Role;
 import com.shuttle.security.RoleService;
 import com.shuttle.user.GenericUser;
@@ -114,5 +120,27 @@ public class DriverService implements IDriverService {
 	@Override
 	public List<Driver> findAll(Pageable pageable) {
 		return this.driverRepository.findAll(pageable).toList();
+	}
+
+	@Override
+	public Driver update(Driver driver, DriverUpdateDTO dto) throws IOException {
+		changeDriver(driver, dto);
+		driver = driverRepository.save(driver);
+		
+		if (dto.getProfilePicture() != null) {
+			FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, driver.getProfilePictureName());
+			FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, driver.getProfilePictureName(), dto.getProfilePicture());
+		}
+		
+		return driver;
+	}
+	
+	private void changeDriver(Driver driver, DriverUpdateDTO dto) {
+		driver.setAddress(dto.getAddress());
+		driver.setEmail(dto.getEmail());
+		driver.setName(dto.getName());
+		if (dto.getProfilePicture() != null) driver.setProfilePicture(dto.getProfilePicture());
+		driver.setSurname(dto.getSurname());
+		if (dto.getTelephoneNumber() != null) driver.setTelephoneNumber(dto.getTelephoneNumber());
 	}
 }

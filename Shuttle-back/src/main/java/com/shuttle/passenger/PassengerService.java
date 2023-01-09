@@ -178,11 +178,14 @@ public class PassengerService implements IPassengerService{
 			throw new NonExistantUserException();
 		}
 		Passenger passenger = passengerO.get();
+		
 		changePassenger(passenger, newData);
 		passenger = this.passengerRepository.save(passenger);
 		
-		FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName());
-		FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName(), newData.getProfilePicture());
+		if (newData.getProfilePicture() != null) {
+			FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName());
+			FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName(), newData.getProfilePicture());
+		}
 		
 		return passenger;
 		
@@ -193,9 +196,8 @@ public class PassengerService implements IPassengerService{
 		passenger.setAddress(newData.getAddress());
 		passenger.setEmail(newData.getEmail());
 		passenger.setName(newData.getName());
-		passenger.setProfilePicture(newData.getProfilePicture());
+		if (newData.getProfilePicture() != null) passenger.setProfilePicture(newData.getProfilePicture());
 		passenger.setSurname(newData.getSurname());
-		passenger.setTelephoneNumber(newData.getTelephoneNumber());
-		
+		if (newData.getTelephoneNumber() != null) passenger.setTelephoneNumber(newData.getTelephoneNumber());
 	}
 }

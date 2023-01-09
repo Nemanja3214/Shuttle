@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
+import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.passenger.PassengerDTO;
 import com.shuttle.ride.IRideRepository;
@@ -146,9 +148,41 @@ public class DriverController {
     }
 
     @PutMapping("/api/driver/{id}")
-    public ResponseEntity<DriverDTO> updateDriver(@RequestBody DriverDTO driver, @PathVariable(value = "id") Long id) {
-        driver.setId(id);
-        return new ResponseEntity<>(driver, HttpStatus.OK);
+    public ResponseEntity<?> updateDriver(@RequestBody DriverUpdateDTO dto, @PathVariable("id") Long id) {
+    	try {
+			MyValidator.validateRequired(dto.getName(), "name");
+			MyValidator.validateRequired(dto.getSurname(), "surname");
+			MyValidator.validateRequired(dto.getEmail(), "email");
+			MyValidator.validateRequired(dto.getAddress(), "address");
+			
+			MyValidator.validateLength(dto.getName(), "name", 100);
+			MyValidator.validateLength(dto.getSurname(), "surname", 100);
+			MyValidator.validateLength(dto.getTelephoneNumber(), "telephoneNumber", 18);
+			MyValidator.validateLength(dto.getEmail(), "email", 100);
+			MyValidator.validateLength(dto.getAddress(), "address", 100);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	Driver driver = driverService.get(id);
+        if (driver == null) {
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		try {
+			driver = this.driverService.update(driver, dto);
+		} catch (IOException e) {
+			return new ResponseEntity<>("Cannot save picture", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
 
     @GetMapping("/api/driver/{id}/documents")
