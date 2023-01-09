@@ -59,35 +59,5 @@ public class CreateRideEstimationDTO {
 		return locations.stream().map(route -> route.getDistance()).collect(Collectors.summingDouble(Double::doubleValue));
 	}
 	
-	public static void main(String[] args) {
-		List<RouteDTO> routes = new ArrayList<>();
-
-		
-//		routes.add(makeRouteDTO(45, 20, 46, 21));
-//		routes.add(makeRouteDTO(45, 20, 46, 21));
-		
-		routes.add(makeRouteDTO(10, 20, 30, 40));
-		
-		System.out.println(routes.stream().map(route -> route.getDistance()).collect(Collectors.summingDouble(Double::doubleValue)));
-
-	}
-	
-	public static RouteDTO makeRouteDTO(double lat1, double lon1, double lat2, double lon2) {
-		
-		LocationDTO departure = new LocationDTO( );
-		departure.setLatitude(lat1);
-		departure.setLongitude(lon1);
-		
-		LocationDTO destination = new LocationDTO();
-		destination.setLatitude(lat2);
-		destination.setLongitude(lon2);
-		
-		RouteDTO routeDTO = new RouteDTO();
-		routeDTO.setDeparture(departure);
-		routeDTO.setDestination(destination);
-		
-		return routeDTO;
-	}
-	
 
 }
