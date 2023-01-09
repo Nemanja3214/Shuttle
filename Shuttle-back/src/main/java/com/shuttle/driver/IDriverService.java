@@ -18,8 +18,7 @@ public interface IDriverService {
 	 */
 	public Driver setAvailable(Driver driver, boolean available);
 	public List<LocationDTO> getActiveDriversLocations();
-	public List<Driver> findByAvailableTrue();
-
+	public List<Driver> findAllActive();
     /**
      * Get duration of work done in the last 24 hours.
      * @param driver The driver
@@ -33,4 +32,5 @@ public interface IDriverService {
      * @return True if so.
      */
     public boolean workedMoreThan8Hours(Driver d);
+	
 }

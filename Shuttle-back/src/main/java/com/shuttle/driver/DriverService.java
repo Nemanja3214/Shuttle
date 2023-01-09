@@ -41,14 +41,14 @@ public class DriverService implements IDriverService {
 
 	@Override
 	public List<LocationDTO> getActiveDriversLocations() {
-		List<Driver> activeDrivers = driverRepository.findByAvailableTrue();
+		List<Driver> activeDrivers = driverRepository.findAllActive();
 		List<Vehicle> driversVehicles = vehicleRepository.findByDriverIn(activeDrivers);
 		return driversVehicles.stream().map(vehicle -> LocationDTO.from(vehicle.getCurrentLocation())).toList();
 	}
 
 	@Override
-	public List<Driver> findByAvailableTrue() {
-		return this.driverRepository.findByAvailableTrue();
+	public List<Driver> findAllActive() {
+		return this.driverRepository.findAllActive();
 	}
     @Override
     public Duration getDurationOfWorkInTheLast24Hours(Driver driver) {

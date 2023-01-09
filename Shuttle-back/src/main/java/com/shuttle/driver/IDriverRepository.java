@@ -12,7 +12,6 @@ public interface IDriverRepository extends JpaRepository<Driver, Long> {
 	@Query("select d from Driver d where d.available = true and d.active = true")
 	public List<Driver> findAllActiveAvailable();
 
-	public List<Driver> findByAvailableTrue();
 	@Query("select d from Driver d where d.available = false and d.active = true")
 	public List<Driver> findAllActiveNotAvailable();
 }
