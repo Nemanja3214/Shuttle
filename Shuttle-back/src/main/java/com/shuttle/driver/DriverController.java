@@ -296,6 +296,14 @@ public class DriverController {
         if (vehicle == null) {
             return new ResponseEntity<RESTError>(new RESTError("Vehicle is not assigned."), HttpStatus.BAD_REQUEST);
         }
+        
+        final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
 
         return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
     }
@@ -331,10 +339,52 @@ public class DriverController {
         return new ResponseEntity<>(VehicleDTO.from(v), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @PutMapping("/api/driver/{id}/vehicle")
-    public ResponseEntity<VehicleDTO> changeVehicle(@RequestBody VehicleDTO vehicleDTO, @PathVariable(value = "id") Long id) {
-        vehicleDTO.setId(id);
-        return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
+    public ResponseEntity<?> changeVehicle(@RequestBody VehicleDTO vehicleDTO, @PathVariable(value = "id") Long id) {
+    	try {
+			MyValidator.validateRequired(vehicleDTO.getVehicleType(), "name");
+			MyValidator.validateRequired(vehicleDTO.getModel(), "model");
+			MyValidator.validateRequired(vehicleDTO.getLicenseNumber(), "licenseNumber");
+			MyValidator.validateRequired(vehicleDTO.getPassengerSeats(), "passengerSeats");
+
+			MyValidator.validateLength(vehicleDTO.getModel(), "name", 100);
+			MyValidator.validateLength(vehicleDTO.getLicenseNumber(), "licenseNumber", 20);
+			MyValidator.validateRange(vehicleDTO.getPassengerSeats().longValue(), "passengerSeats", 1L, 20L);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+
+        Driver driver = driverService.get(id);
+        if (driver == null) {
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+        
+        Vehicle vehicle = vehicleService.findByDriver(driver);
+        if (vehicle == null) {
+        	// TODO: Maybe just create?
+        	return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        try {
+        	vehicle = vehicleService.update(vehicle, vehicleDTO);
+        } catch (IllegalArgumentException e) { // TODO: Specialize exception.
+        	return new ResponseEntity<>(new RESTError("Vehicle type does not exist!"), HttpStatus.NOT_FOUND);
+        }
+       
+        return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
     }
 
     @GetMapping("/api/driver/{id}/working-hour")
