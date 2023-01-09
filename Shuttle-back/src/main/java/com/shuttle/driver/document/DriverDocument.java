@@ -1,4 +1,6 @@
-package com.shuttle.driver;
+package com.shuttle.driver.document;
+
+import com.shuttle.driver.Driver;
 
 import jakarta.persistence.*;
 import lombok.Data;

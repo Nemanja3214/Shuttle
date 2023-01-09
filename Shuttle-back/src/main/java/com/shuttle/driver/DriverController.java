@@ -18,9 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
 import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.driver.document.DriverDocument;
+import com.shuttle.driver.document.DriverDocumentCreateDTO;
+import com.shuttle.driver.document.DriverDocumentDTO;
+import com.shuttle.driver.document.IDriverDocumentService;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverDataPageDTO;
-import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.passenger.PassengerDTO;
@@ -76,6 +79,8 @@ public class DriverController {
     private IVehicleService vehicleService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private IDriverDocumentService driverDocumentService;
 
 	@Autowired
 	private IWorkHoursService workHoursService;
@@ -147,6 +152,7 @@ public class DriverController {
         return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @PutMapping("/api/driver/{id}")
     public ResponseEntity<?> updateDriver(@RequestBody DriverUpdateDTO dto, @PathVariable("id") Long id) {
     	try {
@@ -163,6 +169,10 @@ public class DriverController {
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
+    	
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
     	
     	Driver driver = driverService.get(id);
         if (driver == null) {
@@ -185,21 +195,79 @@ public class DriverController {
 		return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/api/driver/{id}/documents")
-    public ResponseEntity<DriverDocumentDTO> getDriverDocs(@PathVariable(value = "id") Long id) {
-        DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
-        return new ResponseEntity<>(driverControllerMockProvider.getDriverDocument(), HttpStatus.OK);
+    public ResponseEntity<?> getDriverDocs(@PathVariable("id") Long id) {
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+    	
+    	Driver driver = driverService.get(id);
+        if (driver == null) {
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		List<DriverDocument> dd = driverDocumentService.findByDriver(driver);
+		List<DriverDocumentDTO> ddDto = dd.stream().map(doc -> new DriverDocumentDTO(doc)).toList();
+		return new ResponseEntity<>(ddDto, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @DeleteMapping("/api/driver/document/{document-id}")
-    public ResponseEntity<Void> deleteDocsById(@PathVariable(value = "document-id") Long documentId) {
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> deleteDocsById(@PathVariable("document-id") Long id) {
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+    	
+    	DriverDocument dd = driverDocumentService.findById(id);
+        if (dd == null) {
+            return new ResponseEntity<>(new RESTError("Document does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!dd.getDriver().getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Document does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		driverDocumentService.delete(dd);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/api/driver/{id}/documents")
-    public ResponseEntity<DriverDocumentDTO> addDocsById(@PathVariable(value = "id") Long id, @RequestBody DriverDocumentDTO driverDocumentDTO) {
-        driverDocumentDTO.setId(id);
-        return new ResponseEntity<DriverDocumentDTO>(driverDocumentDTO, HttpStatus.valueOf(200));
+    public ResponseEntity<?> addDocsById(@PathVariable("id") Long id, @RequestBody DriverDocumentCreateDTO driverDocumentDTO) {
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+    	
+    	Driver driver = driverService.get(id);
+        if (driver == null) {
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		// TODO: If file not image -> return 400 not an image
+		// TODO: If file bigger than 5MB -> return 400 file bigger than 5mb
+		
+		DriverDocument doc = driverDocumentService.create(driver, driverDocumentDTO);
+		return new ResponseEntity<>(new DriverDocumentDTO(doc), HttpStatus.OK);
     }
 
 
