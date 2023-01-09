@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -57,6 +57,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
+            } else {
+            	//throw new AuthenticationCredentialsNotFoundException("bi");
             }
 
         } catch (ExpiredJwtException ex) {
@@ -66,6 +68,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refreshtoken")) {
                 allowForRefreshToken(ex, request, authToken);
             }
+        } catch (AuthenticationCredentialsNotFoundException ex) {
+        	System.out.println(ex);
         }
         chain.doFilter(request, response);
     }

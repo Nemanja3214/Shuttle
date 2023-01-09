@@ -14,11 +14,14 @@ import java.util.regex.Pattern;
 
 import org.aspectj.apache.bcel.classfile.ExceptionTable;
 import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +29,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,6 +67,7 @@ import com.shuttle.user.passwordReset.PasswordResetCode;
 import com.shuttle.user.passwordReset.dto.PasswordResetCodeDTO;
 import com.shuttle.vehicle.Vehicle;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.websocket.server.PathParam;
 
 @RestController
@@ -82,7 +87,6 @@ public class UserController {
     private IPasswordResetService passwordResetService;
     @Autowired
     private INoteService noteService;
-    
     
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/changePassword")
