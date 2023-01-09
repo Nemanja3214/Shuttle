@@ -45,11 +45,6 @@ import com.shuttle.util.MyValidatorException;
 import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
 
-class Desc{
-	public String desc;
-	public String title;
-}
-
 @RestController
 @RequestMapping("/api/passenger")
 public class PassengerController {
@@ -101,46 +96,9 @@ public class PassengerController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
-	@GetMapping("/verify")
-	public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {
-		boolean verified = false;
-		try {
-			verified = passengerService.verify(code);
-		} catch (TokenExpiredException e) {
-			return new ResponseEntity<>("Activation expired. Register again!", HttpStatus.BAD_REQUEST);	
-		} catch (NonExistantUserException e) {
-			return new ResponseEntity<>("Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
-		}
-		
-		URI yahoo = null;
-		HttpHeaders httpHeaders = new HttpHeaders();
-	    if (verified) {
-	    	
-			try {
-				yahoo = new URI("http://localhost:4200/login");
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-		    
-		    httpHeaders.setLocation(yahoo);
-		    return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
-		    
-	    } else {
-	    	
-			try {
-				yahoo = new URI("http://localhost:4200/bad-request");
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}
-			
-		    httpHeaders.setLocation(yahoo);
-		    return new ResponseEntity<>(httpHeaders, HttpStatus.NOT_ACCEPTABLE);
-	    }
-	}
-
 	@GetMapping
-	public ResponseEntity<?>getPaginated(@PathParam("page") int page, @PathParam("size") int size) {
-		Pageable pageable = PageRequest.of(page, size);
+	@PreAuthorize("hasAnyAuthority('admin')")
+	public ResponseEntity<?> getPaginated(Pageable pageable) {
 		List<Passenger> passengers = this.passengerService.findAll(pageable);
 		List<PassengerDTO> passengersDTO = passengers.stream().map(p -> new PassengerDTO(p)).toList();
 		ListDTO<PassengerDTO> result = new ListDTO<>(passengersDTO);
@@ -234,6 +192,45 @@ public class PassengerController {
 		} catch (NonExistantUserException e) {
 			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
 		}
-		
 	}
+	
+	////////////////////////
+
+	@GetMapping("/verify")
+	public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {
+		boolean verified = false;
+		try {
+			verified = passengerService.verify(code);
+		} catch (TokenExpiredException e) {
+			return new ResponseEntity<>("Activation expired. Register again!", HttpStatus.BAD_REQUEST);	
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<>("Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
+		}
+		
+		URI yahoo = null;
+		HttpHeaders httpHeaders = new HttpHeaders();
+	    if (verified) {
+	    	
+			try {
+				yahoo = new URI("http://localhost:4200/login");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+		    
+		    httpHeaders.setLocation(yahoo);
+		    return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+		    
+	    } else {
+	    	
+			try {
+				yahoo = new URI("http://localhost:4200/bad-request");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+			
+		    httpHeaders.setLocation(yahoo);
+		    return new ResponseEntity<>(httpHeaders, HttpStatus.NOT_ACCEPTABLE);
+	    }
+	}
+
 }
