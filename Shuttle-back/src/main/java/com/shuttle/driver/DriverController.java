@@ -501,11 +501,52 @@ public class DriverController {
 
     @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @PutMapping("/api/driver/working-hour/{working-hour-id}")
-    public ResponseEntity<WorkHours> changeWorkHours(@PathVariable("working-hour-id") Long id) {
-        WorkHours workHoursCollectionDTO = new WorkHours();
-        workHoursCollectionDTO.setId(id);
-        return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);
+    public ResponseEntity<?> changeWorkHours(@PathVariable("working-hour-id") Long id, @RequestBody WorkHoursNoDriverDTO dto) {
+    	try {
+			MyValidator.validateRequired(dto.getEnd(), "end");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	LocalDateTime t = null;
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			t = LocalDateTime.parse(dto.getEnd(), formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (dto) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		// assert(t != null);
+		
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+    	
+    	WorkHours wh = workHoursService.findById(id);
+        if (wh == null) {
+            return new ResponseEntity<>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        	
+		Driver driver = wh.getDriver();
+		
+        final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
 
+		Vehicle vehicle = vehicleService.findByDriver(driver);
+		if (vehicle == null) {
+			return new ResponseEntity<>(new RESTError("Cannot end shift because the vehicle is not defined!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		if (wh.getFinish() != null) {
+			return new ResponseEntity<>(new RESTError("No shift is ongoing!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		wh = workHoursService.setEnd(wh, t);
+        return new ResponseEntity<>(new WorkHoursNoDriverDTO(wh), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('driver', 'admin')")

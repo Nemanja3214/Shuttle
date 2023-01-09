@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 public class WorkHoursNoDriverDTO {
 	private Long id;
 	private String start;
-	private String finish;
+	private String end;
 	
 	public WorkHoursNoDriverDTO(WorkHours workHours) {
 		this.id = workHours.getId();
 		this.start = workHours.getStart() == null ? null : workHours.getStart().toString();
-		this.finish = workHours.getFinish() == null ? null : workHours.getFinish().toString();
+		this.end = workHours.getFinish() == null ? null : workHours.getFinish().toString();
 	}
 }

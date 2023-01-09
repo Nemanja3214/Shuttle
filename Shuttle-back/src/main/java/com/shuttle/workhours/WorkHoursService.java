@@ -68,4 +68,11 @@ public class WorkHoursService implements IWorkHoursService {
 	public WorkHours findById(Long id) {
 		return workHoursRepository.findById(id).orElse(null);
 	}
+
+	@Override
+	public WorkHours setEnd(WorkHours wh, LocalDateTime t) {
+		wh.setFinish(t);
+		wh = workHoursRepository.save(wh);
+		return wh;
+	}
 }
