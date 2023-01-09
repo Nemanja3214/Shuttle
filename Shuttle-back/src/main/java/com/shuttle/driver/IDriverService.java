@@ -2,6 +2,9 @@ package com.shuttle.driver;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Pageable;
+
 import java.time.Duration;
 
 import com.shuttle.driver.dto.DriverDTO;
@@ -34,5 +37,7 @@ public interface IDriverService {
      * @return True if so.
      */
     public boolean workedMoreThan8Hours(Driver d);
+    
+	public List<Driver> findAll(Pageable pageable);
 	
 }

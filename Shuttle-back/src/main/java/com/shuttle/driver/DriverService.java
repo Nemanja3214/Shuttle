@@ -4,6 +4,7 @@ import java.util.List;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -108,5 +109,10 @@ public class DriverService implements IDriverService {
 		String encodedPassword = passwordEncoder.encode(driverDTO.getPassword());
 		d.setPassword(encodedPassword);
 		return d;
+	}
+
+	@Override
+	public List<Driver> findAll(Pageable pageable) {
+		return this.driverRepository.findAll(pageable).toList();
 	}
 }

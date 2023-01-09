@@ -111,11 +111,13 @@ public class DriverController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver')")
+    @PreAuthorize("hasAnyAuthority('admin')")
     @GetMapping("/api/driver")
-    public ResponseEntity<DriverDataPageDTO> getPaginatedDrivers(@PathParam("page") int page, @PathParam("size") int size) {
-        DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
-        return new ResponseEntity<>(driverControllerMockProvider.getDriverDataPageDTO(), HttpStatus.OK);
+    public ResponseEntity<?> getPaginatedDrivers(Pageable pageable) {
+    	List<Driver> drivers = this.driverService.findAll(pageable);
+		List<DriverDTO> passengersDTO = drivers.stream().map(d -> DriverDTO.from(d)).toList();
+		ListDTO<DriverDTO> result = new ListDTO<>(passengersDTO);
+		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/api/driver/{id}")
