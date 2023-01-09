@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -34,6 +38,7 @@ import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.TokenExpiredException;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
+import com.shuttle.ride.RideController;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.GenericUser;
@@ -69,7 +74,7 @@ public class PassengerController {
 			
 			MyValidator.validateLength(dto.getName(), "name", 100);
 			MyValidator.validateLength(dto.getSurname(), "surname", 100);
-			MyValidator.validateLength(dto.getTelephoneNumber(), "telephoneNumber", 100);
+			MyValidator.validateLength(dto.getTelephoneNumber(), "telephoneNumber", 18);
 			MyValidator.validateLength(dto.getEmail(), "email", 100);
 			MyValidator.validateLength(dto.getAddress(), "address", 100);
 			
@@ -105,20 +110,36 @@ public class PassengerController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
+	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getDetails(@PathVariable("id") Long id) {
-		Passenger passenger = this.passengerService.findById(id);
+		if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Field (id) is required!"), HttpStatus.BAD_REQUEST);
+        }
+
+        Passenger passenger = passengerService.findById(id);
+        if (passenger == null) {
+            return new ResponseEntity<>(new RESTError("Passenger does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!passenger.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
 		
-		if(passenger == null) {
-			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
-		}
-		else {
-			return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
-		}
+        return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
 	}
 
+	//@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
 	@GetMapping("/activate/{activationId}")
 	public ResponseEntity<?> activate(@PathVariable("activationId") Long activationId) {
+		if (activationId == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Field (activationId) is required!"), HttpStatus.BAD_REQUEST);
+        }
+		
 		boolean verified = false;
 		try {
 			verified = passengerService.activate(activationId);
@@ -130,33 +151,57 @@ public class PassengerController {
 		
 		URI yahoo = null;
 		HttpHeaders httpHeaders = new HttpHeaders();
-	    if (verified) {
-	    	
+	    if (verified) {   	
 			try {
 				yahoo = new URI("http://localhost:4200/login");
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
-			}
-		    
+			}	    
 		    httpHeaders.setLocation(yahoo);
-		    return new ResponseEntity<>("Successful account activation!", httpHeaders,  HttpStatus.OK);
-		    
-	    } else {
-	    	
+		    return new ResponseEntity<>("Successful account activation!", httpHeaders,  HttpStatus.OK);	    
+	    } else {    	
 			try {
 				yahoo = new URI("http://localhost:4200/bad-request");
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
-			}
-			
+			}		
 		    httpHeaders.setLocation(yahoo);
 		    return new ResponseEntity<>(httpHeaders, HttpStatus.NOT_ACCEPTABLE);
 	    }
 	}
 
+	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
 	@PutMapping("/{id}")
 	public ResponseEntity<?> update(@RequestBody PassengerUpdateDTO newData, @PathVariable("id") Long id) {
-		Passenger updatedPassenger;
+		try {
+			MyValidator.validateRequired(newData.getName(), "name");
+			MyValidator.validateRequired(newData.getSurname(), "surname");
+			MyValidator.validateRequired(newData.getEmail(), "email");
+			MyValidator.validateRequired(newData.getAddress(), "address");
+			
+			MyValidator.validateLength(newData.getName(), "name", 100);
+			MyValidator.validateLength(newData.getSurname(), "surname", 100);
+			MyValidator.validateLength(newData.getTelephoneNumber(), "telephoneNumber", 18);
+			MyValidator.validateLength(newData.getEmail(), "email", 100);
+			MyValidator.validateLength(newData.getAddress(), "address", 100);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+		
+		Passenger updatedPassenger = passengerService.findById(id);
+		
+		if (updatedPassenger == null) {
+			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
+		}
+		
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!updatedPassenger.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
 		try {
 			updatedPassenger = this.passengerService.updatePassenger(id, newData);
 		} catch (NonExistantUserException e) {
@@ -166,7 +211,50 @@ public class PassengerController {
 		}
 		return new ResponseEntity<>(new PassengerDTO(updatedPassenger), HttpStatus.OK);
 	}
-    
+
+	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+	@GetMapping("/{id}/ride")
+	public ResponseEntity<?> getRides(@PathVariable Long id, Pageable pageable, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
+		if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	LocalDateTime tFrom = null, tTo = null;
+    	if (from != null && to != null) {
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tFrom = LocalDateTime.parse(from, formatter);
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tTo = LocalDateTime.parse(to, formatter);
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    	}
+    	
+    	Passenger p = passengerService.findById(id);	
+		if (p == null) {
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+		}
+
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!p.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		List<Ride> rides = rideService.findByUser(p, pageable, tFrom, tTo);
+		ListDTO<RideDTO> ridesDTO = new ListDTO<>(rides.stream().map(r -> RideController.to(r)).toList());
+        return new ResponseEntity<>(ridesDTO, HttpStatus.OK);
+	}
+	
+	////////////////////////
+	
     @GetMapping("/email")
     public ResponseEntity<?> getByEmail(@PathParam("email") String email) {
         Passenger p = passengerService.findByEmail(email);
@@ -177,24 +265,6 @@ public class PassengerController {
             return new ResponseEntity<RidePassengerDTO>(dto, HttpStatus.OK);
         }
     }
-
-	@GetMapping("/{id}/ride")
-	public ResponseEntity<?> getRides(@PathVariable("id") Long passengerId, @PathParam("page") int page,
-			@PathParam("size") int size, @PathParam("sort") String sort, @PathParam("from") String from,
-			@PathParam("to") String to) {
-		
-		Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
-		List<Ride> rides;
-		try {
-			rides = this.rideService.findRidesByPassengerInDateRange(passengerId, from, to, pageable);
-			List<RideDTO> ridesDTO = rides.stream().map(ride -> new RideDTO(ride)).toList();
-			return new ResponseEntity<>(new ListDTO<RideDTO>(ridesDTO), HttpStatus.OK);
-		} catch (NonExistantUserException e) {
-			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
-		}
-	}
-	
-	////////////////////////
 
 	@GetMapping("/verify")
 	public ResponseEntity<?> verifyUser(@RequestParam("token") String code) {

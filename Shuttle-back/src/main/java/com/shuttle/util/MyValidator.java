@@ -50,6 +50,6 @@ public class MyValidator {
 	}
 
 	public static String msgRequired(String field) {
-		return "Field (" + field + ") format is required!";
+		return "Field (" + field + ") is required!";
 	}
 }
