@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
+import com.shuttle.common.RESTError;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.TokenExpiredException;
@@ -31,7 +36,11 @@ import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.user.GenericUser;
+import com.shuttle.user.UserService;
 import com.shuttle.user.email.IEmailService;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
 
 import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
@@ -46,31 +55,50 @@ class Desc{
 public class PassengerController {
 	@Autowired
 	IEmailService emailService;
-	
 	@Autowired
 	IPassengerService passengerService;
-
 	@Autowired
 	IRideService rideService;
+	@Autowired
+	UserService userService;
 	
 	@PostMapping
+	@PreAuthorize("hasAnyAuthority('admin', 'passenger')")
 	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
-		if(dto.isInvalid()) {
-			return ResponseEntity.badRequest().body("Invalid user data sent");
+		try {
+			MyValidator.validateRequired(dto.getName(), "name");
+			MyValidator.validateRequired(dto.getSurname(), "surname");
+			MyValidator.validateRequired(dto.getEmail(), "email");
+			MyValidator.validateRequired(dto.getAddress(), "address");
+			MyValidator.validateRequired(dto.getPassword(), "password");
+			
+			MyValidator.validateLength(dto.getName(), "name", 100);
+			MyValidator.validateLength(dto.getSurname(), "surname", 100);
+			MyValidator.validateLength(dto.getTelephoneNumber(), "telephoneNumber", 100);
+			MyValidator.validateLength(dto.getEmail(), "email", 100);
+			MyValidator.validateLength(dto.getAddress(), "address", 100);
+			
+			MyValidator.validatePattern(dto.getPassword(), "password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 		
-		try {
-			dto = passengerService.register(dto);
-		} catch (UnsupportedEncodingException e) {
-			return ResponseEntity.badRequest().body("Bad encoding");
-		} catch (MessagingException e) {
-			return ResponseEntity.badRequest().body("Failed to send mail");
-		} catch (EmailAlreadyUsedException e) {
-			return ResponseEntity.badRequest().body("Email is already used");
-		} catch (IOException e) {
-			return ResponseEntity.internalServerError().body("Couldn't save image, using default image instead");
+		GenericUser userWithThisEmail = userService.findByEmail(dto.getEmail());
+		if (userWithThisEmail != null) {
+			return new ResponseEntity<RESTError>(new RESTError("User with that email already exists!"), HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<>(dto, HttpStatus.OK);
+		
+		Passenger p = null;
+		try {
+			p = passengerService.register(dto);
+		} catch (IOException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Could not save image!"), HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (MessagingException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Failed to send verification e-mail!"), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		PassengerDTO result = new PassengerDTO(p);
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
 	@GetMapping("/verify")

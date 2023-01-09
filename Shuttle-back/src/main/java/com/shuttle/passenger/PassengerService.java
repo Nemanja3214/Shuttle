@@ -51,23 +51,19 @@ public class PassengerService implements IPassengerService{
 	private RoleService roleService;
 	
 	@Override
-	public PassengerDTO register(PassengerDTO passengerDTO) throws MessagingException, EmailAlreadyUsedException, IOException{
-		if(passengerRepository.existsByEmail(passengerDTO.email)) {
-			throw new EmailAlreadyUsedException();
-		}
+	public Passenger register(PassengerDTO passengerDTO) throws MessagingException, IOException {
 		Passenger newPassenger = createNewPassenger(passengerDTO);
+		FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, newPassenger.getProfilePictureName(), passengerDTO.getProfilePicture());
 	     
 		VerificationToken token = generateToken();
-	    
-	    token.setPassenger(newPassenger);
-	     
+	    token.setPassenger(newPassenger);   
+
 	    newPassenger = passengerRepository.save(newPassenger);
-	    tokenRepository.save(token);
 	    
-        FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, newPassenger.getProfilePictureName(), passengerDTO.getProfilePicture());
-        
-	    emailService.sendVerificationEmail(newPassenger, "http://localhost:8080/api/passenger/verify?token=" + token.getToken());	
-	    return new PassengerDTO(newPassenger);
+	    tokenRepository.save(token);
+	    emailService.sendVerificationEmail(newPassenger, "http://localhost:8080/api/passenger/verify?token=" + token.getToken());
+	      
+	    return newPassenger;
 	}
 
 
@@ -202,5 +198,4 @@ public class PassengerService implements IPassengerService{
 		passenger.setTelephoneNumber(newData.getTelephoneNumber());
 		
 	}
-
 }

@@ -44,11 +44,11 @@ public class PassengerDTO {
 		return p;
 	}
 	
-	@JsonIgnore
-	public boolean isInvalid() {
-		return !isEmailValid() || !isPhoneValid() || !isPasswordValid() || hasEmptyField();
-	}
-	
+//	@JsonIgnore
+//	public boolean isInvalid() {
+//		return !isEmailValid() || !isPhoneValid() || !isPasswordValid() || hasEmptyField();
+//	}
+//	
 	public boolean hasEmptyField() {
 		return this.name.equals("") || 
 				this.surname.equals("") ||
