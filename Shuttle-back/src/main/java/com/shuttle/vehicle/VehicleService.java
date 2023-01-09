@@ -52,7 +52,7 @@ public class VehicleService implements IVehicleService {
 
 	@Override
 	public Optional<VehicleType> findVehicleTypeByName(String name) {
-		return vehicleTypeRepository.findVehicleTypeByName(name);
+		return vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(name);
 	}
 	
 	@Override
@@ -93,7 +93,7 @@ public class VehicleService implements IVehicleService {
 	@Scheduled(initialDelay = 2000, fixedDelay = 2000)
 	public void simulateLocationChange() {
 		
-		List<Driver> activeDrivers = this.driverService.findByAvailableTrue();
+		List<Driver> activeDrivers = this.driverService.findAllActive();
 		for(Driver activeDriver : activeDrivers) {
 			Vehicle vehicle = vehicleRepository.findByDriver(activeDriver);
 			

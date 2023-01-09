@@ -1,5 +1,6 @@
 package com.shuttle.driver;
 
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
+import com.shuttle.ride.dto.RideDTO;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.data.domain.Page;
 
 import com.shuttle.vehicle.IVehicleService;
@@ -34,6 +37,10 @@ import com.shuttle.workhours.dto.WorkHoursNoDriverDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -41,11 +48,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 @CrossOrigin
 @RestController
 public class DriverController {
+
     @Autowired
     private IDriverService driverService;
     @Autowired
@@ -55,6 +64,11 @@ public class DriverController {
 
 	@Autowired
 	private IWorkHoursService workHoursService;
+
+    @ExceptionHandler({ ExpiredJwtException.class, AuthenticationCredentialsNotFoundException.class })
+    public ResponseEntity<?> handleException() {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 
     private ListDTO<WorkHoursNoDriverDTO> from(List<WorkHours> workHours) {
         return new ListDTO<>(workHours.stream().map(w -> new WorkHoursNoDriverDTO(w)).toList());
@@ -109,7 +123,7 @@ public class DriverController {
         if (id == null) {
             return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
         }
-        
+
         final Driver driver = driverService.get(id);
 
         if (driver == null) {
@@ -141,7 +155,7 @@ public class DriverController {
         if (id == null) {
             return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
         }
-        
+
         final Driver driver = driverService.get(id);
 
         if (driver == null) {
@@ -186,6 +200,7 @@ public class DriverController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/api/driver/{id}/ride")
     public ResponseEntity<ListDTO<Ride>> getRideHistory(@PathVariable(value = "id") Long id,
                                                            @PathParam("page") int page, @PathParam("size") int size,
@@ -204,5 +219,6 @@ public class DriverController {
         return new ResponseEntity<>(rideListDTO, HttpStatus.OK);
 
     }
+
 }
 

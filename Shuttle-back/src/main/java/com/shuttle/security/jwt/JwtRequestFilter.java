@@ -11,7 +11,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -45,7 +44,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             if (authToken != null) {
 
-                username = tokenUtil.getUsernameFromToken(authToken);
+                username = tokenUtil.getEmailFromToken(authToken);
 
                 if (username != null) {
 
@@ -53,8 +52,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                     if (tokenUtil.validateToken(authToken, userDetails)) {
-
-
                         TokenBasedAuthentication authentication = new TokenBasedAuthentication(userDetails);
                         authentication.setToken(authToken);
                         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -63,9 +60,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
 
         } catch (ExpiredJwtException ex) {
-            LOGGER.debug("Token expired!");
+            String isRefreshToken = request.getHeader("isRefreshToken");
+            String requestURL = request.getRequestURL().toString();
+            // allow for Refresh Token creation if following conditions are true.
+            if (isRefreshToken != null && isRefreshToken.equals("true") && requestURL.contains("refreshtoken")) {
+                allowForRefreshToken(ex, request, authToken);
+            }
         }
-
         chain.doFilter(request, response);
+    }
+
+    private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request, String authToken) {
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(tokenUtil.getEmailFromToken(authToken));
+        // create a UsernamePasswordAuthenticationToken with null values.
+        TokenBasedAuthentication authentication = new TokenBasedAuthentication(userDetails);
+        authentication.setToken(authToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Set the claims so that in controller we will be using it to create
+        // new JWT
+        request.setAttribute("claims", ex.getClaims());
+
     }
 }

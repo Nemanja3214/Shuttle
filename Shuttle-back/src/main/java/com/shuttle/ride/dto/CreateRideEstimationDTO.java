@@ -1,7 +1,10 @@
 package com.shuttle.ride.dto;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 
 public class CreateRideEstimationDTO {
@@ -9,7 +12,6 @@ public class CreateRideEstimationDTO {
 	private String vehicleType;
 	private boolean babyTransport;
 	private boolean petTransport;
-	private double routeLength;
 	private long travelTime;
 
 	public List<RouteDTO> getLocations() {
@@ -44,13 +46,6 @@ public class CreateRideEstimationDTO {
 		this.petTransport = petTransport;
 	}
 
-	public double getRouteLength() {
-		return routeLength;
-	}
-
-	public void setRouteLength(double routeLength) {
-		this.routeLength = routeLength;
-	}
 
 	public long getTravelTime() {
 		return travelTime;
@@ -59,7 +54,10 @@ public class CreateRideEstimationDTO {
 	public void setTravelTime(long travelTime) {
 		this.travelTime = travelTime;
 	}
-	
+
+	public double calculateLength() {
+		return locations.stream().map(route -> route.getDistance()).collect(Collectors.summingDouble(Double::doubleValue));
+	}
 	
 
 }

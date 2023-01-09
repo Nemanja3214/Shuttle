@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.aspectj.apache.bcel.classfile.ExceptionTable;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -260,17 +262,41 @@ public class UserController {
         
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
-        String token = jwtTokenUtil.generateToken(((GenericUser) auth.getPrincipal()).getId(), credentialsDTO.getEmail(), auth.getAuthorities());
-        TokenDTO tokens = new TokenDTO(token, token);
-        //TODO add refresh token
-        
+        long id = ((GenericUser) auth.getPrincipal()).getId();
+        String token = jwtTokenUtil.generateToken(id, credentialsDTO.getEmail(), auth.getAuthorities());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(id, credentialsDTO.getEmail());
+        TokenDTO tokens = new TokenDTO(token, refreshToken);
+
         GenericUser user = userService.findByEmail(credentialsDTO.getEmail());
         if (user != null) {
-        	userService.setActive(user, true);
+            userService.setActive(user, true);
         }
         
-
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
+    }
+
+
+    @PermitAll
+    @PostMapping(value = "/refreshtoken")
+    public ResponseEntity<TokenDTO> refreshtoken(@RequestBody String refreshToken) throws Exception {
+        // From the HttpRequest get the claims
+        refreshToken = refreshToken.replace("\"","");
+        refreshToken = refreshToken.replace("{","");
+        refreshToken = refreshToken.replace("}","");
+        refreshToken = refreshToken.substring(13).strip();
+        refreshToken = refreshToken.replace("\\","");
+        String email = jwtTokenUtil.getEmailFromToken(refreshToken);
+        GenericUser user = userService.findByEmail(email);
+
+        if (jwtTokenUtil.validateToken(refreshToken, user)) {
+            String token = jwtTokenUtil.generateToken(user.getId(), user.getEmail(), user.getAuthorities());
+            System.out.println("Refreshed token");
+            TokenDTO tokenDTO = new TokenDTO(token,refreshToken);
+            return new ResponseEntity<>(tokenDTO, HttpStatus.OK);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
@@ -332,9 +358,7 @@ public class UserController {
 		if (ride == null && messageDTO.getType() != Type.SUPPORT) {
 			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist."), HttpStatus.NOT_FOUND);
 		}
-		
-		System.out.println(reciever.getEmail());
-        
+
         Message m = new Message(
             null,
             sender,

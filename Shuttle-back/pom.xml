@@ -127,7 +127,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency> 
-
+		
+		<!-- Distance between locations-->
+		<dependency>
+		  <groupId>org.apache.lucene</groupId>
+		  <artifactId>lucene-spatial</artifactId>
+		  <version>8.2.0</version>
+		</dependency>
     </dependencies>
 
     <build>

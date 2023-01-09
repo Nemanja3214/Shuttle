@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 
+import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.cancellation.Cancellation;
@@ -124,5 +125,6 @@ public interface IRideService {
      * @return List of rides.
      */
 	List<Ride> findByUser(GenericUser user, Pageable pageable, LocalDateTime from, LocalDateTime to);
+	List<Ride> findRidesByPassengerInDateRange(Long passengerId, String from, String to, Pageable pageable) throws NonExistantUserException;
 
 }
