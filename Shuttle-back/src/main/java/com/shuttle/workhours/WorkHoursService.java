@@ -20,22 +20,21 @@ public class WorkHoursService implements IWorkHoursService {
     private IDriverService driverService;
 	
 	@Override
-	public void addNew(Driver driver) {
-		WorkHours wh = new WorkHours();
-		wh.setStart(LocalDateTime.now());
-		wh.setDriver(driver);
-		wh.setFinish(null);
-		wh = workHoursRepository.save(wh);
+	public WorkHours addNew(Driver driver) {
+		return addNew(driver, LocalDateTime.now());
 	}
 
 	@Override
-	public void finishLast(Driver driver) {
+	public WorkHours finishLast(Driver driver) {
 		List<WorkHours> allWh = workHoursRepository.findByDriver(driver);
 		
 		if (allWh.size() > 0) {
 			WorkHours last = allWh.get(allWh.size() - 1);
 			last.setFinish(LocalDateTime.now());
 			workHoursRepository.save(last);
+			return last;
+		} else {
+			return null;
 		}
 	}
 	
@@ -49,4 +48,19 @@ public class WorkHoursService implements IWorkHoursService {
     public List<WorkHours> findAllByDriver(Driver driver, LocalDateTime from, LocalDateTime to) {    
         return workHoursRepository.findByDriverId(driver.getId(), from, to);
     }
+
+	@Override
+	public WorkHours addNew(Driver driver, LocalDateTime start) {
+		WorkHours wh = new WorkHours();
+		wh.setStart(start);
+		wh.setDriver(driver);
+		wh.setFinish(null);
+		wh = workHoursRepository.save(wh);
+		return wh;
+	}
+
+	@Override
+	public WorkHours findLastByDriver(Driver driver) {
+		return workHoursRepository.findLastByDriver(driver.getId()).orElse(null);
+	}
 }

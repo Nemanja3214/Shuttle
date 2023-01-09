@@ -6,14 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
@@ -387,37 +379,100 @@ public class DriverController {
         return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @GetMapping("/api/driver/{id}/working-hour")
-    public ResponseEntity<?> getWorkHoursHistory(@PathVariable(value = "id") Long id, Pageable pageable, @RequestParam("from") String from, @RequestParam("to") String to) {
-        if (id == null) {
-            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> getWorkHoursHistory(@PathVariable Long id, Pageable pageable, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	LocalDateTime tFrom = null, tTo = null;
+    	if (from != null && to != null) {
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tFrom = LocalDateTime.parse(from, formatter);
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tTo = LocalDateTime.parse(to, formatter);
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    	}
 
         final Driver driver = driverService.get(id);
-
         if (driver == null) {
-            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
         }
+        
+        final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
 
-        LocalDateTime fromDate, toDate;
-
-        try {
-            fromDate = LocalDateTime.parse(from);
-            toDate = LocalDateTime.parse(to);
-        } catch (DateTimeParseException ex) {
-            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
-        }
-
-        final ListDTO<WorkHoursNoDriverDTO> li = from(workHoursService.findAllByDriver(driver, pageable, fromDate, toDate));
+        final ListDTO<WorkHoursNoDriverDTO> li = from(workHoursService.findAllByDriver(driver, pageable, tFrom, tTo));
         return new ResponseEntity<>(li, HttpStatus.OK);
     }
 
 
+    @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @PostMapping("/api/driver/{id}/working-hour")
-    public ResponseEntity<WorkHours> createWorkHours(@PathVariable(value = "id") Long id) {
-        WorkHours workHoursCollectionDTO = new WorkHours();
-        workHoursCollectionDTO.setId(id);
-        return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);
+    public ResponseEntity<?> createWorkHours(@PathVariable Long id, @RequestBody WorkHoursNoDriverDTO dto) {
+    	try {
+			MyValidator.validateRequired(dto.getStart(), "start");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	LocalDateTime t = null;
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			t = LocalDateTime.parse(dto.getStart(), formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (dto) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		// assert(t != null);
+
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+    	
+    	Driver driver = driverService.get(id);
+        if (driver == null) {
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+        }
+    	
+        final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		if (driverService.workedMoreThan8Hours(driver)) {
+			return new ResponseEntity<>(new RESTError("Cannot start shift because you exceeded the 8 hours limit in last 24 hours!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		Vehicle vehicle = vehicleService.findByDriver(driver);
+		if (vehicle == null) {
+			return new ResponseEntity<>(new RESTError("Cannot start shift because the vehicle is not defined!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		final WorkHours lastWh = workHoursService.findLastByDriver(driver);
+		if (lastWh != null) {
+			if (lastWh.getFinish() == null) {
+				return new ResponseEntity<>(new RESTError("Shift already ongoing!"), HttpStatus.BAD_REQUEST);
+			}
+		}
+        
+		WorkHours wh = workHoursService.addNew(driver, t);
+        return new ResponseEntity<>(new WorkHoursNoDriverDTO(wh), HttpStatus.OK);
 
     }
 
