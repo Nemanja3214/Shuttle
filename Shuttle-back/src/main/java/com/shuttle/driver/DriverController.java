@@ -244,8 +244,18 @@ public class DriverController {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @PostMapping("/api/driver/{id}/documents")
     public ResponseEntity<?> addDocsById(@PathVariable("id") Long id, @RequestBody DriverDocumentCreateDTO driverDocumentDTO) {
+    	try {
+			MyValidator.validateRequired(driverDocumentDTO.getName(), "name");
+			MyValidator.validateRequired(driverDocumentDTO.getDocumentImage(), "documentImage");
+			
+			MyValidator.validateLength(driverDocumentDTO.getName(), "name", 100);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
     	if (id == null) {
     		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
     	}
@@ -273,14 +283,13 @@ public class DriverController {
 
     @GetMapping("/api/driver/{id}/vehicle")
     public ResponseEntity<?> getVehicle(@PathVariable(value = "id") Long id) {
-        if (id == null) {
-            return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
-        }
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
 
-        final Driver driver = driverService.get(id);
-
+        Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
         }
 
         Vehicle vehicle = vehicleService.findByDriver(driver);
