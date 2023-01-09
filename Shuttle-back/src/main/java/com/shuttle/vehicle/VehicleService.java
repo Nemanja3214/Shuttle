@@ -52,7 +52,7 @@ public class VehicleService implements IVehicleService {
 
 	@Override
 	public Optional<VehicleType> findVehicleTypeByName(String name) {
-		return vehicleTypeRepository.findVehicleTypeByName(name);
+		return vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(name);
 	}
 	
 	@Override

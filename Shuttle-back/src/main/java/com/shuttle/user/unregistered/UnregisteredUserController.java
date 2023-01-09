@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.ride.dto.CreateRideEstimationDTO;
 import com.shuttle.ride.dto.EstimationDTO;
 
@@ -21,7 +22,12 @@ public class UnregisteredUserController {
 	
 	@PostMapping
 	public ResponseEntity<?> getEstimatedRide(@RequestBody CreateRideEstimationDTO rideDTO) {
-		EstimationDTO estimation = unregiteredUserService.getEstimation(rideDTO);
+		EstimationDTO estimation;
+		try {
+			estimation = unregiteredUserService.getEstimation(rideDTO);
+		} catch (NonExistantVehicleType e) {
+			return new ResponseEntity<>("Vehicle type does not exist!", HttpStatus.NOT_FOUND);
+		}
 		
 		if (estimation == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Could not create estimation."), HttpStatus.BAD_REQUEST);
