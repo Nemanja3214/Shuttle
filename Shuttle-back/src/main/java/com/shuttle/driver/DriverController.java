@@ -387,13 +387,15 @@ public class DriverController {
 		}
     	
     	LocalDateTime tFrom = null, tTo = null;
-    	if (from != null && to != null) {
+    	if (from != null) {
     		try {
     			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
     			tFrom = LocalDateTime.parse(from, formatter);
     		} catch (DateTimeParseException e) {
     			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
     		}
+    	}
+    	if (to != null) {
     		try {
     			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
     			tTo = LocalDateTime.parse(to, formatter);
@@ -418,7 +420,6 @@ public class DriverController {
         final ListDTO<WorkHoursNoDriverDTO> li = from(workHoursService.findAllByDriver(driver, pageable, tFrom, tTo));
         return new ResponseEntity<>(li, HttpStatus.OK);
     }
-
 
     @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @PostMapping("/api/driver/{id}/working-hour")
