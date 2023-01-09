@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +43,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public GenericUser findById(Long id) throws AccessDeniedException {
-        return userRepository.findById(id).orElseGet(null);
+        return userRepository.findById(id).orElse(null);
     }
 
     public List<GenericUser> findAll() throws AccessDeniedException {
@@ -70,9 +72,9 @@ public class UserServiceImpl implements UserService {
         return this.userRepository.save(user);
     }
 
-    public GenericUser encodeUserPassword(GenericUser user, String password) {
+    public GenericUser changePassword(GenericUser user, String password) {
         user.setPassword(passwordEncoder.encode(password));
-        return user;
+        return userRepository.save(user);
     }
 
     @Override
@@ -155,4 +157,21 @@ public class UserServiceImpl implements UserService {
     	}
     	return false;
     }
+
+	@Override
+	public
+	boolean hasPassword(GenericUser user, String password) {
+		return passwordEncoder.matches(password, user.getPassword());
+	}
+
+	@Override
+	public List<GenericUser> findAll(Pageable pageable) {
+		return userRepository.findAll(pageable).toList();
+	}
+
+	@Override
+	public GenericUser setBlocked(GenericUser u, boolean b) {
+		u.setBlocked(b);
+		return userRepository.save(u);
+	}
 }

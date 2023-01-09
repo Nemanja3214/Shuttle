@@ -21,6 +21,8 @@ import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.vehicleType.VehicleType;
@@ -290,6 +292,13 @@ public class RideService implements IRideService {
     }
 
 	@Override
+	public List<Ride> findByUser(GenericUser user, Pageable pageable, LocalDateTime from, LocalDateTime to) {
+		if (from != null && to != null) {
+			return rideRepository.findByUser(user.getId(), pageable, from, to);
+		} else {
+			return rideRepository.findByUser(user.getId(), pageable);
+		}
+	}
 	public List<Ride> findRidesByPassengerInDateRange(Long passengerId, String from, String to, Pageable pageable) throws NonExistantUserException {
 		Optional<Passenger> passengerO = this.passengerRepository.findById(passengerId);
 		if(passengerO.isEmpty()) {

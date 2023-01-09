@@ -31,6 +31,7 @@ import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.WorkHours;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.server.PathParam;
 import com.shuttle.workhours.*;
 import com.shuttle.workhours.dto.WorkHoursNoDriverDTO;
@@ -43,6 +44,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Writer;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -51,10 +53,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin
 @RestController
 public class DriverController {
-
     @Autowired
     private IDriverService driverService;
     @Autowired
@@ -64,11 +64,6 @@ public class DriverController {
 
 	@Autowired
 	private IWorkHoursService workHoursService;
-
-    @ExceptionHandler({ ExpiredJwtException.class, AuthenticationCredentialsNotFoundException.class })
-    public ResponseEntity<?> handleException() {
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
 
     private ListDTO<WorkHoursNoDriverDTO> from(List<WorkHours> workHours) {
         return new ListDTO<>(workHours.stream().map(w -> new WorkHoursNoDriverDTO(w)).toList());
@@ -81,6 +76,7 @@ public class DriverController {
         return new ResponseEntity<>(DriverDTO.from(driver), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver')")
     @GetMapping("/api/driver")
     public ResponseEntity<DriverDataPageDTO> getPaginatedDrivers(@PathParam("page") int page, @PathParam("size") int size) {
         DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
