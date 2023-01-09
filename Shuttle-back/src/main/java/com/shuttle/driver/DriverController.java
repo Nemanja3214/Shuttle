@@ -20,7 +20,9 @@ import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.passenger.PassengerDTO;
 import com.shuttle.ride.IRideRepository;
+import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
+import com.shuttle.ride.RideController;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
@@ -73,6 +75,8 @@ public class DriverController {
     private UserService userService;
     @Autowired
     private IDriverDocumentService driverDocumentService;
+	@Autowired
+	IRideService rideService;
 
 	@Autowired
 	private IWorkHoursService workHoursService;
@@ -552,23 +556,42 @@ public class DriverController {
 
     @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/api/driver/{id}/ride")
-    public ResponseEntity<ListDTO<Ride>> getRideHistory(@PathVariable(value = "id") Long id,
-                                                           @PathParam("page") int page, @PathParam("size") int size,
-                                                           @PathParam("from") String from, @PathParam("to") String to,
-                                                           @PathParam("sort") String sort) {
-        Pageable pageParams =
-                PageRequest.of(page, size, Sort.by(sort));
+    public ResponseEntity<?> getRideHistory(@PathVariable Long id, Pageable pageable, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
+    	if (id == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	LocalDateTime tFrom = null, tTo = null;
+    	if (from != null && to != null) {
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tFrom = LocalDateTime.parse(from, formatter);
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    		try {
+    			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+    			tTo = LocalDateTime.parse(to, formatter);
+    		} catch (DateTimeParseException e) {
+    			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
+    		}
+    	}
+    	
+    	Driver d = driverService.get(id);	
+		if (d == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+		}
 
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
-        LocalDateTime startTime = LocalDateTime.ofInstant(Instant.from(formatter.parse(from)), ZoneId.of(ZoneOffset.UTC.getId()));
-        LocalDateTime endTime = LocalDateTime.ofInstant(Instant.from(formatter.parse(to)), ZoneId.of(ZoneOffset.UTC.getId()));
-        Page<Ride> rides = rideRepository.getAllBetweenDates(startTime, endTime, id, pageParams);
-        ListDTO<Ride> rideListDTO = new ListDTO<>();
-        rideListDTO.setTotalCount(rides.getTotalElements());
-        rideListDTO.setResults(rides.getContent());
-        return new ResponseEntity<>(rideListDTO, HttpStatus.OK);
-
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!d.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		List<Ride> rides = rideService.findByUser(d, pageable, tFrom, tTo);
+		ListDTO<RideDTO> ridesDTO = new ListDTO<>(rides.stream().map(r -> RideController.to(r)).toList());
+        return new ResponseEntity<>(ridesDTO, HttpStatus.OK);
     }
-
 }
-
