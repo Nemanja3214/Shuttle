@@ -33,7 +33,7 @@ public class VehicleService implements IVehicleService {
 	private IVehicleTypeRepository vehicleTypeRepository;
 	
 	@Override
-	public Vehicle add(VehicleDTO vehicleDTO) throws NoSuchElementException {
+	public Vehicle add(VehicleDTO vehicleDTO) {
 		Driver d = driverService.get(vehicleDTO.getDriverId());
 		VehicleType vehicleType = findVehicleTypeByName(vehicleDTO.getVehicleType()).orElseThrow();
 		
