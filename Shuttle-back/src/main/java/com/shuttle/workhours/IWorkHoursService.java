@@ -8,8 +8,12 @@ import org.springframework.data.domain.Pageable;
 import com.shuttle.driver.Driver;
 
 public interface IWorkHoursService {
-	public void addNew(Driver driver);
-	public void finishLast(Driver driver);
+	public WorkHours addNew(Driver driver);
+	public WorkHours addNew(Driver driver, LocalDateTime start);
+	public WorkHours finishLast(Driver driver);
+	public WorkHours findLastByDriver(Driver driver);
 	public List<WorkHours> findAllByDriver(Driver driver, Pageable pageable, LocalDateTime from, LocalDateTime to);
     public List<WorkHours> findAllByDriver(Driver driver, LocalDateTime from, LocalDateTime to);
+	public WorkHours findById(Long id);
+	public WorkHours setEnd(WorkHours wh, LocalDateTime t);
 }

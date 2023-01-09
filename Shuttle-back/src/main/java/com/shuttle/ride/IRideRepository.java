@@ -32,7 +32,7 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     @Query(value = "from Ride r join r.passengers plist where (plist.id = :userId or r.driver.id = :userId)")
     public List<Ride> findByUser(Long userId, Pageable pageable);
     
-    @Query(value = "from Ride r join r.passengers plist where (plist.id = :userId or r.driver.id = :userId) and (r.startTime between :dateFrom and :dateTo) and (r.endTime between :dateFrom and :dateTo)")
+    @Query(value = "from Ride r join r.passengers plist where (plist.id = :userId or r.driver.id = :userId) and (r.startTime = null or r.startTime between :dateFrom and :dateTo) and (r.endTime = null or r.endTime between :dateFrom and :dateTo)")
     public List<Ride> findByUser(Long userId, Pageable pageable, LocalDateTime dateFrom, LocalDateTime dateTo);
     
     @Query(value = "from Ride r where (:passenger) IN elements(r.passengers) and ( r.endTime BETWEEN :startDate AND :endDate )")

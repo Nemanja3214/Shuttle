@@ -14,6 +14,12 @@ public class MyValidator {
 			return;
 		validateStr(t, s -> s.length() > length, msgLength(name, length));
 	}
+	
+	public static void validateRange(Long t, String name, Long min, Long max) throws MyValidatorException {
+		if (t == null)
+			return;
+		validateLong(t, l -> l < min || l > max, msgRange(name, min, max));
+	}
 
 	public static void validatePattern(String t, String name, String pattern) throws MyValidatorException {
 		if (t == null)
@@ -51,5 +57,9 @@ public class MyValidator {
 
 	public static String msgRequired(String field) {
 		return "Field (" + field + ") is required!";
+	}
+	
+	public static String msgRange(String field, Long min, Long max) {
+		return "Field (" + field + ") must be between " + min.toString() + " and " + max.toString() + "!";
 	}
 }

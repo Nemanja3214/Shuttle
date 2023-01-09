@@ -1,0 +1,13 @@
+package com.shuttle.driver.dto;
+
+import lombok.Data;
+
+@Data
+public class DriverUpdateDTO {
+    private String name;
+    private String surname;
+    private String profilePicture;
+    private String telephoneNumber;
+    private String email;
+    private String address;
+}

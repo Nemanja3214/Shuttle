@@ -1,7 +1,5 @@
 package com.shuttle.workhours.dto;
 
-import java.time.LocalDateTime;
-
 import com.shuttle.workhours.*;
 
 import lombok.AllArgsConstructor;
@@ -12,11 +10,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkHoursNoDriverDTO {
-	private LocalDateTime start;
-	private LocalDateTime finish;
+	private Long id;
+	private String start;
+	private String end;
 	
 	public WorkHoursNoDriverDTO(WorkHours workHours) {
-		this.start = workHours.getStart();
-		this.finish = workHours.getFinish();
+		this.id = workHours.getId();
+		this.start = workHours.getStart() == null ? null : workHours.getStart().toString();
+		this.end = workHours.getFinish() == null ? null : workHours.getFinish().toString();
 	}
 }

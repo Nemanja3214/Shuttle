@@ -33,7 +33,7 @@ public class VehicleService implements IVehicleService {
 	private IVehicleTypeRepository vehicleTypeRepository;
 	
 	@Override
-	public Vehicle add(VehicleDTO vehicleDTO) throws NoSuchElementException {
+	public Vehicle add(VehicleDTO vehicleDTO) {
 		Driver d = driverService.get(vehicleDTO.getDriverId());
 		VehicleType vehicleType = findVehicleTypeByName(vehicleDTO.getVehicleType()).orElseThrow();
 		
@@ -114,6 +114,25 @@ public class VehicleService implements IVehicleService {
 	@Override
 	public Vehicle findById(Long id) {
 		return vehicleRepository.findById(id).orElse(null);
+	}
+
+	@Override
+	public Vehicle update(Vehicle vehicle, VehicleDTO vehicleDTO) throws IllegalArgumentException {
+		if (vehicleDTO.getBabyTransport() != null) vehicle.setBabyTransport(vehicleDTO.getBabyTransport());
+		if (vehicleDTO.getPetTransport() != null) vehicle.setPetTransport(vehicleDTO.getPetTransport());
+		if (vehicleDTO.getCurrentLocation() != null) vehicle.setCurrentLocation(vehicleDTO.getCurrentLocation().to());
+		
+		VehicleType type = vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(vehicleDTO.getVehicleType()).orElse(null);
+		if (type == null) {
+			throw new IllegalArgumentException("Unknown Vehicle Type");
+		}
+		
+		vehicle.setVehicleType(type);
+		vehicle.setModel(vehicleDTO.getModel());
+		vehicle.setLicenseNumber(vehicleDTO.getLicenseNumber());
+		vehicle.setPassengerSeats(vehicleDTO.getPassengerSeats());
+		
+		return vehicle;
 	}
 	
 }
