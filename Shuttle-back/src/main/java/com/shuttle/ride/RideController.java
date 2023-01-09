@@ -91,7 +91,7 @@ public class RideController {
         final Double velocity = 60.0 / 1000.0; // TODO: Where to get average vehicle velocity from?
 
         final VehicleType vehicleType = vehicleTypeRepository
-                .findVehicleTypeByName(rideDTO.getVehicleType())
+                .findVehicleTypeByNameIgnoreCase(rideDTO.getVehicleType())
                 .orElseThrow();
         final Double cost = (vehicleType.getPricePerKM() + 120) * distance;
 

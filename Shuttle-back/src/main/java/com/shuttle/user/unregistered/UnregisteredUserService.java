@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.ride.dto.CreateRideEstimationDTO;
 import com.shuttle.ride.dto.EstimationDTO;
 import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
@@ -17,16 +18,18 @@ public class UnregisteredUserService implements IUnregisteredUserService{
 	private IVehicleTypeRepository vehicleTypeRepository;
 	
 	@Override
-	public EstimationDTO getEstimation(CreateRideEstimationDTO dto) {
-		Optional<VehicleType> vehicleType = vehicleTypeRepository.findVehicleTypeByName(dto.getVehicleType());
+	public EstimationDTO getEstimation(CreateRideEstimationDTO dto) throws NonExistantVehicleType {
+		Optional<VehicleType> vehicleType = vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(dto.getVehicleType());
 		if(vehicleType.isEmpty()) {
-			return null;
+			throw new NonExistantVehicleType();
 		}
 		
-		double price = vehicleType.get().getPricePerKM() * dto.getRouteLength();
+		double price = vehicleType.get().getPricePerKM() * dto.calculateLength();
 		long time = dto.getTravelTime();
 		
 		return new EstimationDTO(time, price);
 	}
+	
+	
 
 }

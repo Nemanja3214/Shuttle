@@ -3,6 +3,8 @@ package com.shuttle.location.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.lucene.util.SloppyMath;
+
 import com.shuttle.location.Location;
 import com.shuttle.location.Route;
 
@@ -27,5 +29,9 @@ public class RouteDTO {
 			routes.add(new RouteDTO(departure, destination));
 		}
 		return routes;
+	}
+	
+	public double getDistance() {
+		return SloppyMath.haversinMeters(departure.getLatitude(), departure.getLongitude(), destination.getLatitude(), destination.getLongitude());
 	}
 }
