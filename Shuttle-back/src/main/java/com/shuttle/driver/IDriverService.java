@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Optional;
 import java.time.Duration;
 
+import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.location.dto.LocationDTO;
 
 public interface IDriverService {
 	public Driver add(Driver driver);
+	public Driver create(DriverDTO dto);
 	public Driver get(Long id);
 	
 	/**

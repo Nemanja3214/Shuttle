@@ -20,9 +20,16 @@ import com.shuttle.common.RESTError;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverDocumentDTO;
+import com.shuttle.passenger.Passenger;
+import com.shuttle.passenger.PassengerDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.user.GenericUser;
+import com.shuttle.user.UserService;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.data.domain.Page;
 
@@ -31,6 +38,7 @@ import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleDTO;
 import com.shuttle.workhours.WorkHours;
 
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.websocket.server.PathParam;
 import com.shuttle.workhours.*;
@@ -44,6 +52,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -61,6 +70,8 @@ public class DriverController {
     private IRideRepository rideRepository;
     @Autowired
     private IVehicleService vehicleService;
+    @Autowired
+    private UserService userService;
 
 	@Autowired
 	private IWorkHoursService workHoursService;
@@ -69,11 +80,35 @@ public class DriverController {
         return new ListDTO<>(workHours.stream().map(w -> new WorkHoursNoDriverDTO(w)).toList());
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PostMapping("/api/driver")
-    public ResponseEntity<DriverDTO> createDriver(@RequestBody DriverDTO driverDTO) {
-    	Driver driver = driverDTO.to();
-    	driver = driverService.add(driver);
-        return new ResponseEntity<>(DriverDTO.from(driver), HttpStatus.OK);
+    public ResponseEntity<?> createDriver(@RequestBody DriverDTO dto) {
+    	try {
+			MyValidator.validateRequired(dto.getName(), "name");
+			MyValidator.validateRequired(dto.getSurname(), "surname");
+			MyValidator.validateRequired(dto.getEmail(), "email");
+			MyValidator.validateRequired(dto.getAddress(), "address");
+			MyValidator.validateRequired(dto.getPassword(), "password");
+			
+			MyValidator.validateLength(dto.getName(), "name", 100);
+			MyValidator.validateLength(dto.getSurname(), "surname", 100);
+			MyValidator.validateLength(dto.getTelephoneNumber(), "telephoneNumber", 18);
+			MyValidator.validateLength(dto.getEmail(), "email", 100);
+			MyValidator.validateLength(dto.getAddress(), "address", 100);
+			
+			MyValidator.validatePattern(dto.getPassword(), "password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+		
+		GenericUser userWithThisEmail = userService.findByEmail(dto.getEmail());
+		if (userWithThisEmail != null) {
+			return new ResponseEntity<RESTError>(new RESTError("User with that email already exists!"), HttpStatus.BAD_REQUEST);
+		}
+		
+		Driver d = driverService.create(dto);
+		DriverDTO result = DriverDTO.from(d);
+		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('driver')")

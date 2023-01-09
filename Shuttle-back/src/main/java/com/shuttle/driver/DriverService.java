@@ -4,9 +4,18 @@ import java.util.List;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.passenger.Passenger;
+import com.shuttle.passenger.PassengerDTO;
+import com.shuttle.security.Role;
+import com.shuttle.security.RoleService;
+import com.shuttle.user.GenericUser;
+import com.shuttle.user.UserService;
+import com.shuttle.user.dto.UserDTO;
 import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.workhours.IWorkHoursService;
@@ -20,6 +29,12 @@ public class DriverService implements IDriverService {
 	private IVehicleRepository vehicleRepository;
     @Autowired
     private IWorkHoursService workHoursService;
+    @Autowired
+    private UserService userService;
+	@Autowired
+    private PasswordEncoder passwordEncoder;
+	@Autowired
+	private RoleService roleService;
 
 	@Override
 	public Driver add(Driver driver) {
@@ -73,4 +88,25 @@ public class DriverService implements IDriverService {
         Duration dur = getDurationOfWorkInTheLast24Hours(d);
         return (dur.compareTo(Duration.ofHours(8)) > 0);
     }
+
+	@Override
+	public Driver create(DriverDTO driverDTO) {
+		Driver d = createDriver(driverDTO);
+		d = driverRepository.save(d);
+		return d;
+	}
+	
+	private Driver createDriver(DriverDTO driverDTO) {
+		Driver d = driverDTO.to();
+		d.setActive(false);
+		d.setBlocked(false);
+		d.setEnabled(false);
+		d.setAvailable(false);
+		List<Role> driverRole = roleService.findByName("passenger");
+		d.setRoles(driverRole);
+		
+		String encodedPassword = passwordEncoder.encode(driverDTO.getPassword());
+		d.setPassword(encodedPassword);
+		return d;
+	}
 }
