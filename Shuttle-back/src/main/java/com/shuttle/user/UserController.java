@@ -8,12 +8,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.aspectj.apache.bcel.classfile.ExceptionTable;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -88,22 +90,45 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> login(@RequestBody CredentialsDTO credentialsDTO) {
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(), credentialsDTO.getPassword());
+        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(),
+                credentialsDTO.getPassword());
         Authentication auth = authenticationManager.authenticate(authReq);
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(auth);
-        String token = jwtTokenUtil.generateToken
-                (((GenericUser) auth.getPrincipal()).getId(), credentialsDTO.getEmail(), auth.getAuthorities());
-        TokenDTO tokens = new TokenDTO(token, token);
-        //TODO add refresh token
-        
+        long id = ((GenericUser) auth.getPrincipal()).getId();
+        String token = jwtTokenUtil.generateToken(id, credentialsDTO.getEmail(), auth.getAuthorities());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(id, credentialsDTO.getEmail());
+        TokenDTO tokens = new TokenDTO(token, refreshToken);
         GenericUser user = userService.findByEmail(credentialsDTO.getEmail());
         if (user != null) {
-        	userService.setActive(user, true);
+            userService.setActive(user, true);
         }
         
         
         return new ResponseEntity<TokenDTO>(tokens, HttpStatus.OK);
+    }
+
+    @PermitAll
+    @PostMapping(value = "/refreshtoken")
+    public ResponseEntity<TokenDTO> refreshtoken(@RequestBody String refreshToken) throws Exception {
+        // From the HttpRequest get the claims
+        refreshToken = refreshToken.replace("\"","");
+        refreshToken = refreshToken.replace("{","");
+        refreshToken = refreshToken.replace("}","");
+        refreshToken = refreshToken.substring(13).strip();
+        refreshToken = refreshToken.replace("\\","");
+        String email = jwtTokenUtil.getEmailFromToken(refreshToken);
+        GenericUser user = userService.findByEmail(email);
+
+        if (jwtTokenUtil.validateToken(refreshToken, user)) {
+            String token = jwtTokenUtil.generateToken(user.getId(), user.getEmail(), user.getAuthorities());
+            System.out.println("Refreshed token");
+            TokenDTO tokenDTO = new TokenDTO(token,refreshToken);
+            return new ResponseEntity<>(tokenDTO, HttpStatus.OK);
+
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @GetMapping("/{id}/message")
@@ -123,11 +148,11 @@ public class UserController {
         }
 
         GenericUser sender = null;
-        
+
         try {
             sender = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         } catch (Exception e) {}
-        
+
         GenericUser reciever = null;
         if (recieverId == -1) {
             final List<GenericUser> admins = userService.findByRole("admin");
@@ -143,7 +168,7 @@ public class UserController {
 		if (sender == null || reciever == null || ride == null) {
 			return new ResponseEntity<Void>((Void)null, HttpStatus.NOT_FOUND);
 		}
-        
+
         Message m = new Message(
             null,
             sender,
@@ -224,7 +249,7 @@ public class UserController {
 
         return new ResponseEntity<>(notes, HttpStatus.OK);
     }
-    
+
 	@GetMapping("/img/{id}")
 	public ResponseEntity<?> getProfilePicture(@PathVariable int id){
 		try {
