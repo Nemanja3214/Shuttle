@@ -27,6 +27,7 @@ import com.shuttle.ride.Ride;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
+import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
 
@@ -50,6 +51,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -107,7 +109,7 @@ public class DriverController {
 		}
 		
 		Driver d = driverService.create(dto);
-		DriverDTO result = DriverDTO.from(d);
+		UserDTONoPassword result = new UserDTONoPassword(d);
 		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -115,16 +117,32 @@ public class DriverController {
     @GetMapping("/api/driver")
     public ResponseEntity<?> getPaginatedDrivers(Pageable pageable) {
     	List<Driver> drivers = this.driverService.findAll(pageable);
-		List<DriverDTO> passengersDTO = drivers.stream().map(d -> DriverDTO.from(d)).toList();
-		ListDTO<DriverDTO> result = new ListDTO<>(passengersDTO);
+		List<UserDTONoPassword> passengersDTO = drivers.stream().map(d -> new UserDTONoPassword(d)).toList();
+		ListDTO<UserDTONoPassword> result = new ListDTO<>(passengersDTO);
 		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/api/driver/{id}")
-    public ResponseEntity<DriverDTO> getDriverDetails(@PathVariable(value = "id") Long id) {
-        DriverControllerMockProvider driverControllerMockProvider = new DriverControllerMockProvider();
-        System.out.println(id);
-        return new ResponseEntity<>(driverControllerMockProvider.getDriverData(), HttpStatus.OK);
+    public ResponseEntity<?> getDriverDetails(@PathVariable("id") Long id) {
+    	if (id == null) {
+            return new ResponseEntity<RESTError>(new RESTError("Field (id) is required!"), HttpStatus.BAD_REQUEST);
+        }
+
+        Driver driver = driverService.get(id);
+        if (driver == null) {
+            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+        return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
 
     @PutMapping("/api/driver/{id}")
