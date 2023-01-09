@@ -14,7 +14,7 @@ import jakarta.mail.MessagingException;
 
 public interface IPassengerService {
 
-	PassengerDTO register(PassengerDTO passengerDTO) throws UnsupportedEncodingException, MessagingException, EmailAlreadyUsedException, IOException;
+	Passenger register(PassengerDTO passengerDTO) throws MessagingException, IOException;
 
 	boolean verify(String code) throws TokenExpiredException, NonExistantUserException;
 
