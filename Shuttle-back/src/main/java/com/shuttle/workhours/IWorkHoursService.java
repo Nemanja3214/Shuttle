@@ -14,4 +14,5 @@ public interface IWorkHoursService {
 	public WorkHours findLastByDriver(Driver driver);
 	public List<WorkHours> findAllByDriver(Driver driver, Pageable pageable, LocalDateTime from, LocalDateTime to);
     public List<WorkHours> findAllByDriver(Driver driver, LocalDateTime from, LocalDateTime to);
+	public WorkHours findById(Long id);
 }

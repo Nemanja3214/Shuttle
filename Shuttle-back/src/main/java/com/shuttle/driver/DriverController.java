@@ -476,16 +476,32 @@ public class DriverController {
 
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @GetMapping("/api/driver/working-hour/{working-hour-id}")
-    public ResponseEntity<WorkHours> getWorkHours(@PathVariable(value = "working-hour-id") Long id) {
-        WorkHours workHoursCollectionDTO = new WorkHours();
-        workHoursCollectionDTO.setId(id);
-        return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);
-
+    public ResponseEntity<?> getWorkHours(@PathVariable("working-hour-id") Long id) {
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+    	
+    	WorkHours wh = workHoursService.findById(id);
+        if (wh == null) {
+            return new ResponseEntity<>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+        }
+        
+        final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!wh.getDriver().getId().equals(user____.getId())) {
+                return new ResponseEntity<RESTError>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+	    	}
+	    }
+        
+        return new ResponseEntity<>(new WorkHoursNoDriverDTO(wh), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyAuthority('admin', 'driver')")
     @PutMapping("/api/driver/working-hour/{working-hour-id}")
-    public ResponseEntity<WorkHours> changeWorkHours(@PathVariable(value = "working-hour-id") Long id) {
+    public ResponseEntity<WorkHours> changeWorkHours(@PathVariable("working-hour-id") Long id) {
         WorkHours workHoursCollectionDTO = new WorkHours();
         workHoursCollectionDTO.setId(id);
         return new ResponseEntity<>(workHoursCollectionDTO, HttpStatus.OK);

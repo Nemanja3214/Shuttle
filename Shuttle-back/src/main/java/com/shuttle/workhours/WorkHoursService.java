@@ -63,4 +63,9 @@ public class WorkHoursService implements IWorkHoursService {
 	public WorkHours findLastByDriver(Driver driver) {
 		return workHoursRepository.findLastByDriver(driver.getId()).orElse(null);
 	}
+
+	@Override
+	public WorkHours findById(Long id) {
+		return workHoursRepository.findById(id).orElse(null);
+	}
 }
