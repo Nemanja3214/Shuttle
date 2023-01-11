@@ -35,6 +35,7 @@ import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.panic.IPanicService;
 import com.shuttle.panic.Panic;
 import com.shuttle.panic.PanicDTO;
+import com.shuttle.panic.PanicSendDTO;
 import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.IPassengerService;
 import com.shuttle.passenger.Passenger;
@@ -286,7 +287,7 @@ public class RideController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('passenger')")
+    @PreAuthorize("hasAnyAuthority('admin', 'passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
     	try {
@@ -401,7 +402,6 @@ public class RideController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{rideId}")
     public ResponseEntity<?> getRide(@PathVariable Long rideId) {
-    	System.out.println("AAAAAAAAAAAAAAAAAAAAAAA");
     	if (rideId == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
@@ -419,7 +419,6 @@ public class RideController {
                 return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
             }	
 	    } else if (userService.isDriver(user)) {
-	    	System.out.println(ride.getDriver().getId() + " " + user.getId());
             if (!ride.getDriver().getId().equals(user.getId())) {
             	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
             }
@@ -448,8 +447,8 @@ public class RideController {
             }	
 	    }
 
-        if (ride.getStatus() != Status.Pending) {
-            return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't pending."), HttpStatus.BAD_REQUEST);
+        if (ride.getStatus() != Status.Pending && ride.getStatus() != Status.Started) {
+            return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't PENDING or STARTED."), HttpStatus.BAD_REQUEST);
         }
 
         this.rideService.cancelRide(ride);
@@ -467,8 +466,14 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping("/{id}/panic")
-    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody String reason) {   
-        if (id == null) {
+    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody PanicSendDTO reason) {   
+    	try {
+			MyValidator.validateRequired(reason.getReason(), "reason");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	if (id == null) {
             return new ResponseEntity<Void>((Void)null, HttpStatus.BAD_REQUEST);
         }
         
@@ -478,29 +483,20 @@ public class RideController {
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        //GenericUser userWithDetails = user;
         if (userService.isPassenger(user)) {
 	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
                 return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
             }
-	    	//Passenger p = passengerService.findById(user.getId());
-	    	//System.out.println("[0][][]" + p.getName());
 	    } else if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
             	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
             }
-            //Driver d = driverService.get(user.getId());
-            //System.out.println("[0][][]" + d.getName());
         }
         
-
-        //System.out.println("[1][][]" + userWithDetails);
-        //System.out.println("[A][][]" + userWithDetails.getName());
-
         rideService.cancelRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
         
-        Panic p = panicService.add(ride, user, reason);
+        Panic p = panicService.add(ride, user, reason.getReason());
         PanicDTO dto = new PanicDTO();
         dto.setReason(p.getReason());
         dto.setTime(p.getTime().toString());
@@ -508,9 +504,6 @@ public class RideController {
         dto.setRide(to(ride));
         dto.setUser(new UserDTONoPassword(p.getUser()));
         
-        //System.out.println("[2][][]" + p.getUser());
-        //System.out.println("[3][][]" + dto.getUser());
-
         notifyRideDriver(ride);
         notifyRidePassengers(ride);
 
