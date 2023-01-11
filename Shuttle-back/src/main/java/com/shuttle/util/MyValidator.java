@@ -1,10 +1,44 @@
 package com.shuttle.util;
 
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.location.dto.RouteDTO;
+import com.shuttle.user.dto.BasicUserInfoDTO;
+
 
 public class MyValidator {
+	private static final String REGEX_EMAIL = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+	
+	public static void validateRouteDTO(List<RouteDTO> locationList, String name) throws MyValidatorException {
+		for (RouteDTO u : locationList) {
+			validateRequired(u.getDeparture(), name + ".departure");
+			validateRequired(u.getDestination(), name + ".destination");
+			
+			validateRequired(u.getDeparture().getLatitude(), name + ".departure.latitude");
+			validateRange(u.getDeparture().getLatitude().longValue(), name + ".departure.latitude", -90L, 90L);
+			validateRequired(u.getDeparture().getLongitude(), name + ".departure.longitude");
+			validateRange(u.getDeparture().getLongitude().longValue(), name + ".departure.longitude", -90L, 90L);
+			
+			validateRequired(u.getDestination().getLatitude(), name + ".destination.latitude");
+			validateRange(u.getDestination().getLatitude().longValue(), name + ".destination.latitude", -90L, 90L);
+			validateRequired(u.getDestination().getLongitude(), name + ".destination.longitude");
+			validateRange(u.getDestination().getLongitude().longValue(), name + ".destination.longitude", -90L, 90L);
+		}
+	}
+	
+	public static void validateUserRef(List<BasicUserInfoDTO> idEmailList, String name) throws MyValidatorException {
+		for (BasicUserInfoDTO u : idEmailList) {
+			validateRequired(u.getId(), name + ".id");
+			validateRequired(u.getEmail(), name + ".email");
+			
+			validatePattern(u.getEmail(), name + ".email", REGEX_EMAIL);
+			validateLength(u.getEmail(), name + ".email", 100);
+		}
+	}
+	
 	public static void validateRequired(Object o, String name) throws MyValidatorException {
 		validateObj(o, obj -> obj == null, msgRequired(name));
 	}

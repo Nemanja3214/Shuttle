@@ -52,6 +52,8 @@ import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
 import com.shuttle.user.dto.UserDTO;
 import com.shuttle.user.dto.UserDTONoPassword;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
 import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
@@ -117,8 +119,8 @@ public class RideController {
         r.setTotalCost(cost);
         r.setDriver(driver);
         r.setVehicleType(vehicleType);
-        r.setBabyTransport(rideDTO.isBabyTransport());
-        r.setPetTransport(rideDTO.isPetTransport());
+        r.setBabyTransport(rideDTO.getBabyTransport());
+        r.setPetTransport(rideDTO.getBabyTransport());
         r.setEstimatedTimeInMinutes((int) ((distance / velocity) * 60));
         r.setPassengers(passengers);
         r.setRoute(route);
@@ -287,7 +289,22 @@ public class RideController {
     @PreAuthorize("hasAnyAuthority('passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
-        try {
+    	try {
+			MyValidator.validateRequired(createRideDTO.getLocations(), "locations");
+			MyValidator.validateRequired(createRideDTO.getPassengers(), "passengers");
+			MyValidator.validateRequired(createRideDTO.getVehicleType(), "vehicleType");
+			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "petTransport");
+			
+			MyValidator.validateUserRef(createRideDTO.getPassengers(), "passengers");
+			MyValidator.validateRouteDTO(createRideDTO.getLocations(), "locations");
+			
+			MyValidator.validateLength(createRideDTO.getVehicleType(), "vehicleType", 50);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}	
+    	
+    	try {
             final Passenger p = (Passenger)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
             if (rideService.findActiveOrPendingByPassenger(p) != null) {
