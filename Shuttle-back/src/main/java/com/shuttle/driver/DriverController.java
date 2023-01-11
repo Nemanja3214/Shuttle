@@ -313,6 +313,7 @@ public class DriverController {
 			MyValidator.validateRequired(vehicleDTO.getLicenseNumber(), "licenseNumber");
 			MyValidator.validateRequired(vehicleDTO.getPassengerSeats(), "passengerSeats");
 
+			MyValidator.validateLocation(vehicleDTO.getCurrentLocation(), "currentLocation");
 			MyValidator.validateLength(vehicleDTO.getModel(), "name", 100);
 			MyValidator.validateLength(vehicleDTO.getLicenseNumber(), "licenseNumber", 20);
 			MyValidator.validateRange(vehicleDTO.getPassengerSeats().longValue(), "passengerSeats", 1L, 20L);
@@ -344,6 +345,7 @@ public class DriverController {
 			MyValidator.validateRequired(vehicleDTO.getLicenseNumber(), "licenseNumber");
 			MyValidator.validateRequired(vehicleDTO.getPassengerSeats(), "passengerSeats");
 
+			MyValidator.validateLocation(vehicleDTO.getCurrentLocation(), "currentLocation");
 			MyValidator.validateLength(vehicleDTO.getModel(), "name", 100);
 			MyValidator.validateLength(vehicleDTO.getLicenseNumber(), "licenseNumber", 20);
 			MyValidator.validateRange(vehicleDTO.getPassengerSeats().longValue(), "passengerSeats", 1L, 20L);
