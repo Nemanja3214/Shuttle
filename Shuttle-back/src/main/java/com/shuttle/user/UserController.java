@@ -94,11 +94,11 @@ public class UserController {
     @PutMapping("/{id}/changePassword")
     public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody PasswordDTO passwordDTO) {
     	try {
-			MyValidator.validateRequired(passwordDTO.getNew_password(), "new_password");
-			MyValidator.validateRequired(passwordDTO.getOld_password(), "old_password");
+			MyValidator.validateRequired(passwordDTO.getNewPassword(), "newPassword");
+			MyValidator.validateRequired(passwordDTO.getOldPassword(), "oldPassword");
 			
-			MyValidator.validatePattern(passwordDTO.getNew_password(), "new_password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
-			MyValidator.validatePattern(passwordDTO.getOld_password(), "old_password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			MyValidator.validatePattern(passwordDTO.getNewPassword(), "newPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			MyValidator.validatePattern(passwordDTO.getOldPassword(), "oldPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
@@ -120,10 +120,10 @@ public class UserController {
 	    	}
 	    }
 		
-		if (!userService.hasPassword(u, passwordDTO.getOld_password())) {
+		if (!userService.hasPassword(u, passwordDTO.getOldPassword())) {
 			return new ResponseEntity<RESTError>(new RESTError("Current password is not matching!"), HttpStatus.BAD_REQUEST);
 		}
-		userService.changePassword(u, passwordDTO.getNew_password());
+		userService.changePassword(u, passwordDTO.getNewPassword());
 		
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
