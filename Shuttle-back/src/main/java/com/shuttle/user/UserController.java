@@ -65,6 +65,8 @@ import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.passwordReset.IPasswordResetService;
 import com.shuttle.user.passwordReset.PasswordResetCode;
 import com.shuttle.user.passwordReset.dto.PasswordResetCodeDTO;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
 import com.shuttle.vehicle.Vehicle;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -91,17 +93,19 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/changePassword")
     public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody PasswordDTO passwordDTO) {
+    	try {
+			MyValidator.validateRequired(passwordDTO.getNew_password(), "new_password");
+			MyValidator.validateRequired(passwordDTO.getOld_password(), "old_password");
+			
+			MyValidator.validatePattern(passwordDTO.getNew_password(), "new_password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			MyValidator.validatePattern(passwordDTO.getOld_password(), "old_password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
-    	
-    	//if (Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", passwordDTO.getNew_password())) {
-    	//	return new ResponseEntity<RESTError>(new RESTError("Field (new_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	//}
-    	
-    	//if (Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", passwordDTO.getNew_password())) {
-    	//	return new ResponseEntity<RESTError>(new RESTError("Field (old_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	//}
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
