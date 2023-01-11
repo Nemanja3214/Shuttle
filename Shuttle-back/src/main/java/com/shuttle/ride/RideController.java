@@ -627,8 +627,8 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Pending) {
-        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status PENDING!"), HttpStatus.BAD_REQUEST);
+        if (ride.getStatus() != Ride.Status.Pending && ride.getStatus() != Ride.Status.Accepted) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that is not in status PENDING or ACCEPTED!"), HttpStatus.BAD_REQUEST);
         }
 
         final Cancellation cancellation = cancellationService.create(reason.getReason(), user); 
