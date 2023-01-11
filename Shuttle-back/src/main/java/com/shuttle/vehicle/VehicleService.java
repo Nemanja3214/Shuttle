@@ -134,5 +134,13 @@ public class VehicleService implements IVehicleService {
 		
 		return vehicle;
 	}
+
+	@Override
+	public void removeDriver(Vehicle oldVehicle) {
+		// TODO Would this mess up any other entities in the database?
+		
+		oldVehicle.setDriver(null);
+		vehicleRepository.save(oldVehicle);		
+	}
 	
 }

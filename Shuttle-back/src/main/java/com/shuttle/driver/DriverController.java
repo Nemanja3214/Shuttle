@@ -332,9 +332,15 @@ public class DriverController {
         if (driver == null) {
             return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
+        
+        // If the driver already has a vehicle, remove it.
+        
+        Vehicle oldVehicle = vehicleService.findByDriver(driver);
+        if (oldVehicle != null) {
+        	vehicleService.removeDriver(oldVehicle);
+        }
 
         vehicleDTO.setDriverId(driver.getId()); // It's kinda ugly to do it this way.
-        
     	Vehicle v = vehicleService.add(vehicleDTO);
         return new ResponseEntity<>(VehicleDTO.from(v), HttpStatus.OK);
     }
