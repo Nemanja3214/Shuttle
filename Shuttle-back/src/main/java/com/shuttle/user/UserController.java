@@ -161,18 +161,20 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/resetPassword")
     public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestBody PasswordResetCodeDTO dto) {
+    	try {
+			MyValidator.validateRequired(dto.getNew_password(), "new_password");
+			MyValidator.validateRequired(dto.getCode(), "code");
+			
+			MyValidator.validatePattern(dto.getNew_password(), "new_password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			MyValidator.validatePattern(dto.getCode(), "code", "^[0-9]{1,6}$");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
     	
-    	//if (!Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", dto.getNew_password())) {
-    	//	return new ResponseEntity<RESTError>(new RESTError("Field (new_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	//}
-    	
-    	if (!Pattern.matches("^[0-9]{1,6}$", dto.getCode())) {
-    		return new ResponseEntity<RESTError>(new RESTError("Field (code) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	}
-		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
 			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
@@ -259,7 +261,16 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CredentialsDTO credentialsDTO) {
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(), credentialsDTO.getPassword());
+    	try {
+			MyValidator.validateRequired(credentialsDTO.getEmail(), "email");
+			MyValidator.validateRequired(credentialsDTO.getPassword(), "password");
+			
+			MyValidator.validateEmail(credentialsDTO.getEmail(), "email");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(), credentialsDTO.getPassword());
         
         Authentication auth = null;
         try {
