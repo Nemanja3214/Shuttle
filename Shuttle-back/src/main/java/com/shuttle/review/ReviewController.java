@@ -30,6 +30,8 @@ import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
 import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
@@ -52,6 +54,16 @@ public class ReviewController {
 	@PreAuthorize("hasAnyAuthority('passenger')")
 	@PostMapping("/api/review/{rideId}/vehicle")
 	public ResponseEntity<?> leaveVehicleRating(@PathVariable("rideId") Long rideId, @RequestBody ReviewMinimalDTO reviewDTO) {
+		try {
+			MyValidator.validateRequired(reviewDTO.getRating(), "rating");
+			MyValidator.validateRequired(reviewDTO.getComment(), "comment");
+			
+			MyValidator.validateLength(reviewDTO.getComment(), "comment", 500);
+			MyValidator.validateRange(Long.valueOf(reviewDTO.getRating().longValue()), "rating", 1L, 10L);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}	
+		
 		if (rideId == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field rideId is required!"), HttpStatus.BAD_REQUEST);
 		}
@@ -82,9 +94,19 @@ public class ReviewController {
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
-	@PreAuthorize("hasAnyAuthority('passenger')")
+	@PreAuthorize("hasAnyAuthority('admin', 'passenger')")
 	@PostMapping("/api/review/{rideId}/driver")
 	public ResponseEntity<?> leaveDriverRating(@PathVariable("rideId") Long rideId, @RequestBody ReviewMinimalDTO reviewDTO) {
+		try {
+			MyValidator.validateRequired(reviewDTO.getRating(), "rating");
+			MyValidator.validateRequired(reviewDTO.getComment(), "comment");
+			
+			MyValidator.validateLength(reviewDTO.getComment(), "comment", 500);
+			MyValidator.validateRange(Long.valueOf(reviewDTO.getRating().longValue()), "rating", 1L, 10L);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}	
+		
 		if (rideId == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field rideId is required!"), HttpStatus.BAD_REQUEST);
 		}
@@ -117,7 +139,7 @@ public class ReviewController {
 	
 	@PreAuthorize("hasAnyAuthority('driver', 'admin')")
 	@GetMapping("/api/review/vehicle/{id}")
-	public ResponseEntity<?> getVehicleRatings(@PathVariable("id") Long vehicleId) {
+	public ResponseEntity<?> getVehicleRatings(@PathVariable("id") Long vehicleId) {	
 		if (vehicleId == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field vehicleId is required!"), HttpStatus.BAD_REQUEST);
 		}
@@ -183,12 +205,6 @@ public class ReviewController {
 		}
 		
 		List<Review> reviews = reviewService.findByRide(r);
-		//for (Review rrrr : reviews) {
-		//	System.out.println(rrrr.getId());
-		//	System.out.println(rrrr.getPassenger().getId());
-		//	System.out.println("");
-		//}
-		//System.out.println("-----------------");
 		
 		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
@@ -212,13 +228,6 @@ public class ReviewController {
 			}
 		}
 		
-		System.out.println("Passengers:");
-		//for (Long pid : passengerIds) {
-			//System.out.println(pid);
-		//}
-		//System.out.println("-------------");
-		
-
 		List<ReviewRideDTO> reviewsResult = new ArrayList<>();
 		for (Long pid : passengerIds) {
 			Passenger p = (Passenger)userService.findById(pid);
@@ -231,18 +240,14 @@ public class ReviewController {
 				if (rr.getPassenger().getId().equals(p.getId())) {
 					if (rr.isForDriver() && driverReview == null) {
 						driverReview = rr;
-						//System.out.println("FoundD " + rr.getId());
 					} else if (!rr.isForDriver() && vehicleReview == null) {
 						vehicleReview = rr;
-						//System.out.println("FoundV " + rr.getId());
 					}
 				}
 			}
 			
 			final ReviewRideDTO rideReview = new ReviewRideDTO(vehicleReview, driverReview);
 			reviewsResult.add(rideReview);
-			
-			//System.out.println("-------------");
 		}
 		
 		return new ResponseEntity<>(reviewsResult, HttpStatus.OK);
