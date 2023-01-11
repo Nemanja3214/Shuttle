@@ -276,7 +276,7 @@ public class DriverController {
 		return new ResponseEntity<>(new DriverDocumentDTO(doc), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('driver', 'admin', 'passenger')")
     @GetMapping("/api/driver/{id}/vehicle")
     public ResponseEntity<?> getVehicle(@PathVariable("id") Long id) {
     	if (id == null) {
@@ -294,11 +294,14 @@ public class DriverController {
         }
         
         final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        
 		if (userService.isAdmin(user____)) {	
-		} else {
+		} else if (userService.isDriver(user____)) {
 	    	if (!driver.getId().equals(user____.getId())) {
                 return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
+	    } else if (userService.isPassenger(user____)) {
+	    	// Always allow.
 	    }
 
         return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
