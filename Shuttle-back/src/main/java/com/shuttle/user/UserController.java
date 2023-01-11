@@ -346,9 +346,17 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PostMapping("/{recieverId}/message")
     public ResponseEntity<?> sendMessage(@PathVariable Long recieverId, @RequestBody CreateMessageDTO messageDTO) {
-    	// TODO: recieverId or messageDTO.receiverId ; one of these is redundant
+    	try {
+			MyValidator.validateRequired(messageDTO.getMessage(), "message");
+			MyValidator.validateRequired(messageDTO.getType(), "type");
+			MyValidator.validateRequired(messageDTO.getRideId(), "rideId");
+				
+			MyValidator.validateLength(messageDTO.getMessage(), "email", 500);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
     	
-        if (recieverId == null) {
+    	if (recieverId == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
 
