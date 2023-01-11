@@ -1,9 +1,18 @@
 package com.shuttle.util;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import com.shuttle.common.RESTError;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.user.dto.BasicUserInfoDTO;
@@ -11,6 +20,21 @@ import com.shuttle.user.dto.BasicUserInfoDTO;
 
 public class MyValidator {
 	private static final String REGEX_EMAIL = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+	
+	public static LocalDateTime validateDateTime(String dateAsString, String name) throws MyValidatorException {
+		if (dateAsString == null || dateAsString.equals("null")) {
+			return null;
+		}
+		
+		LocalDateTime t = null;
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			t = LocalDateTime.parse(dateAsString, formatter);
+			return t;
+		} catch (DateTimeParseException e) {
+			throw new MyValidatorException(msgFormat(name));
+		}
+	}
 	
 	public static void validateLocation(LocationDTO location, String name) throws MyValidatorException {
 		validateRequired(location.getLatitude(), name + ".latitude");

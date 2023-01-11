@@ -1,6 +1,7 @@
 package com.shuttle.ride;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +126,12 @@ public class RideController {
         r.setEstimatedTimeInMinutes((int) ((distance / velocity) * 60));
         r.setPassengers(passengers);
         r.setRoute(route);
+             
+        LocalDateTime scheduledTime = null;
+        if (rideDTO.getScheduledTime() != null) {
+        	scheduledTime = LocalDateTime.parse(rideDTO.getScheduledTime(), DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")));
+        }
+        r.setScheduledTime(scheduledTime);
 
         return r;
     }
@@ -153,6 +160,7 @@ public class RideController {
         rideDTO.setBabyTransport(ride.getBabyTransport());
         rideDTO.setPetTransport(ride.getPetTransport());
         rideDTO.setVehicleType(ride.getVehicleType().getName());
+        rideDTO.setScheduledTime(ride.getScheduledTime() == null ? null : ride.getScheduledTime().toString());
 
         if (ride.getRejection() != null) {
             rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
@@ -290,6 +298,7 @@ public class RideController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
+    	LocalDateTime scheduledFor; 
     	try {
 			MyValidator.validateRequired(createRideDTO.getLocations(), "locations");
 			MyValidator.validateRequired(createRideDTO.getPassengers(), "passengers");
@@ -299,6 +308,8 @@ public class RideController {
 			
 			MyValidator.validateUserRef(createRideDTO.getPassengers(), "passengers");
 			MyValidator.validateRouteDTO(createRideDTO.getLocations(), "locations");
+			
+			scheduledFor = MyValidator.validateDateTime(createRideDTO.getScheduledTime(), "scheduledTime");
 			
 			MyValidator.validateLength(createRideDTO.getVehicleType(), "vehicleType", 50);
 		} catch (MyValidatorException e1) {
@@ -312,20 +323,11 @@ public class RideController {
                 return new ResponseEntity<RESTError>(new RESTError("Cannot create a ride while you have one already pending!"), HttpStatus.BAD_REQUEST);
             }
 
-            final boolean forFuture = createRideDTO.getHour() != null && createRideDTO.getMinute() != null;
+            final boolean forFuture = scheduledFor != null;
             final Driver driver = rideService.findMostSuitableDriver(createRideDTO, forFuture);
             final Ride ride = from(createRideDTO, driver);
-   
-            if (forFuture) {
-                final int h = Integer.valueOf(createRideDTO.getHour());
-                final int m = Integer.valueOf(createRideDTO.getMinute());
-                final LocalDateTime start = LocalDateTime.now()
-                    .withHour(h)
-                    .withMinute(m)
-                    .withSecond(0);
-                ride.setStartTime(start);
-            }
 
+            ride.setScheduledTime(scheduledFor);
             rideService.save(ride);
             notifyRidePassengers(ride);
 

@@ -41,6 +41,7 @@ public class Ride {
     @OneToOne
     private Cancellation rejection;
     private Status status;
+    private LocalDateTime scheduledTime; // Can be null.
 
     public enum Status {
         Pending, Accepted, Rejected, Canceled, Finished, Started

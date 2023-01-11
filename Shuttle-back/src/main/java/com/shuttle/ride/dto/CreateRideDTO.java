@@ -17,6 +17,5 @@ public class CreateRideDTO {
 	private String vehicleType;
 	private Boolean babyTransport;
 	private Boolean petTransport;
-    private String hour;
-    private String minute;
+    private String scheduledTime;
 }
