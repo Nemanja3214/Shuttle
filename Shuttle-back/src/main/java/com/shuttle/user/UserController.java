@@ -109,14 +109,14 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -137,14 +137,14 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -177,14 +177,14 @@ public class UserController {
     	
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -192,7 +192,7 @@ public class UserController {
 		PasswordResetCode req = requests.stream().filter(r -> r.getCode().equals(dto.getCode())).findFirst().orElse(null);
 
 		if (req == null || !req.getActive() || req.getExpires().isBefore(LocalDateTime.now())) {
-			return new ResponseEntity<RESTError>(new RESTError("Code is expired or not correct!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Code is expired or not correct!", HttpStatus.NOT_FOUND);
 		}
 		
 		for (PasswordResetCode pr : requests) {
@@ -231,14 +231,14 @@ public class UserController {
     	
     	GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -327,14 +327,14 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -363,7 +363,7 @@ public class UserController {
         GenericUser sender = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         
         if (sender == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("User does not exist."), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("User does not exist.", HttpStatus.NOT_FOUND);
         }
         
         GenericUser reciever = null;
@@ -377,13 +377,13 @@ public class UserController {
         }
         
         if (reciever == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("Receiver does not exist."), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Receiver does not exist.", HttpStatus.NOT_FOUND);
         }
 
         Ride ride = rideService.findById(messageDTO.getRideId());
 
 		if (ride == null && messageDTO.getType() != Type.SUPPORT) {
-			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist."), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Ride does not exist.", HttpStatus.NOT_FOUND);
 		}
 
         Message m = new Message(
@@ -409,11 +409,11 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		if (u.getBlocked()) {
-			return new ResponseEntity<RESTError>(new RESTError("User is already blocked!"), HttpStatus.BAD_REQUEST);	
+			return new ResponseEntity<>(new RESTError("User is already blocked!"), HttpStatus.BAD_REQUEST);	
 		}
 		
 		u = userService.setBlocked(u, true);
@@ -429,7 +429,7 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		if (!u.getBlocked()) {
@@ -457,7 +457,7 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser creator = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -475,11 +475,11 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		List<Note> notes = noteService.findAll(u, pageable);
-		ListDTO<NoteDTO> notesDTO = new ListDTO(notes.stream().map(n -> new NoteDTO(n)).toList());		
+		ListDTO<NoteDTO> notesDTO = new ListDTO<>(notes.stream().map(n -> new NoteDTO(n)).toList());		
         return new ResponseEntity<>(notesDTO, HttpStatus.OK);
     }
     

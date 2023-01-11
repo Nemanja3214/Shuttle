@@ -71,22 +71,22 @@ public class ReviewController {
 		Ride r = rideService.findById(rideId);
 		
 		if (r == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 		}
 		if (r.getDriver() == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		Vehicle v = vehicleService.findByDriver(r.getDriver());
 		
 		if (v == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isPassenger(user)) {
 	    	if (r.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
         
@@ -114,22 +114,22 @@ public class ReviewController {
 		Ride r = rideService.findById(rideId);
 		
 		if (r == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 		}
 		if (r.getDriver() == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		Vehicle v = vehicleService.findByDriver(r.getDriver());
 		
 		if (v == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isPassenger(user)) {
 	    	if (r.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
         
@@ -147,7 +147,7 @@ public class ReviewController {
 		Vehicle v = vehicleService.findById(vehicleId);
 		
 		if (v == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		List<Review> reviews = reviewService.findByVehicle(v);
@@ -157,7 +157,7 @@ public class ReviewController {
 		if (userService.isAdmin(user)) {
 		} else if (userService.isDriver(user)) {
 	    	if (!v.getDriver().getId().equals(user.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 
@@ -174,7 +174,7 @@ public class ReviewController {
 		Driver d = driverService.get(driverId);
 		
 		if (d == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		List<Review> reviews = reviewService.findByDriver(d);
@@ -184,7 +184,7 @@ public class ReviewController {
 		if (userService.isAdmin(user)) {
 		} else if (userService.isDriver(user)) {
 	    	if (!d.getId().equals(user.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 
@@ -201,7 +201,7 @@ public class ReviewController {
 		Ride r = rideService.findById(rideId);
 		
 		if (r == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		List<Review> reviews = reviewService.findByRide(r);
@@ -211,11 +211,11 @@ public class ReviewController {
 		if (userService.isAdmin(user)) {
 		} else if (userService.isDriver(user)) {
 	    	if (!r.getDriver().getId().equals(user.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    } else if (userService.isPassenger(user)) {
 	    	if (r.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		

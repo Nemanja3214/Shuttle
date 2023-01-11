@@ -151,7 +151,7 @@ public class VehicleController {
 		Vehicle v = vehicleService.findById(id);
     	
 		if (v == null) {
-			return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		this.vehicleService.changeCurrentLocation(id, location);
@@ -159,7 +159,7 @@ public class VehicleController {
 		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isDriver(user)) {
 			if (user.getId() != v.getDriver().getId()) {
-				return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 			}
 		}
 

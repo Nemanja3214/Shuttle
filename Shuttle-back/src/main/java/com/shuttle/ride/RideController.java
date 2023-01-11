@@ -350,7 +350,7 @@ public class RideController {
         final Driver driver = driverService.get(driverId);
 
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver not found."), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver not found.", HttpStatus.NOT_FOUND);
         } 
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -358,13 +358,13 @@ public class RideController {
         if (userService.isAdmin(user)) {
 	    } else if (userService.isDriver(user)) {
             if (user.getId() != driverId) {
-                return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
             
        Ride ride = rideService.findCurrentRideByDriver(driver);
        if (ride == null) {
-           return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+           return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
        }
        
        return new ResponseEntity<>(to(ride), HttpStatus.OK);
@@ -380,20 +380,20 @@ public class RideController {
 
         final Passenger passenger = passengerService.findById(passengerId);
         if (passenger == null) {
-            return new ResponseEntity<RESTError>(new RESTError("Passenger not found."), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Passenger not found.", HttpStatus.NOT_FOUND);
         }
 
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isAdmin(user)) {
 	    } else if (userService.isPassenger(user)) {
             if (user.getId() != passengerId) {
-                return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
 
         Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
         if (ride == null) {
-            return new ResponseEntity<RESTError>(new RESTError("Active ride does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
         return new ResponseEntity<>(to(ride), HttpStatus.OK);
@@ -408,7 +408,7 @@ public class RideController {
 
         final Ride ride = rideService.findById(rideId);
         if (ride == null) {
-            return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -416,11 +416,11 @@ public class RideController {
         if (userService.isAdmin(user)) {	
 	    } else if (userService.isPassenger(user)) {
 	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }	
 	    } else if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
-            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
        
@@ -436,14 +436,14 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-            return new ResponseEntity<>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         if (userService.isPassenger(user)) {
 	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }	
 	    }
 
@@ -479,17 +479,17 @@ public class RideController {
         
         Ride ride = rideService.findById(id);   
         if (ride == null) {
-            return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isPassenger(user)) {
 	    	if (ride.getPassengers().stream().noneMatch(p -> p.getId().equals(user.getId()))) {
-                return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }
 	    } else if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
-            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
         
@@ -519,13 +519,13 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
 
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
-            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
         
@@ -553,13 +553,13 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
-            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
         
@@ -585,13 +585,13 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
-            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
         
@@ -617,13 +617,13 @@ public class RideController {
 
         Ride ride = rideService.findById(id);
         if (ride == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
-            	return new ResponseEntity<RESTError>(new RESTError("Ride does not exist!"), HttpStatus.NOT_FOUND);
+            	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
         

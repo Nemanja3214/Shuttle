@@ -119,14 +119,14 @@ public class PassengerController {
 
         Passenger passenger = passengerService.findById(id);
         if (passenger == null) {
-            return new ResponseEntity<>(new RESTError("Passenger does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
         }
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!passenger.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -198,7 +198,7 @@ public class PassengerController {
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!updatedPassenger.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -237,14 +237,14 @@ public class PassengerController {
     	
     	Passenger p = passengerService.findById(id);	
 		if (p == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Passenger does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
 		}
 
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!p.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Passenger does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
