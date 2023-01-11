@@ -443,6 +443,14 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin')")
     @PostMapping("/{id}/note")
     public ResponseEntity<?> createNote(@PathVariable Long id, @RequestBody NoteMessage message) {
+    	try {
+			MyValidator.validateRequired(message.getMessage(), "message");
+			
+			MyValidator.validateLength(message.getMessage(), "email", 500);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
