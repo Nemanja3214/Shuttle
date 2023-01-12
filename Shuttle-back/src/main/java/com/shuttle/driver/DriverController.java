@@ -88,8 +88,7 @@ public class DriverController {
         return new ListDTO<>(workHours.stream().map(w -> new WorkHoursNoDriverDTO(w)).toList());
     }
 
-//    TODO uncomment
-//    @PreAuthorize("hasAnyAuthority('admin')")
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PostMapping("/api/driver")
     public ResponseEntity<?> createDriver(@RequestBody DriverDTO dto) {
     	try {
@@ -249,7 +248,7 @@ public class DriverController {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-//    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @PostMapping("/api/driver/{id}/documents")
     public ResponseEntity<?> addDocsById(@PathVariable("id") Long id, @RequestBody DriverDocumentCreateDTO driverDocumentDTO) {
     	try {
@@ -270,13 +269,13 @@ public class DriverController {
             return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
-//		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-//		if (userService.isAdmin(user____)) {	
-//		} else {
-//	    	if (!driver.getId().equals(user____.getId())) {
-//                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
-//	    	}
-//	    }
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+	    	}
+	    }
 		
 		// TODO: If file not image -> return 400 not an image
 		// TODO: If file bigger than 5MB -> return 400 file bigger than 5mb
