@@ -26,11 +26,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverService;
+import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.ILocationService;
 import com.shuttle.location.Location;
 import com.shuttle.location.Route;
+import com.shuttle.location.dto.CreateFavouriteRouteDTO;
+import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.panic.IPanicService;
@@ -642,4 +647,21 @@ public class RideController {
 
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
+    
+    @PostMapping("/favorites")
+    public ResponseEntity<?> createFavouriteRide(@RequestBody CreateFavouriteRouteDTO dto){
+//    	TODO validation
+//    	TODO auth
+//    	TODO limit of favorites
+    	try {
+			 FavoriteRoute favoriteRoute = this.rideService.createFavoriteRoute(dto);
+			 return new ResponseEntity<FavoriteRouteDTO>(FavoriteRouteDTO.from(favoriteRoute), HttpStatus.OK);
+		} catch (NonExistantVehicleType e) {
+			return new ResponseEntity<RESTError>(new RESTError("Vehicle type doesn't exist"), HttpStatus.BAD_REQUEST);
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<RESTError>(new RESTError("User doesn't exist"), HttpStatus.BAD_REQUEST);
+		}
+    }
+    
+
 }

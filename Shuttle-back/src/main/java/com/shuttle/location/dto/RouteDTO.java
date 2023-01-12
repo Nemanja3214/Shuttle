@@ -2,6 +2,7 @@ package com.shuttle.location.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.lucene.util.SloppyMath;
 
@@ -21,6 +22,15 @@ public class RouteDTO {
 	
 	public static List<RouteDTO> getRoutes(Route route) {
 		List<Location> locations =route.getLocations();
+		return convertToRoutes(locations);
+		
+	}
+
+	public double getDistance() {
+		return SloppyMath.haversinMeters(departure.getLatitude(), departure.getLongitude(), destination.getLatitude(), destination.getLongitude());
+	}
+	
+	public static List<RouteDTO> convertToRoutes(List<Location> locations) {
 		List<RouteDTO> routes = new ArrayList<RouteDTO>();
 		
 		for(int i = 1; i < locations.size(); ++i) {
@@ -31,7 +41,10 @@ public class RouteDTO {
 		return routes;
 	}
 	
-	public double getDistance() {
-		return SloppyMath.haversinMeters(departure.getLatitude(), departure.getLongitude(), destination.getLatitude(), destination.getLongitude());
+	public static List<Location> convertToLocations(List<RouteDTO> routes) {
+    	List<Location> locations = routes.stream().map(route -> route.getDeparture().to()).collect(Collectors.toList());
+    	Location last = routes.get(routes.size() - 1).getDestination().to();
+    	locations.add(last);
+    	return locations;
 	}
 }
