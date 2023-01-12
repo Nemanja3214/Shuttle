@@ -26,6 +26,9 @@ public class FileUploadUtil {
         }
          
         BufferedImage image = null;
+        if(imageBase64 == null) {
+        	return;
+        }
         byte[] imageByte = Base64.getDecoder().decode(imageBase64);
         image = ImageIO.read(new ByteArrayInputStream(imageByte));
         

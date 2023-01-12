@@ -132,7 +132,7 @@ public class PassengerController {
         return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
 	}
 
-	//@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
 	@GetMapping("/activate/{activationId}")
 	public ResponseEntity<?> activate(@PathVariable("activationId") Long activationId) {
 		if (activationId == null) {
