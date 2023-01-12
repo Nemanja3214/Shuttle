@@ -63,7 +63,6 @@ public class PassengerController {
 	UserService userService;
 	
 	@PostMapping
-	@PreAuthorize("hasAnyAuthority('admin', 'passenger')")
 	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
 		try {
 			MyValidator.validateRequired(dto.getName(), "name");
@@ -133,7 +132,7 @@ public class PassengerController {
         return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
 	}
 
-	//@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
 	@GetMapping("/activate/{activationId}")
 	public ResponseEntity<?> activate(@PathVariable("activationId") Long activationId) {
 		if (activationId == null) {

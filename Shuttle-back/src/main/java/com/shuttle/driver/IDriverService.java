@@ -8,13 +8,14 @@ import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.time.Duration;
 
+import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.location.dto.LocationDTO;
 
 public interface IDriverService {
 	public Driver add(Driver driver);
-	public Driver create(DriverDTO dto);
+	public Driver create(DriverDTO dto) throws IOException;
 	public Driver get(Long id);
 	
 	/**

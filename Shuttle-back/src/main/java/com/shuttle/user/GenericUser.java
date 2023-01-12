@@ -1,6 +1,8 @@
 package com.shuttle.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.shuttle.common.FileUploadUtil;
+import com.shuttle.common.exception.NonExistantImageException;
 import com.shuttle.note.Note;
 import com.shuttle.security.Role;
 import jakarta.persistence.*;
@@ -12,10 +14,11 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -61,8 +64,18 @@ public class GenericUser implements UserDetails {
         return this.roles;
     }
     
+	public String getProfilePicture() {
+		try {
+			return FileUploadUtil.getImageBase64(FileUploadUtil.profilePictureUploadDir + "/", getProfilePictureName());
+		} catch (IOException e) {
+			return null;
+		} catch (NonExistantImageException e) {
+			return FileUploadUtil.getDefaultImageBase64();
+		}
+	}
+    
     public String getProfilePictureName() {
-    	return this.getId() == null ? null: Long.toString(this.id) + ".png";
+    	return this.email == null ? null: this.email + ".png";
     }
 
     @Override
@@ -89,4 +102,6 @@ public class GenericUser implements UserDetails {
     public boolean isEnabled() {
         return enabled;
     }
+
+
 }

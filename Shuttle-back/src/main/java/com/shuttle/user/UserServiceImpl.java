@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
 		if(user.isEmpty()) {
 			throw new NonExistantUserException();
 		}
-		String result = FileUploadUtil.getImageBase64(FileUploadUtil.profilePictureUploadDir, user.get().getProfilePictureName());
+		String result = user.get().getProfilePicture();
 		return result;
 	}
   

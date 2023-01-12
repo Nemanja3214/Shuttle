@@ -73,6 +73,11 @@ public class VehicleService implements IVehicleService {
 	public List<String> getAllVehicleTypesNames() {
 		return vehicleTypeRepository.findAll().stream().map(x -> x.getName()).collect(Collectors.toList());
 	}
+	@Override
+	public List<Vehicle> findAllCurrentlyActive() {
+		return vehicleRepository.findAllCurrentlyActive();
+    }
+
 
 	@Override
 	public boolean changeCurrentLocation(long vehicleId, LocationDTO location) {
