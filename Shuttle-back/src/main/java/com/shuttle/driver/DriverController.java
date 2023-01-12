@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
 import com.shuttle.common.exception.InvalidBase64Exception;
@@ -279,14 +280,7 @@ public class DriverController {
 		
 		// TODO: If file not image -> return 400 not an image
 		// TODO: If file bigger than 5MB -> return 400 file bigger than 5mb
-		String encoding = System.getProperty("file.encoding");
-		int imageSize;
-		try {
-			imageSize = driverDocumentDTO.getDocumentImage().getBytes(encoding).length;
-		} catch (UnsupportedEncodingException e1) {
-			imageSize = driverDocumentDTO.getDocumentImage().getBytes(StandardCharsets.UTF_16).length;
-		}
-		imageSize /= (1000 * 1000);
+		int imageSize = FileUploadUtil.calculateImageSize(driverDocumentDTO.getDocumentImage());
 		if(imageSize >= 500) {
 			return new ResponseEntity<>(new RESTError("Image is bigger than 5mb"), HttpStatus.BAD_REQUEST);
 		}

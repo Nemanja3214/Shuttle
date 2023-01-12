@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,6 +68,18 @@ public class FileUploadUtil {
 	public static void deleteFile(String uploadDir, String fileName) {
 		 File pictureFile = new File(uploadDir + fileName);
 		 pictureFile.delete();
+	}
+	
+	public static int calculateImageSize(String imageBase64) {
+		String encoding = System.getProperty("file.encoding");
+		int imageSize;
+		try {
+			imageSize = imageBase64.getBytes(encoding).length;
+		} catch (UnsupportedEncodingException e1) {
+			imageSize = imageBase64.getBytes(StandardCharsets.UTF_16).length;
+		}
+		imageSize /= (1000 * 1000);
+		return imageSize;
 	}
 
 }
