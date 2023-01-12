@@ -184,11 +184,14 @@ public class PassengerService implements IPassengerService{
 		}
 		Passenger passenger = passengerO.get();
 		
+		if (newData.getProfilePicture() != null) {
+			FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName());
+		}
+		
 		changePassenger(passenger, newData);
 		passenger = this.passengerRepository.save(passenger);
 		
 		if (newData.getProfilePicture() != null) {
-			FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName());
 			try {
 				FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName(), newData.getProfilePicture());
 			}catch (InvalidBase64Exception e) {

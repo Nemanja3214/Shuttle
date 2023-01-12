@@ -130,18 +130,20 @@ public class DriverService implements IDriverService {
 
 	@Override
 	public Driver update(Driver driver, DriverUpdateDTO dto) throws IOException {
-		
 		if (dto.getProfilePicture() != null) {
 			FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, driver.getProfilePictureName());
+		}
+		
+		changeDriver(driver, dto);
+		driver = driverRepository.save(driver);
+		
+		if (dto.getProfilePicture() != null) {
 			try {
 				FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, driver.getProfilePictureName(), dto.getProfilePicture());
 			} catch (InvalidBase64Exception e) {
 //				Nothing just user has default picture
 			}
 		}
-		
-		changeDriver(driver, dto);
-		driver = driverRepository.save(driver);
 		return driver;
 	}
 	
