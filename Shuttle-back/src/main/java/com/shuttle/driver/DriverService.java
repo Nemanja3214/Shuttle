@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.common.FileUploadUtil;
+import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
@@ -123,15 +124,15 @@ public class DriverService implements IDriverService {
 	}
 
 	@Override
-	public Driver update(Driver driver, DriverUpdateDTO dto) throws IOException {
-		changeDriver(driver, dto);
-		driver = driverRepository.save(driver);
+	public Driver update(Driver driver, DriverUpdateDTO dto) throws IOException, InvalidBase64Exception {
 		
 		if (dto.getProfilePicture() != null) {
 			FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, driver.getProfilePictureName());
 			FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, driver.getProfilePictureName(), dto.getProfilePicture());
 		}
 		
+		changeDriver(driver, dto);
+		driver = driverRepository.save(driver);
 		return driver;
 	}
 	

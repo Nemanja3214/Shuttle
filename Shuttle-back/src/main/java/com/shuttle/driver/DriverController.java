@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.document.DriverDocument;
 import com.shuttle.driver.document.DriverDocumentCreateDTO;
@@ -54,7 +55,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -187,6 +190,8 @@ public class DriverController {
 			driver = this.driverService.update(driver, dto);
 		} catch (IOException e) {
 			return new ResponseEntity<>("Cannot save picture", HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (InvalidBase64Exception e) {
+			return new ResponseEntity<>("Invalid base64 provided", HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
@@ -240,7 +245,7 @@ public class DriverController {
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+//    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @PostMapping("/api/driver/{id}/documents")
     public ResponseEntity<?> addDocsById(@PathVariable("id") Long id, @RequestBody DriverDocumentCreateDTO driverDocumentDTO) {
     	try {
@@ -261,18 +266,36 @@ public class DriverController {
             return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
-		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		if (userService.isAdmin(user____)) {	
-		} else {
-	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
-	    	}
-	    }
+//		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+//		if (userService.isAdmin(user____)) {	
+//		} else {
+//	    	if (!driver.getId().equals(user____.getId())) {
+//                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+//	    	}
+//	    }
 		
 		// TODO: If file not image -> return 400 not an image
 		// TODO: If file bigger than 5MB -> return 400 file bigger than 5mb
+		String encoding = System.getProperty("file.encoding");
+		int imageSize;
+		try {
+			imageSize = driverDocumentDTO.getDocumentImage().getBytes(encoding).length;
+		} catch (UnsupportedEncodingException e1) {
+			imageSize = driverDocumentDTO.getDocumentImage().getBytes(StandardCharsets.UTF_16).length;
+		}
+		imageSize /= (1000 * 1000);
+		if(imageSize >= 500) {
+			return new ResponseEntity<>(new RESTError("Image is bigger than 5mb"), HttpStatus.BAD_REQUEST);
+		}
 		
-		DriverDocument doc = driverDocumentService.create(driver, driverDocumentDTO);
+		DriverDocument doc;
+		try {
+			doc = driverDocumentService.create(driver, driverDocumentDTO);
+		} catch (IOException e) {
+			return new ResponseEntity<>(new RESTError("Couldn't save image"), HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (InvalidBase64Exception e) {
+			return new ResponseEntity<>(new RESTError("Invalid base64 provided"), HttpStatus.BAD_REQUEST);
+		}
 		return new ResponseEntity<>(new DriverDocumentDTO(doc), HttpStatus.OK);
     }
 

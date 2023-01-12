@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.EmailAlreadyUsedException;
+import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.TokenExpiredException;
 import com.shuttle.security.Role;
@@ -53,7 +54,11 @@ public class PassengerService implements IPassengerService{
 	@Override
 	public Passenger register(PassengerDTO passengerDTO) throws MessagingException, IOException {
 		Passenger newPassenger = createNewPassenger(passengerDTO);
-		FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, newPassenger.getProfilePictureName(), passengerDTO.getProfilePicture());
+		try {
+			FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, newPassenger.getProfilePictureName(), passengerDTO.getProfilePicture());
+		}catch (InvalidBase64Exception e) {
+//			Nothing just user has default picture
+		}
 	     
 		VerificationToken token = generateToken();
 	    token.setPassenger(newPassenger);   
@@ -184,7 +189,11 @@ public class PassengerService implements IPassengerService{
 		
 		if (newData.getProfilePicture() != null) {
 			FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName());
-			FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName(), newData.getProfilePicture());
+			try {
+				FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, passenger.getProfilePictureName(), newData.getProfilePicture());
+			}catch (InvalidBase64Exception e) {
+//				Nothing just user has default picture
+			}
 		}
 		
 		return passenger;

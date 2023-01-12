@@ -22,4 +22,8 @@ public class Driver extends GenericUser {
     private boolean available;
 	//boolean blocked;
     private Long timeWorkedToday;
+	
+	public String getFolderName() {
+		return this.getId().toString();
+	}
 }

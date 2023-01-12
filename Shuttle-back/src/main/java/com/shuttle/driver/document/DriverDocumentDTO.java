@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 public class DriverDocumentDTO {
 	private Long id;
 	private String name;
-	private String documentImage;
 	private Long driverId;
+	private String documentImage;
 	
 	public DriverDocumentDTO(DriverDocument dd) {
 		this.id = dd.getId();
 		this.name = dd.getName();
-		this.documentImage = dd.getImage();
 		this.driverId = dd.getDriver().getId();
+		this.documentImage = dd.getDocumentImage();
 	}
 }
