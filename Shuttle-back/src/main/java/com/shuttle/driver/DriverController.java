@@ -134,14 +134,14 @@ public class DriverController {
 
         Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -172,14 +172,14 @@ public class DriverController {
     	
     	Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -200,14 +200,14 @@ public class DriverController {
     	
     	Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -225,14 +225,14 @@ public class DriverController {
     	
     	DriverDocument dd = driverDocumentService.findById(id);
         if (dd == null) {
-            return new ResponseEntity<>(new RESTError("Document does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Document does not exist!", HttpStatus.NOT_FOUND);
         }
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!dd.getDriver().getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Document does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Document does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -258,14 +258,14 @@ public class DriverController {
     	
     	Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -276,7 +276,7 @@ public class DriverController {
 		return new ResponseEntity<>(new DriverDocumentDTO(doc), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('driver', 'admin', 'passenger')")
     @GetMapping("/api/driver/{id}/vehicle")
     public ResponseEntity<?> getVehicle(@PathVariable("id") Long id) {
     	if (id == null) {
@@ -285,7 +285,7 @@ public class DriverController {
 
         Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
 
         Vehicle vehicle = vehicleService.findByDriver(driver);
@@ -294,11 +294,14 @@ public class DriverController {
         }
         
         final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        
 		if (userService.isAdmin(user____)) {	
-		} else {
+		} else if (userService.isDriver(user____)) {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
+	    } else if (userService.isPassenger(user____)) {
+	    	// Always allow.
 	    }
 
         return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
@@ -313,6 +316,7 @@ public class DriverController {
 			MyValidator.validateRequired(vehicleDTO.getLicenseNumber(), "licenseNumber");
 			MyValidator.validateRequired(vehicleDTO.getPassengerSeats(), "passengerSeats");
 
+			MyValidator.validateLocation(vehicleDTO.getCurrentLocation(), "currentLocation");
 			MyValidator.validateLength(vehicleDTO.getModel(), "name", 100);
 			MyValidator.validateLength(vehicleDTO.getLicenseNumber(), "licenseNumber", 20);
 			MyValidator.validateRange(vehicleDTO.getPassengerSeats().longValue(), "passengerSeats", 1L, 20L);
@@ -326,11 +330,17 @@ public class DriverController {
 
         Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+        }
+        
+        // If the driver already has a vehicle, remove it.
+        
+        Vehicle oldVehicle = vehicleService.findByDriver(driver);
+        if (oldVehicle != null) {
+        	vehicleService.removeDriver(oldVehicle);
         }
 
         vehicleDTO.setDriverId(driver.getId()); // It's kinda ugly to do it this way.
-        
     	Vehicle v = vehicleService.add(vehicleDTO);
         return new ResponseEntity<>(VehicleDTO.from(v), HttpStatus.OK);
     }
@@ -344,6 +354,7 @@ public class DriverController {
 			MyValidator.validateRequired(vehicleDTO.getLicenseNumber(), "licenseNumber");
 			MyValidator.validateRequired(vehicleDTO.getPassengerSeats(), "passengerSeats");
 
+			MyValidator.validateLocation(vehicleDTO.getCurrentLocation(), "currentLocation");
 			MyValidator.validateLength(vehicleDTO.getModel(), "name", 100);
 			MyValidator.validateLength(vehicleDTO.getLicenseNumber(), "licenseNumber", 20);
 			MyValidator.validateRange(vehicleDTO.getPassengerSeats().longValue(), "passengerSeats", 1L, 20L);
@@ -357,27 +368,27 @@ public class DriverController {
 
         Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
         
         Vehicle vehicle = vehicleService.findByDriver(driver);
         if (vehicle == null) {
         	// TODO: Maybe just create?
-        	return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
         }
         
         try {
         	vehicle = vehicleService.update(vehicle, vehicleDTO);
         } catch (IllegalArgumentException e) { // TODO: Specialize exception.
-        	return new ResponseEntity<>(new RESTError("Vehicle type does not exist!"), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Vehicle type does not exist!", HttpStatus.NOT_FOUND);
         }
        
         return new ResponseEntity<>(VehicleDTO.from(vehicle), HttpStatus.OK);
@@ -410,14 +421,14 @@ public class DriverController {
 
         final Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 
@@ -449,14 +460,14 @@ public class DriverController {
     	
     	Driver driver = driverService.get(id);
         if (driver == null) {
-            return new ResponseEntity<>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
         }
     	
         final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -490,14 +501,14 @@ public class DriverController {
     	
     	WorkHours wh = workHoursService.findById(id);
         if (wh == null) {
-            return new ResponseEntity<>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Working hour does not exist!", HttpStatus.NOT_FOUND);
         }
         
         final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!wh.getDriver().getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Working hour does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
         
@@ -528,7 +539,7 @@ public class DriverController {
     	
     	WorkHours wh = workHoursService.findById(id);
         if (wh == null) {
-            return new ResponseEntity<>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Working hour does not exist!", HttpStatus.NOT_FOUND);
         }
         	
 		Driver driver = wh.getDriver();
@@ -537,7 +548,7 @@ public class DriverController {
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!driver.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Working hour does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Working hour does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 
@@ -579,14 +590,14 @@ public class DriverController {
     	
     	Driver d = driverService.get(id);	
 		if (d == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 		}
 
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!d.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("Driver does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		

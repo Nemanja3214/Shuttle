@@ -65,6 +65,8 @@ import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.passwordReset.IPasswordResetService;
 import com.shuttle.user.passwordReset.PasswordResetCode;
 import com.shuttle.user.passwordReset.dto.PasswordResetCodeDTO;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
 import com.shuttle.vehicle.Vehicle;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -91,35 +93,37 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/changePassword")
     public ResponseEntity<?> changePassword(@PathVariable Long id, @RequestBody PasswordDTO passwordDTO) {
+    	try {
+			MyValidator.validateRequired(passwordDTO.getNewPassword(), "newPassword");
+			MyValidator.validateRequired(passwordDTO.getOldPassword(), "oldPassword");
+			
+			MyValidator.validatePattern(passwordDTO.getNewPassword(), "newPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			MyValidator.validatePattern(passwordDTO.getOldPassword(), "oldPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
-    	
-    	//if (Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", passwordDTO.getNew_password())) {
-    	//	return new ResponseEntity<RESTError>(new RESTError("Field (new_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	//}
-    	
-    	//if (Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", passwordDTO.getNew_password())) {
-    	//	return new ResponseEntity<RESTError>(new RESTError("Field (old_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	//}
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
-		if (!userService.hasPassword(u, passwordDTO.getOld_password())) {
+		if (!userService.hasPassword(u, passwordDTO.getOldPassword())) {
 			return new ResponseEntity<RESTError>(new RESTError("Current password is not matching!"), HttpStatus.BAD_REQUEST);
 		}
-		userService.changePassword(u, passwordDTO.getNew_password());
+		userService.changePassword(u, passwordDTO.getNewPassword());
 		
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
@@ -133,14 +137,14 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -157,28 +161,30 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/resetPassword")
     public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestBody PasswordResetCodeDTO dto) {
+    	try {
+			MyValidator.validateRequired(dto.getNew_password(), "new_password");
+			MyValidator.validateRequired(dto.getCode(), "code");
+			
+			MyValidator.validatePattern(dto.getNew_password(), "new_password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			MyValidator.validatePattern(dto.getCode(), "code", "^[0-9]{1,6}$");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
     	
-    	//if (!Pattern.matches("^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$", dto.getNew_password())) {
-    	//	return new ResponseEntity<RESTError>(new RESTError("Field (new_password) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	//}
-    	
-    	if (!Pattern.matches("^[0-9]{1,6}$", dto.getCode())) {
-    		return new ResponseEntity<RESTError>(new RESTError("Field (code) format is not valid!!"), HttpStatus.BAD_REQUEST);
-    	}
-		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -186,7 +192,7 @@ public class UserController {
 		PasswordResetCode req = requests.stream().filter(r -> r.getCode().equals(dto.getCode())).findFirst().orElse(null);
 
 		if (req == null || !req.getActive() || req.getExpires().isBefore(LocalDateTime.now())) {
-			return new ResponseEntity<RESTError>(new RESTError("Code is expired or not correct!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Code is expired or not correct!", HttpStatus.NOT_FOUND);
 		}
 		
 		for (PasswordResetCode pr : requests) {
@@ -225,14 +231,14 @@ public class UserController {
     	
     	GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -255,7 +261,16 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CredentialsDTO credentialsDTO) {
-        UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(), credentialsDTO.getPassword());
+    	try {
+			MyValidator.validateRequired(credentialsDTO.getEmail(), "email");
+			MyValidator.validateRequired(credentialsDTO.getPassword(), "password");
+			
+			MyValidator.validateEmail(credentialsDTO.getEmail(), "email");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(credentialsDTO.getEmail(), credentialsDTO.getPassword());
         
         Authentication auth = null;
         try {
@@ -312,14 +327,14 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
 		
@@ -331,16 +346,24 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PostMapping("/{recieverId}/message")
     public ResponseEntity<?> sendMessage(@PathVariable Long recieverId, @RequestBody CreateMessageDTO messageDTO) {
-    	// TODO: recieverId or messageDTO.receiverId ; one of these is redundant
+    	try {
+			MyValidator.validateRequired(messageDTO.getMessage(), "message");
+			MyValidator.validateRequired(messageDTO.getType(), "type");
+			MyValidator.validateRequired(messageDTO.getRideId(), "rideId");
+				
+			MyValidator.validateLength(messageDTO.getMessage(), "email", 500);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
     	
-        if (recieverId == null) {
+    	if (recieverId == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
 
         GenericUser sender = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         
         if (sender == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("User does not exist."), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("User does not exist.", HttpStatus.NOT_FOUND);
         }
         
         GenericUser reciever = null;
@@ -354,13 +377,13 @@ public class UserController {
         }
         
         if (reciever == null) {
-        	return new ResponseEntity<RESTError>(new RESTError("Receiver does not exist."), HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Receiver does not exist.", HttpStatus.NOT_FOUND);
         }
 
         Ride ride = rideService.findById(messageDTO.getRideId());
 
 		if (ride == null && messageDTO.getType() != Type.SUPPORT) {
-			return new ResponseEntity<RESTError>(new RESTError("Ride does not exist."), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Ride does not exist.", HttpStatus.NOT_FOUND);
 		}
 
         Message m = new Message(
@@ -386,11 +409,11 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		if (u.getBlocked()) {
-			return new ResponseEntity<RESTError>(new RESTError("User is already blocked!"), HttpStatus.BAD_REQUEST);	
+			return new ResponseEntity<>(new RESTError("User is already blocked!"), HttpStatus.BAD_REQUEST);	
 		}
 		
 		u = userService.setBlocked(u, true);
@@ -406,7 +429,7 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		if (!u.getBlocked()) {
@@ -420,13 +443,21 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin')")
     @PostMapping("/{id}/note")
     public ResponseEntity<?> createNote(@PathVariable Long id, @RequestBody NoteMessage message) {
+    	try {
+			MyValidator.validateRequired(message.getMessage(), "message");
+			
+			MyValidator.validateLength(message.getMessage(), "email", 500);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
     	if (id == null) {
 			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
 		}
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		final GenericUser creator = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
@@ -444,11 +475,11 @@ public class UserController {
 		
 		GenericUser u = userService.findById(id);	
 		if (u == null) {
-			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		List<Note> notes = noteService.findAll(u, pageable);
-		ListDTO<NoteDTO> notesDTO = new ListDTO(notes.stream().map(n -> new NoteDTO(n)).toList());		
+		ListDTO<NoteDTO> notesDTO = new ListDTO<>(notes.stream().map(n -> new NoteDTO(n)).toList());		
         return new ResponseEntity<>(notesDTO, HttpStatus.OK);
     }
     

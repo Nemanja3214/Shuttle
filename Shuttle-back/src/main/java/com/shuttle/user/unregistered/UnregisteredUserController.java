@@ -13,6 +13,8 @@ import com.shuttle.common.RESTError;
 import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.ride.dto.CreateRideEstimationDTO;
 import com.shuttle.ride.dto.EstimationDTO;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
 
 @RestController
 @RequestMapping("/api/unregisteredUser")
@@ -22,6 +24,18 @@ public class UnregisteredUserController {
 	
 	@PostMapping
 	public ResponseEntity<?> getEstimatedRide(@RequestBody CreateRideEstimationDTO rideDTO) {
+		try {
+			MyValidator.validateRequired(rideDTO.getLocations(), "locations");
+			MyValidator.validateRequired(rideDTO.getVehicleType(), "vehicleType");
+			MyValidator.validateRequired(rideDTO.getBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(rideDTO.getBabyTransport(), "petTransport");
+			
+			MyValidator.validateRouteDTO(rideDTO.getLocations(), "locations");
+			MyValidator.validateLength(rideDTO.getVehicleType(), "vehicleType", 50);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}	
+		
 		EstimationDTO estimation;
 		try {
 			estimation = unregiteredUserService.getEstimation(rideDTO);

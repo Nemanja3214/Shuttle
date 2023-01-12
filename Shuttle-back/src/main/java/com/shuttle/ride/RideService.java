@@ -81,11 +81,11 @@ public class RideService implements IRideService {
 
         final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
-            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
+            .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
         final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
-            .filter(d -> requestParamsMatch(d, createRideDTO.isBabyTransport(), createRideDTO.isPetTransport(), createRideDTO.getPassengers().size(), vt))
+            .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
 
         if (noPendingNoAccepted.size() > 0) {

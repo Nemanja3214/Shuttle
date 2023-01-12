@@ -15,8 +15,7 @@ public class CreateRideDTO {
 	private List<BasicUserInfoDTO> passengers;
 	private List<RouteDTO> locations;
 	private String vehicleType;
-	private boolean babyTransport;
-	private boolean petTransport;
-    private String hour;
-    private String minute;
+	private Boolean babyTransport;
+	private Boolean petTransport;
+    private String scheduledTime;
 }

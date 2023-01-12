@@ -14,22 +14,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class RideDTO {
-	public RideDTO(Ride ride) {
-		this.id = ride.getId();
-		this.locations = RouteDTO.getRoutes(ride.getRoute());
-		this.startTime = ride.getStartTime().toString();
-		this.endTime = ride.getEndTime().toString();
-		this.totalCost = ride.getTotalCost();
-		this.driver = new RideDriverDTO(ride.getDriver());
-		this.passengers= ride.getPassengers().stream().map(passenger -> new RidePassengerDTO(passenger)).toList() ;
-		this.estimatedTimeInMinutes= ride.getEstimatedTimeInMinutes();
-		this.babyTransport = ride.getBabyTransport();
-		this.petTransport= ride.getPetTransport() ;
-		this.vehicleType = ride.getVehicleType().toString();
-		this.rejection = ride.getRejection() == null ? null :  new CancellationDTO(ride.getRejection());
-		this.status= ride.getStatus() ;
-		
-	}
 	private Long id;
 	private List<RouteDTO> locations;
 	private String startTime;
@@ -43,4 +27,5 @@ public class RideDTO {
 	private String vehicleType;
 	private CancellationDTO rejection;
 	private Ride.Status status;
+	private String scheduledTime;
 }

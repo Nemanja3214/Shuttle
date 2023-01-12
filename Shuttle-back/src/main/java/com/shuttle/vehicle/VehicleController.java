@@ -26,6 +26,8 @@ import com.shuttle.ride.Ride;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
+import com.shuttle.util.MyValidator;
+import com.shuttle.util.MyValidatorException;
 
 @RestController
 @RequestMapping("/api/vehicle")
@@ -132,6 +134,16 @@ public class VehicleController {
 
 	@PutMapping("/{id}/location")
 	public ResponseEntity<?> changeLocation(@PathVariable Long id, @RequestBody LocationDTO location) {
+		try {
+			MyValidator.validateRequired(location.getLatitude(), "latitude");
+			MyValidator.validateRequired(location.getLongitude(), "longitude");
+			
+			MyValidator.validateRange(location.getLatitude().longValue(), "latitude", -90L, 90L);
+			MyValidator.validateRange(location.getLongitude().longValue(), "longitude", -90L, 90L);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}	
+		
 		if (id == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
@@ -139,7 +151,7 @@ public class VehicleController {
 		Vehicle v = vehicleService.findById(id);
     	
 		if (v == null) {
-			return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
 		this.vehicleService.changeCurrentLocation(id, location);
@@ -147,7 +159,7 @@ public class VehicleController {
 		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isDriver(user)) {
 			if (user.getId() != v.getDriver().getId()) {
-				return new ResponseEntity<>(new RESTError("Vehicle does not exist!"), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 			}
 		}
 
