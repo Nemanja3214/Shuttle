@@ -166,6 +166,14 @@ public class VehicleController {
     	return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 	
+	@GetMapping("/active")
+    public ResponseEntity<List<VehicleLocationDTO>> getAllActiveVehicleLocations() {
+		final List<Vehicle> vehicles = vehicleService.findAllCurrentlyActive();
+		final List<VehicleLocationDTO> result = vehicles.stream().map(v -> conv(v)).toList();
+        return new ResponseEntity<>( result, HttpStatus.OK);
+    }
+
+	
 	@PostMapping
 	public ResponseEntity<VehicleDTO> createVehicle(@RequestBody VehicleDTO vehicleDTO) {
 		Vehicle vehicle = vehicleService.add(vehicleDTO);

@@ -88,7 +88,8 @@ public class DriverController {
         return new ListDTO<>(workHours.stream().map(w -> new WorkHoursNoDriverDTO(w)).toList());
     }
 
-    @PreAuthorize("hasAnyAuthority('admin')")
+//    TODO uncomment
+//    @PreAuthorize("hasAnyAuthority('admin')")
     @PostMapping("/api/driver")
     public ResponseEntity<?> createDriver(@RequestBody DriverDTO dto) {
     	try {
@@ -114,7 +115,12 @@ public class DriverController {
 			return new ResponseEntity<RESTError>(new RESTError("User with that email already exists!"), HttpStatus.BAD_REQUEST);
 		}
 		
-		Driver d = driverService.create(dto);
+		Driver d;
+		try {
+			d = driverService.create(dto);
+		} catch (IOException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Could not save image!"), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		UserDTONoPassword result = new UserDTONoPassword(d);
 		return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -190,8 +196,6 @@ public class DriverController {
 			driver = this.driverService.update(driver, dto);
 		} catch (IOException e) {
 			return new ResponseEntity<>("Cannot save picture", HttpStatus.INTERNAL_SERVER_ERROR);
-		} catch (InvalidBase64Exception e) {
-			return new ResponseEntity<>("Invalid base64 provided", HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }

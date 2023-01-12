@@ -15,7 +15,7 @@ import com.shuttle.location.dto.LocationDTO;
 
 public interface IDriverService {
 	public Driver add(Driver driver);
-	public Driver create(DriverDTO dto);
+	public Driver create(DriverDTO dto) throws IOException;
 	public Driver get(Long id);
 	
 	/**
@@ -42,6 +42,6 @@ public interface IDriverService {
     public boolean workedMoreThan8Hours(Driver d);
     
 	public List<Driver> findAll(Pageable pageable);
-	public Driver update(Driver driver, DriverUpdateDTO dto) throws IOException, InvalidBase64Exception;
+	public Driver update(Driver driver, DriverUpdateDTO dto) throws IOException;
 	
 }

@@ -26,4 +26,5 @@ public interface IVehicleService {
 	public Vehicle findById(Long id);
 	public Vehicle update(Vehicle vehicle, VehicleDTO vehicleDTO) throws IllegalArgumentException;
 	public void removeDriver(Vehicle oldVehicle);
+	List<Vehicle> findAllCurrentlyActive();
 }

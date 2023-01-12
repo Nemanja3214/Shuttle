@@ -25,6 +25,6 @@ public class UserDTONoPassword {
         this.email = user.getEmail();
         this.telephoneNumber = user.getTelephoneNumber();
         this.address = user.getAddress();
-        this.profilePicture = user.getPassword();
+        this.profilePicture = user.getProfilePicture();
     }
 }
