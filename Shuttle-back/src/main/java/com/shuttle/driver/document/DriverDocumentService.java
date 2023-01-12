@@ -39,12 +39,9 @@ public class DriverDocumentService implements IDriverDocumentService {
 	public DriverDocument create(Driver driver, DriverDocumentCreateDTO driverDocumentDTO) throws IOException, InvalidBase64Exception {
 		DriverDocument doc = new DriverDocument();
 		
-		String uploadPath = FileUploadUtil.documentPictureUploadDir + driver.getFolderName();
+		String uploadPath = FileUploadUtil.documentPictureUploadDir + driver.getFolderName() + "/";
 		File f = new File(uploadPath);
-		if(!f.exists()){
-			Files.createDirectories(Path.of(f.getPath()));
-		}
-		FileUploadUtil.saveFile(uploadPath + "/", driverDocumentDTO.getName(), driverDocumentDTO.getDocumentImage());
+		FileUploadUtil.saveFile(uploadPath, driverDocumentDTO.getName(), driverDocumentDTO.getDocumentImage());
 		
 		doc.setName(driverDocumentDTO.getName());
 		doc.setDriver(driver);

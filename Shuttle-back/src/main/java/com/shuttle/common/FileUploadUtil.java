@@ -12,6 +12,7 @@ import java.util.Base64;
 import javax.imageio.ImageIO;
 
 import com.shuttle.common.exception.InvalidBase64Exception;
+import com.shuttle.common.exception.NonExistantImageException;
 
 public class FileUploadUtil {
 	public final static String profilePictureUploadDir = "user-photos/";
@@ -35,14 +36,14 @@ public class FileUploadUtil {
         ImageIO.write(image, "png", outputfile);
     }
 
-	public static String getImageBase64(String uploadDir,String pictureName) throws IOException {
+	public static String getImageBase64(String uploadDir,String pictureName) throws IOException, NonExistantImageException {
 		File inputFile = new File(uploadDir + pictureName);
 		
 		byte[] fileContent;
 		try {
 			fileContent = Files.readAllBytes(Paths.get(inputFile.getPath()));
 		} catch (IOException e) {
-			return getDefaultImageBase64();
+			throw new NonExistantImageException();
 		}
         String base64 = Base64
           .getEncoder()
@@ -51,8 +52,12 @@ public class FileUploadUtil {
 		return base64;
 	}
 	
-	public static String getDefaultImageBase64() throws IOException {
-		return getImageBase64(profilePictureUploadDir, "default.png");
+	public static String getDefaultImageBase64(){
+		try {
+			return getImageBase64(profilePictureUploadDir, "default.png");
+		} catch (IOException | NonExistantImageException e) {
+			return null;
+		}
 	}
 
 	public static void deleteFile(String uploadDir, String fileName) {

@@ -63,7 +63,6 @@ public class PassengerController {
 	UserService userService;
 	
 	@PostMapping
-	@PreAuthorize("hasAnyAuthority('admin', 'passenger')")
 	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
 		try {
 			MyValidator.validateRequired(dto.getName(), "name");

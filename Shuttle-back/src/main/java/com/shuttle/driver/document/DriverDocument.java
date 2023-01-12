@@ -3,6 +3,7 @@ package com.shuttle.driver.document;
 import java.io.IOException;
 
 import com.shuttle.common.FileUploadUtil;
+import com.shuttle.common.exception.NonExistantImageException;
 import com.shuttle.driver.Driver;
 
 import jakarta.persistence.Entity;
@@ -27,8 +28,8 @@ public class DriverDocument {
 	
 	public String getDocumentImage() {
 		try {
-			return FileUploadUtil.getImageBase64(FileUploadUtil.documentPictureUploadDir + "/", name);
-		} catch (IOException e) {
+			return FileUploadUtil.getImageBase64(FileUploadUtil.documentPictureUploadDir + driver.getId() + "/", name);
+		} catch (IOException | NonExistantImageException e) {
 			return null;
 		}
 		
