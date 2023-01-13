@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 
 import com.shuttle.common.exception.FavoriteRideLimitExceeded;
+import com.shuttle.common.exception.NonExistantFavoriteRoute;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
@@ -133,5 +134,9 @@ public interface IRideService {
 
 	FavoriteRoute createFavoriteRoute(CreateFavouriteRouteDTO dto, long favLimit)
 			throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded;
+
+	List<FavoriteRoute> getFavouriteRoutes();
+
+	void delete(long id) throws NonExistantFavoriteRoute;
 
 }

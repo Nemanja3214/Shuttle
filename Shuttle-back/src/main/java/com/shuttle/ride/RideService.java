@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.common.exception.FavoriteRideLimitExceeded;
+import com.shuttle.common.exception.NonExistantFavoriteRoute;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
@@ -371,5 +372,19 @@ public class RideService implements IRideService {
     private static List<Location> convertToLocation(List<RouteDTO> routes){
     	return routes.stream().map(route -> route.destination.to()).toList();
     }
+
+	@Override
+	public List<FavoriteRoute> getFavouriteRoutes() {
+		return this.favouriteRouteRepository.findAll();
+	}
+
+	@Override
+	public void delete(long id) throws NonExistantFavoriteRoute {
+		if(!this.favouriteRouteRepository.existsById(id)) {
+			throw new NonExistantFavoriteRoute();
+		}
+		this.favouriteRouteRepository.deleteById(id);
+		
+	}
 
 }
