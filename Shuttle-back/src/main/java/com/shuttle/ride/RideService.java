@@ -349,12 +349,14 @@ public class RideService implements IRideService {
     		throw new NonExistantUserException();
     	}
     	
-    	Boolean exceededLimit = ids.stream().anyMatch(id -> Boolean.TRUE.equals(this.favouriteRouteRepository.findCountPassengerFavorites(id, favLimit)));
+//    	TODO rplace limit
+    	Boolean exceededLimit = Boolean.TRUE.equals(this.favouriteRouteRepository.findCountPassengerFavorites(ids, (long)3));
     	if(exceededLimit == true) {
     		throw new FavoriteRideLimitExceeded();
     	}
     	
-//    	boolean somePassengerExceededLimit = ids.stream().anyMatch(id -> this.favouriteRouteRepository.countPassengerFavorites(id) > 10);
+    	System.out.println(exceededLimit);
+    	
 
     	List<Passenger> passengers = Collections.unmodifiableList(this.passengerRepository.findAllById(ids));
     	favoriteRoute.setPassengers(passengers);
