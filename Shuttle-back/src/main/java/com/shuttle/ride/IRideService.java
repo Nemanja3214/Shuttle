@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 
+import com.shuttle.common.exception.FavoriteRideLimitExceeded;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
@@ -130,6 +131,7 @@ public interface IRideService {
 	List<Ride> findByUser(GenericUser user, Pageable pageable, LocalDateTime from, LocalDateTime to);
 	List<Ride> findRidesByPassengerInDateRange(Long passengerId, String from, String to, Pageable pageable) throws NonExistantUserException;
 
-	FavoriteRoute createFavoriteRoute(CreateFavouriteRouteDTO dto) throws NonExistantVehicleType, NonExistantUserException;
+	FavoriteRoute createFavoriteRoute(CreateFavouriteRouteDTO dto, long favLimit)
+			throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded;
 
 }

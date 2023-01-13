@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.FavoriteRideLimitExceeded;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
@@ -648,18 +650,31 @@ public class RideController {
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
     
+    @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
     @PostMapping("/favorites")
     public ResponseEntity<?> createFavouriteRide(@RequestBody CreateFavouriteRouteDTO dto){
+		try {
+			MyValidator.validateRequired(dto.getFavoriteName(), "name");
+			MyValidator.validateRequired(dto.getVehicleType(), "vehicle type");
+			MyValidator.validateRequired(dto.isBabyTransport(), "baby");
+			MyValidator.validateRequired(dto.getLocations(), "route dto");
+			MyValidator.validateRequired(dto.getPassengers(), "passengers");
+			
+			MyValidator.validateRouteDTO(dto.getLocations(), "route dto");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+
 //    	TODO validation
-//    	TODO auth
-//    	TODO limit of favorites
     	try {
-			 FavoriteRoute favoriteRoute = this.rideService.createFavoriteRoute(dto);
+			 FavoriteRoute favoriteRoute = this.rideService.createFavoriteRoute(dto, 10);
 			 return new ResponseEntity<FavoriteRouteDTO>(FavoriteRouteDTO.from(favoriteRoute), HttpStatus.OK);
 		} catch (NonExistantVehicleType e) {
 			return new ResponseEntity<RESTError>(new RESTError("Vehicle type doesn't exist"), HttpStatus.BAD_REQUEST);
 		} catch (NonExistantUserException e) {
 			return new ResponseEntity<RESTError>(new RESTError("User doesn't exist"), HttpStatus.BAD_REQUEST);
+		} catch (FavoriteRideLimitExceeded e) {
+			return new ResponseEntity<RESTError>(new RESTError("Number of favorite rides cannot exceed 10!"), HttpStatus.BAD_REQUEST);
 		}
     }
     

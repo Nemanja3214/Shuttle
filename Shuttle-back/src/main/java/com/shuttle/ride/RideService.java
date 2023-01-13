@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.common.exception.FavoriteRideLimitExceeded;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
@@ -335,7 +336,7 @@ public class RideService implements IRideService {
 
 	@Override
 	@Transactional
-    public FavoriteRoute createFavoriteRoute(CreateFavouriteRouteDTO dto) throws NonExistantVehicleType, NonExistantUserException {
+    public FavoriteRoute createFavoriteRoute(CreateFavouriteRouteDTO dto, long favLimit) throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded {
     	FavoriteRoute favoriteRoute = new FavoriteRoute();
     	
     	Optional<VehicleType> vehicleType = this.vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(dto.getVehicleType());
@@ -347,6 +348,13 @@ public class RideService implements IRideService {
     	if(!allPassengersExist) {
     		throw new NonExistantUserException();
     	}
+    	
+    	Boolean exceededLimit = ids.stream().anyMatch(id -> Boolean.TRUE.equals(this.favouriteRouteRepository.findCountPassengerFavorites(id, favLimit)));
+    	if(exceededLimit == true) {
+    		throw new FavoriteRideLimitExceeded();
+    	}
+    	
+//    	boolean somePassengerExceededLimit = ids.stream().anyMatch(id -> this.favouriteRouteRepository.countPassengerFavorites(id) > 10);
 
     	List<Passenger> passengers = Collections.unmodifiableList(this.passengerRepository.findAllById(ids));
     	favoriteRoute.setPassengers(passengers);
