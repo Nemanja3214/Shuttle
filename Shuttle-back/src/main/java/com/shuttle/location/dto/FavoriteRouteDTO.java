@@ -1,5 +1,8 @@
 package com.shuttle.location.dto;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import com.shuttle.location.FavoriteRoute;
@@ -16,6 +19,7 @@ public class FavoriteRouteDTO {
     private String vehicleType;
     private boolean babyTransport;
     private boolean petTransport;
+    private String scheduledTime;
     
     public static FavoriteRouteDTO from(FavoriteRoute favoriteRoute) {
     	FavoriteRouteDTO dto = new FavoriteRouteDTO();
@@ -27,6 +31,7 @@ public class FavoriteRouteDTO {
     	dto.setPassengers(usersInfo);
     	dto.setPetTransport(favoriteRoute.isPetTransport());
     	dto.setVehicleType(favoriteRoute.getVehicleType().getName());
+    	
     	return dto;
     }
 

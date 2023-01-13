@@ -1,7 +1,9 @@
 package com.shuttle.ride;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -350,10 +352,13 @@ public class RideService implements IRideService {
     		throw new NonExistantUserException();
     	}
     	
-    	Boolean exceededLimit = Boolean.TRUE.equals(this.favouriteRouteRepository.findCountPassengerFavorites(ids, favLimit));
+    	Boolean exceededLimit = Boolean.TRUE.equals(this.favouriteRouteRepository.anyPassengerExceededLimit(ids, favLimit));
     	if(exceededLimit == true) {
     		throw new FavoriteRideLimitExceeded();
     	}
+        
+        LocalDateTime scheduledTime = LocalDateTime.parse(dto.getScheduledTime(), DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")));
+        favoriteRoute.setScheduledTime(scheduledTime);
     	
     	List<Passenger> passengers = Collections.unmodifiableList(this.passengerRepository.findAllById(ids));
     	favoriteRoute.setPassengers(passengers);

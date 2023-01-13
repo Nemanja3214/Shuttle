@@ -653,18 +653,19 @@ public class RideController {
     @PostMapping("/favorites")
     public ResponseEntity<?> createFavouriteRoute(@RequestBody CreateFavouriteRouteDTO dto){
 		try {
-			MyValidator.validateRequired(dto.getFavoriteName(), "name");
-			MyValidator.validateRequired(dto.getVehicleType(), "vehicle type");
-			MyValidator.validateRequired(dto.isBabyTransport(), "baby");
-			MyValidator.validateRequired(dto.getLocations(), "route dto");
+			MyValidator.validateRequired(dto.getFavoriteName(), "favoriteName");
+			MyValidator.validateRequired(dto.getVehicleType(), "vehicleType");
+			MyValidator.validateRequired(dto.isBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(dto.getLocations(), "locations");
 			MyValidator.validateRequired(dto.getPassengers(), "passengers");
+			MyValidator.validateRequired(dto.getScheduledTime(), "scheduledTime");
 			
-			MyValidator.validateRouteDTO(dto.getLocations(), "route dto");
+			MyValidator.validateRouteDTO(dto.getLocations(), "locations");
+			MyValidator.validateDateTime(dto.getScheduledTime(), "scheduledTime");
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 
-//    	TODO validation
     	try {
 			 FavoriteRoute favoriteRoute = this.rideService.createFavoriteRoute(dto, 10);
 			 return new ResponseEntity<FavoriteRouteDTO>(FavoriteRouteDTO.from(favoriteRoute), HttpStatus.OK);

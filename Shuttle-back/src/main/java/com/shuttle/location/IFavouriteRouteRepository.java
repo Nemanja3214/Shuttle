@@ -12,6 +12,6 @@ public interface IFavouriteRouteRepository extends JpaRepository<FavoriteRoute, 
 		+ " WHERE p.id IN (:ids)"
 		+ " GROUP BY p"
 		+ " HAVING COUNT(f) >= (:limitation) ")
-	public Boolean findCountPassengerFavorites(List<Long> ids, Long limitation);
+	public Boolean anyPassengerExceededLimit(List<Long> ids, Long limitation);
 
 }

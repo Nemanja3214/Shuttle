@@ -14,5 +14,5 @@ public class CreateFavouriteRouteDTO {
     private String vehicleType;
     private boolean babyTransport;
     private boolean petTransport;
-
+    private String scheduledTime;
 }

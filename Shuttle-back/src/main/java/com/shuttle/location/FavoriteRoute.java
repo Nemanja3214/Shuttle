@@ -1,5 +1,6 @@
 package com.shuttle.location;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.shuttle.passenger.Passenger;
@@ -42,4 +43,5 @@ public class FavoriteRoute {
 	
     private boolean babyTransport;
     private boolean petTransport;
+    private LocalDateTime scheduledTime;
 }
