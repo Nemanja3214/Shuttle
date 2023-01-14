@@ -128,7 +128,7 @@ public class RideController {
         r.setDriver(driver);
         r.setVehicleType(vehicleType);
         r.setBabyTransport(rideDTO.getBabyTransport());
-        r.setPetTransport(rideDTO.getBabyTransport());
+        r.setPetTransport(rideDTO.getPetTransport());
         r.setEstimatedTimeInMinutes((int) ((distance / velocity) * 60));
         r.setPassengers(passengers);
         r.setRoute(route);
@@ -167,7 +167,7 @@ public class RideController {
         rideDTO.setPetTransport(ride.getPetTransport());
         rideDTO.setVehicleType(ride.getVehicleType().getName());
         rideDTO.setScheduledTime(ride.getScheduledTime() == null ? null : ride.getScheduledTime().toString());
-
+        
         if (ride.getRejection() != null) {
             rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
         }
