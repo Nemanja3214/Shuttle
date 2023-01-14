@@ -109,7 +109,7 @@ public class PassengerController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
-	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+	@PreAuthorize("hasAnyAuthority('passenger', 'driver', 'admin')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getDetails(@PathVariable("id") Long id) {
 		if (id == null) {
@@ -122,7 +122,7 @@ public class PassengerController {
         }
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		if (userService.isAdmin(user____)) {	
+		if (userService.isAdmin(user____) || userService.isDriver(user____)) {	
 		} else {
 	    	if (!passenger.getId().equals(user____.getId())) {
                 return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
