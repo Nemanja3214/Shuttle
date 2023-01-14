@@ -2,6 +2,8 @@ package com.shuttle.user;
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import com.shuttle.security.jwt.JwtTokenUtil;
 
 import java.time.Instant;
@@ -14,6 +16,7 @@ import java.util.regex.Pattern;
 
 import org.aspectj.apache.bcel.classfile.ExceptionTable;
 import jakarta.annotation.security.PermitAll;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,15 +56,19 @@ import com.shuttle.note.INoteService;
 import com.shuttle.note.Note;
 import com.shuttle.note.NoteMessage;
 import com.shuttle.note.dto.NoteDTO;
+import com.shuttle.passenger.Passenger;
 import com.shuttle.security.jwt.JwtTokenUtil;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.RideController;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.user.dto.BasicUserInfoDTO;
 import com.shuttle.user.dto.PasswordDTO;
 import com.shuttle.user.dto.UserDTO;
 import com.shuttle.user.dto.UserDTONoPassword;
+import com.shuttle.user.email.IEmailService;
 import com.shuttle.user.passwordReset.IPasswordResetService;
 import com.shuttle.user.passwordReset.PasswordResetCode;
 import com.shuttle.user.passwordReset.dto.PasswordResetCodeDTO;
@@ -89,6 +96,8 @@ public class UserController {
     private IPasswordResetService passwordResetService;
     @Autowired
     private INoteService noteService;
+    @Autowired
+    private IEmailService emailService;
     
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/changePassword")
@@ -128,7 +137,7 @@ public class UserController {
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
     
-    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    //@PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/resetPassword")
     public ResponseEntity<?> resetPasswordSendEmail(@PathVariable Long id) {
     	if (id == null) {
@@ -140,25 +149,35 @@ public class UserController {
 			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
-		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		if (userService.isAdmin(user____)) {	
-		} else {
-	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
-	    	}
-	    }
+//		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+//		if (user____ != null) {
+//			if (userService.isAdmin(user____)) {	
+//			} else {
+//		    	if (!u.getId().equals(user____.getId())) {
+//	                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
+//		    	}
+//		    }
+//		}
 		
 		if (passwordResetService.findByUser(u) != null) {
 			return new ResponseEntity<RESTError>(new RESTError("Active code already exists!"), HttpStatus.BAD_REQUEST);
 		}
 		
 		PasswordResetCode prc = passwordResetService.create(u);
-		System.out.println("Sending email to " + u.getEmail() + " with code " + prc.getCode() + ". There's a time limit.");
+		
+		try {
+			System.out.println("Sending email to " + u.getEmail() + " with code " + prc.getCode() + ". There's a time limit.");
+			emailService.sendPasswordResetEmail(prc);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (MessagingException e) {
+			e.printStackTrace();
+		}
 		
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT); 
     }
     
-    @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    //@PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/resetPassword")
     public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestBody PasswordResetCodeDTO dto) {
     	try {
@@ -180,13 +199,13 @@ public class UserController {
 			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
-		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		if (userService.isAdmin(user____)) {	
-		} else {
-	    	if (!u.getId().equals(user____.getId())) {
-                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
-	    	}
-	    }
+//		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+//		if (userService.isAdmin(user____)) {	
+//		} else {
+//	    	if (!u.getId().equals(user____.getId())) {
+//                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
+//	    	}
+//	    }
 		
 		List<PasswordResetCode> requests = passwordResetService.findByUserMaybeExpired(u);
 		PasswordResetCode req = requests.stream().filter(r -> r.getCode().equals(dto.getCode())).findFirst().orElse(null);
@@ -536,4 +555,15 @@ public class UserController {
 			return ResponseEntity.internalServerError().body("Error saving picture");
 		}
 	}
+	
+    @GetMapping("/email")
+    public ResponseEntity<?> getByEmail(@PathParam("email") String email) {
+        GenericUser p = userService.findByEmail(email);
+        if (p == null) {
+            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        } else {
+        	BasicUserInfoDTO dto = new BasicUserInfoDTO(p);
+            return new ResponseEntity<BasicUserInfoDTO>(dto, HttpStatus.OK);
+        }
+    }
 }
