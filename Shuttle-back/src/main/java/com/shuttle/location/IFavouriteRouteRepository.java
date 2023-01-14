@@ -14,4 +14,7 @@ public interface IFavouriteRouteRepository extends JpaRepository<FavoriteRoute, 
 		+ " HAVING COUNT(f) >= (:limitation) ")
 	public Boolean anyPassengerExceededLimit(List<Long> ids, Long limitation);
 
+	@Query("SELECT f FROM FavoriteRoute f JOIN f.passengers p WHERE (:passengerId) = p.id")
+	public List<FavoriteRoute> findByPassengerId(long passengerId);
+
 }
