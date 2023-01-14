@@ -1,31 +1,45 @@
 package com.shuttle.ride;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.common.exception.FavoriteRideLimitExceeded;
+import com.shuttle.common.exception.NonExistantFavoriteRoute;
 import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
+import com.shuttle.location.FavoriteRoute;
+import com.shuttle.location.IFavouriteRouteRepository;
+import com.shuttle.location.ILocationRepository;
 import com.shuttle.location.Location;
+import com.shuttle.location.dto.CreateFavouriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
-import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
+import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
 import com.shuttle.vehicle.vehicleType.VehicleType;
+
+import jakarta.transaction.Transactional;
 
 class NoAvailableDriverException extends Throwable {
 	private static final long serialVersionUID = -2718176046357707329L;
@@ -43,6 +57,12 @@ public class RideService implements IRideService {
     private IVehicleService vehicleService;
     @Autowired
     private IPassengerRepository passengerRepository;
+    @Autowired
+    private IFavouriteRouteRepository favouriteRouteRepository;
+    @Autowired
+	private IVehicleTypeRepository vehicleTypeRepository;
+    @Autowired
+	private ILocationRepository locationRepository;
 
 	@Override
 	public Ride save(Ride ride) {
@@ -315,6 +335,61 @@ public class RideService implements IRideService {
 		LocalDateTime toTime = zdt.toLocalDateTime();
 		
 		return this.rideRepository.getAllByPassengerAndBetweenDates(fromTime, toTime, passenger, pageable);
+	}
+
+	@Override
+	@Transactional
+    public FavoriteRoute createFavoriteRoute(CreateFavouriteRouteDTO dto, long favLimit) throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded {
+    	FavoriteRoute favoriteRoute = new FavoriteRoute();
+    	
+    	Optional<VehicleType> vehicleType = this.vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(dto.getVehicleType());
+    	if(vehicleType.isEmpty()) {
+    		throw new NonExistantVehicleType();
+    	}
+    	List<Long> ids = dto.getPassengers().parallelStream().map(passenger -> passenger.getId()).toList();
+    	boolean allPassengersExist = ids.parallelStream().allMatch(id -> this.passengerRepository.existsById(id));
+    	if(!allPassengersExist) {
+    		throw new NonExistantUserException();
+    	}
+    	
+    	Boolean exceededLimit = Boolean.TRUE.equals(this.favouriteRouteRepository.anyPassengerExceededLimit(ids, favLimit));
+    	if(exceededLimit == true) {
+    		throw new FavoriteRideLimitExceeded();
+    	}
+        
+        LocalDateTime scheduledTime = LocalDateTime.parse(dto.getScheduledTime(), DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")));
+        favoriteRoute.setScheduledTime(scheduledTime);
+    	
+    	List<Passenger> passengers = Collections.unmodifiableList(this.passengerRepository.findAllById(ids));
+    	favoriteRoute.setPassengers(passengers);
+    	
+    	List<Location> locations = RouteDTO.convertToLocations(dto.getLocations());
+    	favoriteRoute.setLocations(locations);
+    	
+    	favoriteRoute.setVehicleType(vehicleType.get());
+    	favoriteRoute.setBabyTransport(dto.isBabyTransport());
+    	favoriteRoute.setFavoriteName(dto.getFavoriteName());
+    	favoriteRoute.setPetTransport(dto.isPetTransport());
+    	favoriteRoute = this.favouriteRouteRepository.save(favoriteRoute);
+    	return favoriteRoute;
+    }
+    
+    private static List<Location> convertToLocation(List<RouteDTO> routes){
+    	return routes.stream().map(route -> route.destination.to()).toList();
+    }
+
+	@Override
+	public List<FavoriteRoute> getFavouriteRoutes() {
+		return this.favouriteRouteRepository.findAll();
+	}
+
+	@Override
+	public void delete(long id) throws NonExistantFavoriteRoute {
+		if(!this.favouriteRouteRepository.existsById(id)) {
+			throw new NonExistantFavoriteRoute();
+		}
+		this.favouriteRouteRepository.deleteById(id);
+		
 	}
 
 }

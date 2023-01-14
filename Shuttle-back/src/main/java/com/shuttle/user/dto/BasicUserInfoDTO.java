@@ -1,8 +1,17 @@
 package com.shuttle.user.dto;
 
+import com.shuttle.passenger.Passenger;
+
 public class BasicUserInfoDTO {
 	private long id;
 	private String email;
+	
+	public static BasicUserInfoDTO from(Passenger passenger) {
+		BasicUserInfoDTO dto = new BasicUserInfoDTO();
+		dto.setEmail(passenger.getEmail());
+		dto.setId(passenger.getId());
+		return dto;
+	}
 	
 	
 	

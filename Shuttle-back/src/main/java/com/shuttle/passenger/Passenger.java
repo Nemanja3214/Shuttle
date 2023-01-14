@@ -2,6 +2,7 @@ package com.shuttle.passenger;
 
 import java.util.Set;
 
+import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.Route;
 import com.shuttle.user.GenericUser;
 import com.shuttle.verificationToken.VerificationToken;
@@ -20,8 +21,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 public class Passenger extends GenericUser {
-    @OneToMany(fetch = FetchType.EAGER)
-    private Set<Route> favoriteRoutes;
     Double finance;
     Boolean currentlyRiding;
     @OneToOne(mappedBy = "passenger", cascade = CascadeType.ALL, orphanRemoval=true)

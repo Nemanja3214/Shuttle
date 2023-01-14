@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,11 +27,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.FavoriteRideLimitExceeded;
+import com.shuttle.common.exception.NonExistantFavoriteRoute;
+import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.common.exception.NonExistantVehicleType;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverService;
+import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.ILocationService;
 import com.shuttle.location.Location;
 import com.shuttle.location.Route;
+import com.shuttle.location.dto.CreateFavouriteRouteDTO;
+import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.panic.IPanicService;
@@ -49,10 +57,8 @@ import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
-import com.shuttle.security.Role;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
-import com.shuttle.user.dto.UserDTO;
 import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
@@ -642,4 +648,54 @@ public class RideController {
 
         return new ResponseEntity<RideDTO>(to(ride), HttpStatus.OK);
     }
+    
+    @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+    @PostMapping("/favorites")
+    public ResponseEntity<?> createFavouriteRoute(@RequestBody CreateFavouriteRouteDTO dto){
+		try {
+			MyValidator.validateRequired(dto.getFavoriteName(), "favoriteName");
+			MyValidator.validateRequired(dto.getVehicleType(), "vehicleType");
+			MyValidator.validateRequired(dto.isBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(dto.getLocations(), "locations");
+			MyValidator.validateRequired(dto.getPassengers(), "passengers");
+			MyValidator.validateRequired(dto.getScheduledTime(), "scheduledTime");
+			
+			MyValidator.validateRouteDTO(dto.getLocations(), "locations");
+			MyValidator.validateDateTime(dto.getScheduledTime(), "scheduledTime");
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+
+    	try {
+			 FavoriteRoute favoriteRoute = this.rideService.createFavoriteRoute(dto, 10);
+			 return new ResponseEntity<FavoriteRouteDTO>(FavoriteRouteDTO.from(favoriteRoute), HttpStatus.OK);
+		} catch (NonExistantVehicleType e) {
+			return new ResponseEntity<RESTError>(new RESTError("Vehicle type doesn't exist"), HttpStatus.BAD_REQUEST);
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<RESTError>(new RESTError("User doesn't exist"), HttpStatus.BAD_REQUEST);
+		} catch (FavoriteRideLimitExceeded e) {
+			return new ResponseEntity<RESTError>(new RESTError("Number of favorite rides cannot exceed 10!"), HttpStatus.BAD_REQUEST);
+		}
+    }
+    
+    @GetMapping("/favorites")
+    public ResponseEntity<?> getFavouriteRoutes(@RequestBody CreateFavouriteRouteDTO dto){
+    	List<FavoriteRoute> favoriteRoutes = this.rideService.getFavouriteRoutes();
+    	List<FavoriteRouteDTO> favoriteRouteDTOs = favoriteRoutes.stream().map(fav -> FavoriteRouteDTO.from(fav)).toList();
+    	return new ResponseEntity<List<FavoriteRouteDTO>>(favoriteRouteDTOs, HttpStatus.OK);
+    	
+    }
+    
+    @DeleteMapping("/favorites/{id}")
+    public ResponseEntity<?> getFavouriteRoutes(@PathVariable long id){
+    	try {
+			this.rideService.delete(id);
+		} catch (NonExistantFavoriteRoute e) {
+			return new ResponseEntity<RESTError>(new RESTError("Favorite route doesn't exist"), HttpStatus.NOT_FOUND);
+		}
+    	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    	
+    }
+    
+
 }
