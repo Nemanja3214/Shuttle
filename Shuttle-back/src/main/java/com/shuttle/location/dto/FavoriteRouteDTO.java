@@ -31,7 +31,9 @@ public class FavoriteRouteDTO {
     	dto.setPassengers(usersInfo);
     	dto.setPetTransport(favoriteRoute.isPetTransport());
     	dto.setVehicleType(favoriteRoute.getVehicleType().getName());
-    	dto.setScheduledTime(favoriteRoute.getScheduledTime().format(DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"))));
+    	if(favoriteRoute.getScheduledTime() != null) {
+    		dto.setScheduledTime(favoriteRoute.getScheduledTime().format(DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"))));
+    	}
     	return dto;
     }
 

@@ -37,7 +37,6 @@ import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.ILocationService;
 import com.shuttle.location.Location;
 import com.shuttle.location.Route;
-import com.shuttle.location.dto.CreateFavouriteRouteDTO;
 import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
@@ -651,17 +650,18 @@ public class RideController {
     
     @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
     @PostMapping("/favorites")
-    public ResponseEntity<?> createFavouriteRoute(@RequestBody CreateFavouriteRouteDTO dto){
+    public ResponseEntity<?> createFavouriteRoute(@RequestBody FavoriteRouteDTO dto){
 		try {
 			MyValidator.validateRequired(dto.getFavoriteName(), "favoriteName");
 			MyValidator.validateRequired(dto.getVehicleType(), "vehicleType");
 			MyValidator.validateRequired(dto.isBabyTransport(), "babyTransport");
 			MyValidator.validateRequired(dto.getLocations(), "locations");
 			MyValidator.validateRequired(dto.getPassengers(), "passengers");
-			MyValidator.validateRequired(dto.getScheduledTime(), "scheduledTime");
+//			MyValidator.validateRequired(dto.getScheduledTime(), "scheduledTime");
 			
 			MyValidator.validateRouteDTO(dto.getLocations(), "locations");
-			MyValidator.validateDateTime(dto.getScheduledTime(), "scheduledTime");
+			if(dto.getScheduledTime() != null)
+				MyValidator.validateDateTime(dto.getScheduledTime(), "scheduledTime");
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
@@ -679,15 +679,28 @@ public class RideController {
     }
     
     @GetMapping("/favorites")
-    public ResponseEntity<?> getFavouriteRoutes(@RequestBody CreateFavouriteRouteDTO dto){
+    public ResponseEntity<?> getFavouriteRoutes(){
     	List<FavoriteRoute> favoriteRoutes = this.rideService.getFavouriteRoutes();
     	List<FavoriteRouteDTO> favoriteRouteDTOs = favoriteRoutes.stream().map(fav -> FavoriteRouteDTO.from(fav)).toList();
     	return new ResponseEntity<List<FavoriteRouteDTO>>(favoriteRouteDTOs, HttpStatus.OK);
     	
     }
     
+    @GetMapping("/favorites/passenger/{passengerId}")
+    public ResponseEntity<?> getFavouriteRoutesByPassenger(@PathVariable long passengerId){
+    	List<FavoriteRoute> favoriteRoutes;
+		try {
+			favoriteRoutes = this.rideService.getFavouriteRoutesByPassengerId(passengerId);
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Passenger with this id doesn't exist!"), HttpStatus.BAD_REQUEST);
+		}
+    	List<FavoriteRouteDTO> favoriteRouteDTOs = favoriteRoutes.stream().map(fav -> FavoriteRouteDTO.from(fav)).toList();
+    	return new ResponseEntity<List<FavoriteRouteDTO>>(favoriteRouteDTOs, HttpStatus.OK);
+    	
+    }
+    
     @DeleteMapping("/favorites/{id}")
-    public ResponseEntity<?> getFavouriteRoutes(@PathVariable long id){
+    public ResponseEntity<?> deleteFavouriteRoute(@PathVariable long id){
     	try {
 			this.rideService.delete(id);
 		} catch (NonExistantFavoriteRoute e) {
@@ -697,5 +710,5 @@ public class RideController {
     	
     }
     
-
 }
+

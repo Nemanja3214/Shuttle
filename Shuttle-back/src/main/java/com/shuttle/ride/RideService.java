@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +24,7 @@ import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.IFavouriteRouteRepository;
 import com.shuttle.location.ILocationRepository;
 import com.shuttle.location.Location;
-import com.shuttle.location.dto.CreateFavouriteRouteDTO;
+import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.passenger.IPassengerRepository;
@@ -339,7 +338,7 @@ public class RideService implements IRideService {
 
 	@Override
 	@Transactional
-    public FavoriteRoute createFavoriteRoute(CreateFavouriteRouteDTO dto, long favLimit) throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded {
+    public FavoriteRoute createFavoriteRoute(FavoriteRouteDTO dto, long favLimit) throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded {
     	FavoriteRoute favoriteRoute = new FavoriteRoute();
     	
     	Optional<VehicleType> vehicleType = this.vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(dto.getVehicleType());
@@ -357,8 +356,10 @@ public class RideService implements IRideService {
     		throw new FavoriteRideLimitExceeded();
     	}
         
-        LocalDateTime scheduledTime = LocalDateTime.parse(dto.getScheduledTime(), DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")));
-        favoriteRoute.setScheduledTime(scheduledTime);
+    	if(dto.getScheduledTime() != null) {
+            LocalDateTime scheduledTime = LocalDateTime.parse(dto.getScheduledTime(), DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC")));
+            favoriteRoute.setScheduledTime(scheduledTime);
+    	}
     	
     	List<Passenger> passengers = Collections.unmodifiableList(this.passengerRepository.findAllById(ids));
     	favoriteRoute.setPassengers(passengers);
@@ -389,6 +390,24 @@ public class RideService implements IRideService {
 			throw new NonExistantFavoriteRoute();
 		}
 		this.favouriteRouteRepository.deleteById(id);
+		
+	}
+
+	@Override
+	public List<FavoriteRoute> getFavouriteRoutesByPassengerId(long passengerId) throws NonExistantUserException {
+		if(!this.passengerRepository.existsById(passengerId)) {
+			throw new NonExistantUserException();
+		}
+		return this.favouriteRouteRepository.findByPassengerId(passengerId);
+	}
+
+	@Override
+	public void delete(List<Long> routesToDelete) throws NonExistantFavoriteRoute {
+		boolean anyNotExists = routesToDelete.stream().anyMatch(id -> !this.favouriteRouteRepository.existsById(id));
+		if(anyNotExists) {
+			throw new NonExistantFavoriteRoute();
+		}
+		this.favouriteRouteRepository.deleteAllById(routesToDelete);
 		
 	}
 
