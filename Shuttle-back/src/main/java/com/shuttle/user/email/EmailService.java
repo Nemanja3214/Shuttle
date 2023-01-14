@@ -11,6 +11,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.passenger.Passenger;
+import com.shuttle.user.passwordReset.PasswordResetCode;
 
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
@@ -21,7 +22,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
 @Service
-public class EmailService implements IEmailService{
+public class EmailService implements IEmailService {
 	
 	@Value("${spring.mail.host}")
     private String host;
@@ -63,7 +64,6 @@ public class EmailService implements IEmailService{
 		return Session.getInstance(props, auth);
     }
 
-
 	@Override
 	public void sendVerificationEmail(Passenger passenger, String url) throws UnsupportedEncodingException, MessagingException, jakarta.mail.MessagingException {
 		String toAddress = passenger.getEmail();
@@ -76,15 +76,32 @@ public class EmailService implements IEmailService{
 	            + "Please click the link below to verify your registration:<br>"
 	            + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
 	            + "Thank you,<br>"
-	            + "Your company name.";
+	            + "Shuttle";
 	    
 	    content = content.replace("[[name]]", passenger.getName());
 	    content = content.replace("[[URL]]", url);
 	     
 		Session session = getSession();
-		
 		sendEmail(session, toAddress, subject, content);
+	}
+	
+	@Override
+	public void sendPasswordResetEmail(PasswordResetCode prc) throws UnsupportedEncodingException, jakarta.mail.MessagingException {
+		String toAddress = prc.getUser().getEmail();
+		String fromAddress = getMailProperties().getProperty("mail.user");
+		String senderName = "Shuttle";
 		
+		String subject = "Password change request";
+		String content = "Dear [[name]],<br>"
+				+ "Your password reset code is <b>[[code]]</b>"
+				+ "<br/><br/>Shuttle";
+		
+		content = content
+				.replace("[[name]]", prc.getUser().getName())
+				.replace("[[code]]", prc.getCode());
+		
+		Session session = getSession();
+		sendEmail(session, toAddress, subject, content);
 	}
 	
 	private void sendEmail(Session session, String toEmail, String subject, String body) throws jakarta.mail.MessagingException, UnsupportedEncodingException{
