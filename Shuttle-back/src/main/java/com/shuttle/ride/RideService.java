@@ -32,6 +32,7 @@ import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
@@ -410,5 +411,23 @@ public class RideService implements IRideService {
 		this.favouriteRouteRepository.deleteAllById(routesToDelete);
 		
 	}
+
+	@Override
+	public List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId) throws NonExistantUserException {
+		if(!this.passengerRepository.existsById(passengerId)) {
+			throw new NonExistantUserException();
+		}
+		return this.rideRepository.getPassengerGraphData(start, end, passengerId);
+	}
+	
+	@Override
+	public List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId) throws NonExistantUserException {
+		if(!this.driverRepository.existsById(driverId)) {
+			throw new NonExistantUserException();
+		}
+		return this.rideRepository.getDriverGraphData(start, end, driverId);
+	}
+
+
 
 }
