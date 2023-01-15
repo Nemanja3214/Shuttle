@@ -43,13 +43,15 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     		+ " FROM Ride r JOIN r.passengers p"
     		+ " WHERE (:passengerId) = p.id"
     		+ " AND (r.endTime BETWEEN :start AND :end )"
-    		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)")
+    		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
+    		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
 	public List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId);
     
     @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
     		+ " FROM Ride r JOIN r.driver d"
     		+ " WHERE (:driverId) = d.id"
     		+ " AND (r.endTime BETWEEN :start AND :end )"
-    		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)")
+    		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
+    		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
 	public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId);
 }
