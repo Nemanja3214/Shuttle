@@ -151,4 +151,9 @@ public interface IRideService {
 	List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId)
 			throws NonExistantUserException;
 
+	void generate(Long driverId, Long passengerId);
+
+//	TODO remove
+	List<Ride> findAll();
+
 }

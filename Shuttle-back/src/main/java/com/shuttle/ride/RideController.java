@@ -7,13 +7,14 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -768,6 +769,19 @@ public class RideController {
 			return new ResponseEntity<RESTError>(new RESTError("Passenger with that id doesn't exist"), HttpStatus.NOT_FOUND);
 		}
     }
+    
+//    TODO remove
+    @GetMapping
+    public ResponseEntity<?> getRides(){
+    	return new ResponseEntity<List<Ride>>(this.rideService.findAll(), HttpStatus.OK);
+     }
+    
+    @PostMapping("/generate")
+    public ResponseEntity<?> generate(@RequestParam Long driverId, @RequestParam Long passengerId){
+    	this.rideService.generate(driverId, passengerId);
+    	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+     }
+
     
 }
 
