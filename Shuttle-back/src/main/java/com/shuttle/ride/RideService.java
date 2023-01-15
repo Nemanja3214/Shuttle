@@ -98,23 +98,23 @@ public class RideService implements IRideService {
 
         VehicleType vt = vehicleService.findVehicleTypeByName(createRideDTO.getVehicleType()).orElse(null);
 
-        final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream()
+        final List<Driver> noPendingNoAcceptedNoStarted = findDriversWithNoPendingNoAcceptedNoStarted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
             .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
-        final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream()
+        final List<Driver> noPendingYesAcceptedOrStarted = findDriversWithNoPendingYesAcceptedOrStarted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
             .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
 
-        if (noPendingNoAccepted.size() > 0) {
+        if (noPendingNoAcceptedNoStarted.size() > 0) {
             // Find nearest one.
-            return findNearestDriver(noPendingNoAccepted, createRideDTO.getLocations().get(0).getDeparture());
-        } else if (noPendingYesAccepted.size() > 0) {
+            return findNearestDriver(noPendingNoAcceptedNoStarted, createRideDTO.getLocations().get(0).getDeparture());
+        } else if (noPendingYesAcceptedOrStarted.size() > 0) {
             // Find the one that'll finish soon.
-            return findDriverAvailableMostSoon(noPendingYesAccepted);
+            return findDriverAvailableMostSoon(noPendingYesAcceptedOrStarted);
         } else {
-            // All logged in drivers have a pending ride. They are busy with a future ride.
+            // All logged in drivers have a current ride and a pending ride.
             throw new NoAvailableDriverException();
         }
     }
@@ -140,39 +140,35 @@ public class RideService implements IRideService {
         return true;
     }
 
-    /**
-     * @return Logged-in drivers with no pending rides and no accepted rides.  
-     */
-    private List<Driver> findDriversWithNoPendingNoAccepted() {
+    private List<Driver> findDriversWithNoPendingNoAcceptedNoStarted() {
         List<Driver> drivers = new ArrayList<>();
 
         for (Driver d : driverRepository.findAllActive()) {
             final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
             final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.Started);
 
-            if (pending.size() == 0 && accepted.size() == 0)
+            if (pending.size() == 0 && accepted.size() == 0 && accepted.size() == 0)
             drivers.add(d);
         }	
     	return drivers;        
     }
 
-    /**
-     * @return Logged-in drivers with no pending rides but with accepted rides.  
-     */
-    private List<Driver> findDriversWithNoPendingYesAccepted() {
+    private List<Driver> findDriversWithNoPendingYesAcceptedOrStarted() {
         List<Driver> drivers = new ArrayList<>();
         
         for (Driver d : driverRepository.findAllActive()) {
             final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
             final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.Started);
 
-            if (pending.size() == 0 && accepted.size() > 0)
+            if (pending.size() == 0 && (accepted.size() > 0 || started.size() > 0))
             drivers.add(d);
         }	
     	return drivers;        
     }
 
-    
+   
     /**
      * 
      * @param drivers List of drivers from which to pick.
@@ -206,13 +202,13 @@ public class RideService implements IRideService {
 
     /**
      * 
-     * @param drivers List of drivers from which to pick. They *must* all have an ACCEPTED ride.
+     * @param drivers List of drivers from which to pick. They *must* all have an ACCEPTED or STARTED ride.
      * @return Driver who will finish the current ride the soonest.
      */
     private Driver findDriverAvailableMostSoon(List<Driver> drivers) {
         return drivers.stream().sorted((d1, d2) -> {
-            final LocalDateTime ldt1 = findCurrentRideByDriverInProgress(d1).getEstimatedEndTime();
-            final LocalDateTime ldt2 = findCurrentRideByDriverInProgress(d2).getEstimatedEndTime();
+            final LocalDateTime ldt1 = findCurrentRideByDriverStartedAccepted(d1).getEstimatedEndTime();
+            final LocalDateTime ldt2 = findCurrentRideByDriverStartedAccepted(d2).getEstimatedEndTime();
             return ldt1.compareTo(ldt2);
         }).findFirst().get();
     }
@@ -233,24 +229,33 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride findCurrentRideByDriver(Driver driver) {
-		List<Ride> accepted = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
-		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
-	
-        if (accepted.size() != 0) {
-			return accepted.get(0);
+		List<Ride> li;
+		li = rideRepository.findByDriverAndStatus(driver, Status.Started);
+		if (li.size() != 0) {
+			return li.get(0);
 		}
-		if (pending.size() != 0) {
-			return pending.get(0);
+		li = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
+		if (li.size() != 0) {
+			return li.get(0);
+		}
+		li = rideRepository.findByDriverAndStatus(driver, Status.Pending);
+		if (li.size() != 0) {
+			return li.get(0);
 		}
 		
 		return null;
 	}
 
 	@Override
-	public Ride findCurrentRideByDriverInProgress(Driver driver) {
-		List<Ride> active = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
-		if (active.size() != 0) {
-			return active.get(0);
+	public Ride findCurrentRideByDriverStartedAccepted(Driver driver) {
+		List<Ride> li;
+		li = rideRepository.findByDriverAndStatus(driver, Status.Started);
+		if (li.size() != 0) {
+			return li.get(0);
+		}
+		li = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
+		if (li.size() != 0) {
+			return li.get(0);
 		}
 		
 		return null;
@@ -259,11 +264,20 @@ public class RideService implements IRideService {
 	@Override
 	public Ride acceptRide(Ride ride) {
 		ride.setStatus(Status.Accepted);
+
+		ride = rideRepository.save(ride);
+		return ride;
+	}
+	
+	@Override
+	public Ride startRide(Ride ride) {
+		ride.setStatus(Status.Started);
 		ride.setStartTime(LocalDateTime.now());
 		
 		ride = rideRepository.save(ride);
 		return ride;
 	}
+
 
 	@Override
 	public Ride finishRide(Ride ride) {
@@ -275,15 +289,18 @@ public class RideService implements IRideService {
 	}
 
     @Override
-    public Ride findActiveOrPendingByPassenger(Passenger passenger) {
-        List<Ride> all = rideRepository.findActiveOrPendingByPassengerId(passenger.getId());
+    public Ride findCurrentRideByPassenger(Passenger passenger) {
+        List<Ride> all = rideRepository.findStartedAcceptedPendingByPassenger(passenger.getId());
         if (all.size() == 0) {
             return null;
         }
         
+        
         Ride bestOne = all.get(0);
         for (Ride r : all) {
-            if (r.getStatus() == Status.Accepted) {
+        	if (r.getStatus() == Status.Started) {
+        		bestOne = r;
+        	} else if (r.getStatus() == Status.Accepted && bestOne.getStatus() != Status.Started) {
                 bestOne = r;
             }
         }
@@ -410,5 +427,4 @@ public class RideService implements IRideService {
 		this.favouriteRouteRepository.deleteAllById(routesToDelete);
 		
 	}
-
 }

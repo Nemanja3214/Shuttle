@@ -266,7 +266,7 @@ public class RideController {
             return;
         }
 
-        final Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
+        final Ride ride = rideService.findCurrentRideByPassenger(passenger);
         final String dest = String.format("/ride/passenger/%d", passengerId.longValue());
         if (ride == null) {
             return;
@@ -325,7 +325,7 @@ public class RideController {
     	try {
             final Passenger p = (Passenger)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
-            if (rideService.findActiveOrPendingByPassenger(p) != null) {
+            if (rideService.findCurrentRideByPassenger(p) != null) {
                 return new ResponseEntity<RESTError>(new RESTError("Cannot create a ride while you have one already pending!"), HttpStatus.BAD_REQUEST);
             }
 
@@ -399,7 +399,7 @@ public class RideController {
             }
         }
 
-        Ride ride = rideService.findActiveOrPendingByPassenger(passenger);
+        Ride ride = rideService.findCurrentRideByPassenger(passenger);
         if (ride == null) {
             return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
         }
@@ -540,15 +540,13 @@ public class RideController {
         if (ride.getStatus() != Ride.Status.Accepted) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status ACCEPTED!"), HttpStatus.BAD_REQUEST);
         }
-
-        // TODO: What's the purpose of this endpoint?
-        //rideService.acceptRide(ride);
-        //driverService.setAvailable(ride.getDriver(), false);
-        //notifyRidePassengers(ride);
-        //notifyRideDriver(ride);
+        
+        rideService.startRide(ride);
+        driverService.setAvailable(ride.getDriver(), false);
+        notifyRidePassengers(ride);
+        notifyRideDriver(ride);
         
         RideDTO dto = to(ride);
-        dto.setStatus(Ride.Status.Started);
         return new ResponseEntity<RideDTO>(dto, HttpStatus.OK);
     }
     
@@ -572,7 +570,7 @@ public class RideController {
         }
         
         if (ride.getStatus() != Ride.Status.Pending) {
-        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status PENDING!"), HttpStatus.BAD_REQUEST);
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot accept a ride that is not in status PENDING!"), HttpStatus.BAD_REQUEST);
         }
 
         rideService.acceptRide(ride);
@@ -603,8 +601,8 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Accepted && ride.getStatus() != Ride.Status.Started) {
-        	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status STARTED!"), HttpStatus.BAD_REQUEST);
+        if (ride.getStatus() != Ride.Status.Started) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot end a ride that is not in status STARTED!"), HttpStatus.BAD_REQUEST);
         }
 
         rideService.finishRide(ride);

@@ -44,9 +44,7 @@ public class Ride {
     private LocalDateTime scheduledTime; // Can be null.
 
     public enum Status {
-        Pending, Accepted, Rejected, Canceled, Finished, Started
-        // TODO: Started - why?! For now it's mock-added as a response.
-        // Don't use the /start end-point.
+        Pending, Accepted, Started, Rejected, Canceled, Finished
     }
 
     public List<Location> getLocations() {

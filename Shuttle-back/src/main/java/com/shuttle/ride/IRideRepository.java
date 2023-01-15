@@ -18,8 +18,8 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     public Page<Ride> getAllBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long driverId, Pageable pageable);
 
     // If Ride::Status is stored as an int, it must be an int here, too.
-    @Query(value = "from Ride r join r.passengers plist where plist.id = :passengerId and r.status in (0, 1)")
-    public List<Ride> findActiveOrPendingByPassengerId(Long passengerId);
+    @Query(value = "from Ride r join r.passengers plist where plist.id = :passengerId and r.status in (0, 1, 2)")
+    public List<Ride> findStartedAcceptedPendingByPassenger(Long passengerId);
 
     /**
      * @return List of Ride objects whose Driver is null.
