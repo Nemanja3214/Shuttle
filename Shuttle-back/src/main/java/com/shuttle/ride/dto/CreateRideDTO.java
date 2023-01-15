@@ -18,4 +18,5 @@ public class CreateRideDTO {
 	private Boolean babyTransport;
 	private Boolean petTransport;
     private String scheduledTime;
+    private Double distance; // In meters.
 }

@@ -28,6 +28,7 @@ import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
+import com.shuttle.vehicle.vehicleType.VehicleTypeDTO;
 
 @RestController
 @RequestMapping("/api/vehicle")
@@ -201,5 +202,13 @@ public class VehicleController {
 	public ResponseEntity<List<String>> getVehicleTypes(){
 		List<String> names = vehicleService.getAllVehicleTypesNames();
 		return new ResponseEntity<List<String>>(names, HttpStatus.OK);
+	}
+	
+	@GetMapping("/types")
+	public ResponseEntity<List<VehicleTypeDTO>> getAllVehicleTypes() {
+		List<VehicleTypeDTO> result = vehicleService.getAllVehicleTypes().stream().map(vt -> {
+			return new VehicleTypeDTO(vt.getId(), vt.getName(), vt.getPricePerKM());
+		}).toList();		
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 }

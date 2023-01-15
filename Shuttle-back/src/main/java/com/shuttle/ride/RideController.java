@@ -96,13 +96,12 @@ public class RideController {
      * @return Ride object made from the DTO.
      */
     private Ride from(CreateRideDTO rideDTO, Driver driver) {
-        final Double distance = 0.5; // TODO: Where to get total distance from?
         final Double velocity = 60.0 / 1000.0; // TODO: Where to get average vehicle velocity from?
 
         final VehicleType vehicleType = vehicleTypeRepository
                 .findVehicleTypeByNameIgnoreCase(rideDTO.getVehicleType())
                 .orElseThrow();
-        final Double cost = (vehicleType.getPricePerKM() + 120) * distance;
+        final Double cost = (vehicleType.getPricePerKM() + 120) * Math.round(rideDTO.getDistance() / 1000.0);
 
         final List<Passenger> passengers = rideDTO.getPassengers()
                 .stream()
@@ -128,7 +127,7 @@ public class RideController {
         r.setVehicleType(vehicleType);
         r.setBabyTransport(rideDTO.getBabyTransport());
         r.setPetTransport(rideDTO.getPetTransport());
-        r.setEstimatedTimeInMinutes((int) ((distance / velocity) * 60));
+        r.setEstimatedTimeInMinutes((int) ((Math.round(rideDTO.getDistance() / 1000.0) / velocity) * 60));
         r.setPassengers(passengers);
         r.setRoute(route);
              
@@ -310,6 +309,7 @@ public class RideController {
 			MyValidator.validateRequired(createRideDTO.getVehicleType(), "vehicleType");
 			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "babyTransport");
 			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "petTransport");
+			MyValidator.validateRequired(createRideDTO.getDistance(), "distance");
 			
 			MyValidator.validateUserRef(createRideDTO.getPassengers(), "passengers");
 			MyValidator.validateRouteDTO(createRideDTO.getLocations(), "locations");
@@ -321,6 +321,7 @@ public class RideController {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}	
     	
+    	System.out.println("AAA " + createRideDTO.toString());
     	try {
             final Passenger p = (Passenger)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 

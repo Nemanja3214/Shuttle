@@ -22,6 +22,7 @@ public interface IVehicleService {
 	public Vehicle findByDriver(Driver driver);
     public List<Vehicle> findAllCurrentlyActiveWhoseDriverCanWork();
 	public List<String> getAllVehicleTypesNames();
+	public List<VehicleType> getAllVehicleTypes();
 	public boolean changeCurrentLocation(long id, LocationDTO location);
 	public Vehicle findById(Long id);
 	public Vehicle update(Vehicle vehicle, VehicleDTO vehicleDTO) throws IllegalArgumentException;

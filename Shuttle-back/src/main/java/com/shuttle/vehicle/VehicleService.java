@@ -147,5 +147,10 @@ public class VehicleService implements IVehicleService {
 		oldVehicle.setDriver(null);
 		vehicleRepository.save(oldVehicle);		
 	}
+
+	@Override
+	public List<VehicleType> getAllVehicleTypes() {
+		return vehicleTypeRepository.findAll();
+	}
 	
 }
