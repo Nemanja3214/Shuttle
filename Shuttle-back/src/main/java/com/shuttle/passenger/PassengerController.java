@@ -37,6 +37,7 @@ import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
+import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.email.IEmailService;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;

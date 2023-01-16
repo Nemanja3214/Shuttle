@@ -1,9 +1,9 @@
 -- Vehicle types are hardcoded at the start and never changed.
 -- Don't remove this!
 
-insert into vehicle_type(name, price_PerKM) values ('Standard', 40);
-insert into vehicle_type(name, price_PerKM) values ('Luxury', 80);
-insert into vehicle_type(name, price_PerKM) values ('Van', 60);
+insert into vehicle_type(name, price_PerKM) values ('STANDARD', 40);
+insert into vehicle_type(name, price_PerKM) values ('LUXURY', 80);
+insert into vehicle_type(name, price_PerKM) values ('VAN', 60);
 
 -- Role types are hardcoded at the start and never changed.
 -- Don't remove this!
@@ -16,7 +16,7 @@ insert into role(name) values('admin');
 
 insert into generic_user(email, password, enabled, blocked, active, name) values ('bob@gmail.com', 'bob123', true, false, false, 'Bob');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', 'john123', true, false, false, 'John');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'Troy1234', true, false, false, 'Troy');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'Troytroy123', true, false, false, 'Troy');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', 'admin', true, false, false, 'Admin');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('expired@gmail.com', 'expired123', false, false, false, 'Exp');
 
