@@ -363,25 +363,24 @@ public class RideController {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
     	
-        final Driver driver = driverService.get(driverId);
-
-        if (driver == null) {
-            return new ResponseEntity<>("Driver not found.", HttpStatus.NOT_FOUND);
-        } 
-        
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-
         if (userService.isAdmin(user)) {
 	    } else if (userService.isDriver(user)) {
             if (user.getId() != driverId) {
                 return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
-            
-       Ride ride = rideService.findCurrentRideByDriver(driver);
-       if (ride == null) {
-           return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
-       }
+        
+        final Driver driver = driverService.get(driverId);
+
+		if (driver == null) {
+		    return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
+		} 
+  
+		Ride ride = rideService.findCurrentRideByDriver(driver);
+		if (ride == null) {
+			return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
+		}
        
        return new ResponseEntity<>(to(ride), HttpStatus.OK);
     }
@@ -393,12 +392,6 @@ public class RideController {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
         
-
-        final Passenger passenger = passengerService.findById(passengerId);
-        if (passenger == null) {
-            return new ResponseEntity<>("Passenger not found.", HttpStatus.NOT_FOUND);
-        }
-
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isAdmin(user)) {
 	    } else if (userService.isPassenger(user)) {
@@ -406,6 +399,12 @@ public class RideController {
                 return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
+
+        final Passenger passenger = passengerService.findById(passengerId);
+        if (passenger == null) {
+            return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
+        }
+
 
         Ride ride = rideService.findCurrentRideByPassenger(passenger);
         if (ride == null) {
