@@ -39,6 +39,10 @@ public class FileUploadUtil {
         catch (IllegalArgumentException e) {
           	throw new InvalidBase64Exception();
 		}
+        
+        if(!isImage(imageByte)) {
+        	throw new InvalidBase64Exception();
+        }
 
         try (OutputStream stream = new FileOutputStream(uploadDir + fileName + ".png")) {
             stream.write(imageByte);
@@ -48,8 +52,18 @@ public class FileUploadUtil {
         }
     }
 
+	private static boolean isImage(byte[] imageByte) {
+		BufferedImage image;
+		try {
+			 image = ImageIO.read(new ByteArrayInputStream(imageByte));
+		} catch (IOException e) {
+			return false;
+		}
+		return image != null;
+	}
+
 	public static String getImageBase64(String uploadDir,String pictureName) throws IOException, NonExistantImageException {
-		File inputFile = new File(uploadDir + pictureName);
+		File inputFile = new File(uploadDir + pictureName + ".png");
 		
 		byte[] fileContent;
 		try {
@@ -66,7 +80,7 @@ public class FileUploadUtil {
 	
 	public static String getDefaultImageBase64(){
 		try {
-			return getImageBase64(profilePictureUploadDir, "default.png");
+			return getImageBase64(profilePictureUploadDir, "default");
 		} catch (IOException | NonExistantImageException e) {
 			return null;
 		}
@@ -88,5 +102,4 @@ public class FileUploadUtil {
 		imageSize /= (1000 * 1000);
 		return imageSize;
 	}
-
 }

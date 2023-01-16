@@ -75,7 +75,7 @@ public class GenericUser implements UserDetails {
 	}
     
     public String getProfilePictureName() {
-    	return this.email == null ? null: this.email + ".png";
+    	return this.email == null ? null: this.email;
     }
 
     @Override
