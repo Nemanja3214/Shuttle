@@ -160,7 +160,7 @@ public class PassengerService implements IPassengerService{
 
 	
 	
-	@Scheduled(fixedDelay = 1000 * 60 * 60)
+	@Scheduled(initialDelay = 1000 * 60 * 60,  fixedDelay = 1000 * 60 * 60)
 	@Transactional
 	public void deleteUnverified() {
 		System.out.println("Num of users previuos: " + passengerRepository.findAll().size());

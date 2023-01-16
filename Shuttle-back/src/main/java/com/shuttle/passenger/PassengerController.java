@@ -2,7 +2,6 @@ package com.shuttle.passenger;
 
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
@@ -10,13 +9,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
-import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.TokenExpiredException;
 import com.shuttle.ride.IRideService;
@@ -102,7 +96,7 @@ public class PassengerController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasAnyAuthority('admin')")
+	@PreAuthorize("hasAnyAuthority('passenger', 'driver', 'admin')")
 	public ResponseEntity<?> getPaginated(Pageable pageable) {
 		List<Passenger> passengers = this.passengerService.findAll(pageable);
 		List<PassengerDTO> passengersDTO = passengers.stream().map(p -> new PassengerDTO(p)).toList();
@@ -110,7 +104,6 @@ public class PassengerController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
-	//@PreAuthorize("hasAnyAuthority('passenger', 'driver', 'admin')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getDetails(@PathVariable("id") Long id) {
 		if (id == null) {
@@ -129,11 +122,10 @@ public class PassengerController {
 //                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 //	    	}
 //	    }
-	
-        return new ResponseEntity<>(new UserDTONoPassword(passenger), HttpStatus.OK);
+		
+        return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
 	}
 
-	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
 	@GetMapping("/activate/{activationId}")
 	public ResponseEntity<?> activate(@PathVariable("activationId") Long activationId) {
 		if (activationId == null) {
@@ -144,30 +136,32 @@ public class PassengerController {
 		try {
 			verified = passengerService.activate(activationId);
 		} catch (TokenExpiredException e) {
-			return new ResponseEntity<>("Activation expired. Register again!", HttpStatus.BAD_REQUEST);	
+			return new ResponseEntity<>(new RESTError( "Activation expired. Register again!"), HttpStatus.BAD_REQUEST);	
 		} catch (NonExistantUserException e) {
-			return new ResponseEntity<>("Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>( "Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
 		}
+		return new ResponseEntity<>(new RESTError( "Successful account activation!"), HttpStatus.OK);
 		
-		URI yahoo = null;
-		HttpHeaders httpHeaders = new HttpHeaders();
-	    if (verified) {   	
-			try {
-				yahoo = new URI("http://localhost:4200/login");
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}	    
-		    httpHeaders.setLocation(yahoo);
-		    return new ResponseEntity<>("Successful account activation!", httpHeaders,  HttpStatus.OK);	    
-	    } else {    	
-			try {
-				yahoo = new URI("http://localhost:4200/bad-request");
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			}		
-		    httpHeaders.setLocation(yahoo);
-		    return new ResponseEntity<>(httpHeaders, HttpStatus.NOT_ACCEPTABLE);
-	    }
+		
+//		URI yahoo = null;
+//		HttpHeaders httpHeaders = new HttpHeaders();
+//	    if (verified) {   	
+//			try {
+//				yahoo = new URI("http://localhost:4200/login");
+//			} catch (URISyntaxException e) {
+//				e.printStackTrace();
+//			}	    
+//		    httpHeaders.setLocation(yahoo);
+//		    return new ResponseEntity<>("Successful account activation!", httpHeaders,  HttpStatus.OK);	    
+//	    } else {    	
+//			try {
+//				yahoo = new URI("http://localhost:4200/bad-request");
+//			} catch (URISyntaxException e) {
+//				e.printStackTrace();
+//			}		
+//		    httpHeaders.setLocation(yahoo);
+//		    return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
+//	    }
 	}
 
 	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
