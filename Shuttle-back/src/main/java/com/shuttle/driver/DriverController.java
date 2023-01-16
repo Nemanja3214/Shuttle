@@ -121,7 +121,7 @@ public class DriverController {
 		} catch (IOException e) {
 			return new ResponseEntity<RESTError>(new RESTError("Could not save image!"), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		UserDTONoPassword result = new UserDTONoPassword(d);
+		DriverDTO result = DriverDTO.from(d);
 		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
