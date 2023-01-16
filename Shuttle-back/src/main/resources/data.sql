@@ -1,9 +1,9 @@
 -- Vehicle types are hardcoded at the start and never changed.
 -- Don't remove this!
 
-insert into vehicle_type(name, price_PerKM) values ('Standard', 40);
-insert into vehicle_type(name, price_PerKM) values ('Luxury', 80);
-insert into vehicle_type(name, price_PerKM) values ('Van', 60);
+insert into vehicle_type(name, price_PerKM) values ('STANDARD', 40);
+insert into vehicle_type(name, price_PerKM) values ('LUXURY', 80);
+insert into vehicle_type(name, price_PerKM) values ('VAN', 60);
 
 -- Role types are hardcoded at the start and never changed.
 -- Don't remove this!

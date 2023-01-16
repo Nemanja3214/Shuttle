@@ -80,7 +80,7 @@ public class VehicleController {
             } else {
                 final Ride r = rideService.findCurrentRideByDriver(v.getDriver());
                 if (r == null) {
-                    throw new IllegalStateException("Driver is ACTIVE and NOT AVAILABLE => He MUST have a ride");
+                    throw new IllegalStateException("Driver " + v.getDriver().getEmail() + " " + v.getDriver().getId() + " is ACTIVE and NOT AVAILABLE => He MUST have a ride");
                 }
 
                 Location target = r.getLocations().get(0);
