@@ -16,7 +16,7 @@ insert into role(name) values('admin');
 
 insert into generic_user(email, password, enabled, blocked, active, name) values ('bob@gmail.com', 'bob123', true, false, false, 'Bob');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', 'john123', true, false, false, 'John');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'Troy1234', true, false, false, 'Troy');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'Troytroy123', true, false, false, 'Troy');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', 'admin', true, false, false, 'Admin');
 
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver1@gmail.com', '1234', true, false, false, 'DriverName_1');

@@ -43,6 +43,7 @@ import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
+import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.email.IEmailService;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
@@ -109,7 +110,7 @@ public class PassengerController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
-	@PreAuthorize("hasAnyAuthority('passenger', 'driver', 'admin')")
+	//@PreAuthorize("hasAnyAuthority('passenger', 'driver', 'admin')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getDetails(@PathVariable("id") Long id) {
 		if (id == null) {
@@ -121,15 +122,15 @@ public class PassengerController {
             return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
         }
         
-		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		if (userService.isAdmin(user____) || userService.isDriver(user____)) {	
-		} else {
-	    	if (!passenger.getId().equals(user____.getId())) {
-                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
-	    	}
-	    }
-		
-        return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
+//		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+//		if (userService.isAdmin(user____) || userService.isDriver(user____)) {	
+//		} else {
+//	    	if (!passenger.getId().equals(user____.getId())) {
+//                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
+//	    	}
+//	    }
+	
+        return new ResponseEntity<>(new UserDTONoPassword(passenger), HttpStatus.OK);
 	}
 
 	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
