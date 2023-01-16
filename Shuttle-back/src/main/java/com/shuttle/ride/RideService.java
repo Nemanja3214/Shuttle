@@ -1,13 +1,18 @@
 package com.shuttle.ride;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.TimeZone;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +29,7 @@ import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.IFavouriteRouteRepository;
 import com.shuttle.location.ILocationRepository;
 import com.shuttle.location.Location;
+import com.shuttle.location.Route;
 import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
@@ -32,6 +38,7 @@ import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
@@ -426,5 +433,83 @@ public class RideService implements IRideService {
 		}
 		this.favouriteRouteRepository.deleteAllById(routesToDelete);
 		
+	}
+
+	@Override
+	public List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId) throws NonExistantUserException {
+		if(!this.passengerRepository.existsById(passengerId)) {
+			throw new NonExistantUserException();
+		}
+		return this.rideRepository.getPassengerGraphData(start, end, passengerId);
+	}
+	
+	@Override
+	public List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId) throws NonExistantUserException {
+		if(!this.driverRepository.existsById(driverId)) {
+			throw new NonExistantUserException();
+		}
+		return this.rideRepository.getDriverGraphData(start, end, driverId);
+	}
+
+
+	@Override
+	public void generate(Long driverId, Long passengerId) {
+    	for(int i = 0; i < 10; ++i) {
+            LocalDateTime start = generateDateTime(true);
+            LocalDateTime end = generateDateTime(false);            
+            Driver d = this.driverRepository.findById(driverId).get();
+            Passenger p = this.passengerRepository.findById(passengerId).get();
+            
+            List<Passenger> passengers = new ArrayList<>();
+            passengers.add(p);
+            
+            Route route = new Route();
+            List<Location> locations = new ArrayList<>();
+            route.setLocations(locations);
+            
+            VehicleType vt = vehicleTypeRepository.findVehicleTypeByNameIgnoreCase("standard").get();
+            
+     		Ride r = new Ride(null,
+     				start, end,
+     				new Random().nextDouble(30, 60),
+     				d, passengers, route, 12, false, false, vt, null, Status.Finished, LocalDateTime.now(), new Random().nextDouble(30, 100));
+     		this.rideRepository.save(r);
+    	}
+		
+	}
+    
+    private LocalDateTime generateDateTime(boolean isStart) {
+		Calendar calendar = Calendar.getInstance();
+        TimeZone tz = calendar.getTimeZone();
+        ZoneId zoneId = tz.toZoneId();     
+        
+        calendar.add(Calendar.DAY_OF_MONTH, -10);
+        LocalDate lowerBound = LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
+        
+        calendar.add(Calendar.DAY_OF_MONTH, 20);
+        LocalDate upperBound= LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
+        
+        if(isStart) {
+        	return between(lowerBound, LocalDate.now());
+        }
+        else {
+        	return between(LocalDate.now(), upperBound);
+        }
+	}
+
+	public static LocalDateTime between(LocalDate startInclusive, LocalDate endExclusive) {
+        long startEpochDay = startInclusive.toEpochDay();
+        long endEpochDay = endExclusive.toEpochDay();
+        long randomDay = ThreadLocalRandom
+          .current()
+          .nextLong(startEpochDay, endEpochDay);
+
+        return LocalDate.ofEpochDay(randomDay).atStartOfDay();
+    }
+    
+
+	@Override
+	public List<Ride> findAll() {
+		return this.rideRepository.findAll();
 	}
 }
