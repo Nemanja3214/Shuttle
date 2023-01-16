@@ -3,7 +3,9 @@ package com.shuttle.common;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -27,18 +29,28 @@ public class FileUploadUtil {
             Files.createDirectories(uploadPath);
         }
          
-        BufferedImage image = null;
+//        BufferedImage image = null;
         if(imageBase64 == null) {
         	return;
         }
-        byte[] imageByte = Base64.getDecoder().decode(imageBase64);
-        image = ImageIO.read(new ByteArrayInputStream(imageByte));
-        
-        File outputfile = new File(uploadDir + fileName);
-        if(image == null) {
-        	throw new InvalidBase64Exception();
+        byte[] imageByte;
+        try {
+        	imageByte = Base64.getDecoder().decode(imageBase64);
         }
-        ImageIO.write(image, "png", outputfile);
+        catch (IllegalArgumentException e) {
+          	throw new InvalidBase64Exception();
+		}
+
+//        image = ImageIO.read(new ByteArrayInputStream(imageByte));
+        
+//        File outputfile = new File(uploadDir + fileName);
+//        if(image == null) {
+//        	throw new InvalidBase64Exception();
+//        }
+        try (OutputStream stream = new FileOutputStream(uploadDir + fileName + ".png")) {
+            stream.write(imageByte);
+        }
+//        ImageIO.write(image, "png", outputfile);
     }
 
 	public static String getImageBase64(String uploadDir,String pictureName) throws IOException, NonExistantImageException {
@@ -80,6 +92,24 @@ public class FileUploadUtil {
 		}
 		imageSize /= (1000 * 1000);
 		return imageSize;
+	}
+	
+	public static void main(String[] args) {
+		String picture = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdj+L+U4T8ABu8CpCYJ1DQAAAAASUVORK5CYII=";
+		try {
+			saveFile(documentPictureUploadDir, "asd", picture);
+			String result = getImageBase64(documentPictureUploadDir, "asd.png");
+			System.out.println(picture.equals(result));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidBase64Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NonExistantImageException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 	}
 
 }
