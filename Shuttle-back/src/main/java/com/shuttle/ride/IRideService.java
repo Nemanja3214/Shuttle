@@ -1,7 +1,9 @@
 package com.shuttle.ride;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +17,7 @@ import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
@@ -141,5 +144,16 @@ public interface IRideService {
 	List<FavoriteRoute> getFavouriteRoutesByPassengerId(long passengerId) throws NonExistantUserException;
 
 	void delete(List<Long> routesToDelete) throws NonExistantFavoriteRoute;
+
+	List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId)
+			throws NonExistantUserException;
+
+	List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId)
+			throws NonExistantUserException;
+
+	void generate(Long driverId, Long passengerId);
+
+//	TODO remove
+	List<Ride> findAll();
 
 }

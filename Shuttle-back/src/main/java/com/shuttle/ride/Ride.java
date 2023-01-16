@@ -42,6 +42,7 @@ public class Ride {
     private Cancellation rejection;
     private Status status;
     private LocalDateTime scheduledTime; // Can be null.
+    private Double totalLength;
 
     public enum Status {
         Pending, Accepted, Rejected, Canceled, Finished, Started

@@ -3,13 +3,18 @@ package com.shuttle.ride;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.RESTError;
@@ -53,6 +59,7 @@ import com.shuttle.ride.cancellation.ICancellationService;
 import com.shuttle.ride.cancellation.dto.CancellationBodyDTO;
 import com.shuttle.ride.cancellation.dto.CancellationDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
@@ -334,6 +341,7 @@ public class RideController {
             final Ride ride = from(createRideDTO, driver);
 
             ride.setScheduledTime(scheduledFor);
+            ride.setTotalLength(createRideDTO.getLocations().stream().mapToDouble(route -> route.getDistance()).sum());
             rideService.save(ride);
             notifyRidePassengers(ride);
 
@@ -710,6 +718,71 @@ public class RideController {
     	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     	
     }
+    
+    @GetMapping("/graph/passenger/{passengerId}")
+    public ResponseEntity<?> getPassengerGraphData(@PathVariable Long passengerId, @RequestParam(required = true) String from, @RequestParam(required = true) String to){
+		if (passengerId == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+    	LocalDateTime tFrom = null, tTo = null;
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			tFrom = LocalDateTime.parse(from, formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			tTo = LocalDateTime.parse(to, formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			List<GraphEntryDTO>result = this.rideService.getPassengerGraphData(tFrom, tTo, passengerId);
+			return new ResponseEntity<List<GraphEntryDTO>>(result, HttpStatus.OK);
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Passenger with that id doesn't exist"), HttpStatus.NOT_FOUND);
+		}
+    }
+    
+    @GetMapping("/graph/driver/{driverId}")
+    public ResponseEntity<?> getDriverGraphData(@PathVariable Long driverId, @RequestParam(required = true) String from, @RequestParam(required = true) String to){
+		if (driverId == null) {
+			return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
+		}
+    	LocalDateTime tFrom = null, tTo = null;
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			tFrom = LocalDateTime.parse(from, formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			tTo = LocalDateTime.parse(to, formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			List<GraphEntryDTO>result = this.rideService.getDrivertGraphData(tFrom, tTo, driverId);
+			return new ResponseEntity<List<GraphEntryDTO>>(result, HttpStatus.OK);
+		} catch (NonExistantUserException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Passenger with that id doesn't exist"), HttpStatus.NOT_FOUND);
+		}
+    }
+    
+//    TODO remove
+    @GetMapping
+    public ResponseEntity<?> getRides(){
+    	return new ResponseEntity<List<Ride>>(this.rideService.findAll(), HttpStatus.OK);
+     }
+    
+    @PostMapping("/generate")
+    public ResponseEntity<?> generate(@RequestParam Long driverId, @RequestParam Long passengerId){
+    	this.rideService.generate(driverId, passengerId);
+    	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+     }
+
     
 }
 
