@@ -684,6 +684,7 @@ public class RideController {
 		}
     }
     
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @GetMapping("/favorites")
     public ResponseEntity<?> getFavouriteRoutes(){
     	List<FavoriteRoute> favoriteRoutes = this.rideService.getFavouriteRoutes();
@@ -705,12 +706,13 @@ public class RideController {
     	
     }
     
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @DeleteMapping("/favorites/{id}")
     public ResponseEntity<?> deleteFavouriteRoute(@PathVariable long id){
     	try {
 			this.rideService.delete(id);
 		} catch (NonExistantFavoriteRoute e) {
-			return new ResponseEntity<RESTError>(new RESTError("Favorite route doesn't exist"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Favorite location does not exist!", HttpStatus.NOT_FOUND);
 		}
     	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     	
