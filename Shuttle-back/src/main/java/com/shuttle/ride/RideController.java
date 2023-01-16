@@ -316,7 +316,7 @@ public class RideController {
 			MyValidator.validateRequired(createRideDTO.getVehicleType(), "vehicleType");
 			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "babyTransport");
 			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "petTransport");
-			MyValidator.validateRequired(createRideDTO.getDistance(), "distance");
+			//MyValidator.validateRequired(createRideDTO.getDistance(), "distance");
 			
 			MyValidator.validateUserRef(createRideDTO.getPassengers(), "passengers");
 			MyValidator.validateRouteDTO(createRideDTO.getLocations(), "locations");
@@ -328,7 +328,10 @@ public class RideController {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}	
     	
-    	System.out.println("AAA " + createRideDTO.toString());
+    	if (createRideDTO.getDistance() == null) {
+    		createRideDTO.setDistance(404.0);    	
+    	}
+    	
     	try {
             final Passenger p = (Passenger)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
