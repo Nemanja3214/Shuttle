@@ -18,6 +18,7 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', 'john123', true, false, false, 'John');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'Troy1234', true, false, false, 'Troy');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', 'admin', true, false, false, 'Admin');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('expired@gmail.com', 'expired123', false, false, false, 'Exp');
 
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver1@gmail.com', '1234', true, false, false, 'DriverName_1');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver2@gmail.com', '1234', true, false, false, 'DriverName_2');
@@ -30,6 +31,9 @@ insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
 insert into user_role(user_id, role_id) values (3, 1);
 insert into user_role(user_id, role_id) values (4, 3);
+insert into user_role(user_id, role_id) values (5, 1);
+
+
 
 insert into user_role(user_id, role_id) values (5, 2);
 insert into user_role(user_id, role_id) values (6, 2);
@@ -50,6 +54,7 @@ insert into driver(id, available, time_worked_today) values (10, true, 0);
 
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
+insert into passenger(id) values (5);
 
 -- Vehicle
 
@@ -68,6 +73,10 @@ insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transp
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(8, 5, 2, false, true, 5);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(9, 6, 1, false, false, 6);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(10, 7, 3, false, false, 7);
+
+-- Expired token case for testing
+
+insert into verification_token(expire_date_time, token, passenger_id) values('2021-01-17 17:11:49.795',  'asdqwdwegegr', 5);
 
 -- insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
 -- insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
