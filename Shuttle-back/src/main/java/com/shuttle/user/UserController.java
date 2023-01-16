@@ -278,6 +278,7 @@ public class UserController {
         return new ResponseEntity<>(usersDTO, HttpStatus.OK);
     }
 
+	@PermitAll
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody CredentialsDTO credentialsDTO) {
     	try {
