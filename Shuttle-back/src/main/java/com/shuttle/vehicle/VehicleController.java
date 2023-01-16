@@ -84,7 +84,7 @@ public class VehicleController {
                 }
 
                 Location target = r.getLocations().get(0);
-                if (r.getStatus() == Status.Accepted || r.getStatus() == Status.Started) {
+                if (r.getStatus() == Status.ACCEPTED || r.getStatus() == Status.STARTED) {
                     target = r.getLocations().get(r.getLocations().size() - 1);
                 }
 

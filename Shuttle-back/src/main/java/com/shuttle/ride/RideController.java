@@ -128,7 +128,7 @@ public class RideController {
         route.setLocations(locations);
 
         Ride r = new Ride();
-        r.setStatus(Status.Pending);
+        r.setStatus(Status.PENDING);
         r.setTotalCost(cost);
         r.setDriver(driver);
         r.setVehicleType(vehicleType);
@@ -306,7 +306,7 @@ public class RideController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('admin', 'passenger')")
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
     	LocalDateTime scheduledFor; 
@@ -463,7 +463,7 @@ public class RideController {
             }	
 	    }
 
-        if (ride.getStatus() != Status.Pending && ride.getStatus() != Status.Started) {
+        if (ride.getStatus() != Status.PENDING && ride.getStatus() != Status.STARTED) {
             return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't PENDING or STARTED."), HttpStatus.BAD_REQUEST);
         }
 
@@ -545,7 +545,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Accepted) {
+        if (ride.getStatus() != Ride.Status.ACCEPTED) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status ACCEPTED!"), HttpStatus.BAD_REQUEST);
         }
         
@@ -577,7 +577,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Pending) {
+        if (ride.getStatus() != Ride.Status.PENDING) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot accept a ride that is not in status PENDING!"), HttpStatus.BAD_REQUEST);
         }
 
@@ -609,7 +609,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Started) {
+        if (ride.getStatus() != Ride.Status.STARTED) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot end a ride that is not in status STARTED!"), HttpStatus.BAD_REQUEST);
         }
 
@@ -641,7 +641,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Pending && ride.getStatus() != Ride.Status.Accepted) {
+        if (ride.getStatus() != Ride.Status.PENDING && ride.getStatus() != Ride.Status.ACCEPTED) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that is not in status PENDING or ACCEPTED!"), HttpStatus.BAD_REQUEST);
         }
 
