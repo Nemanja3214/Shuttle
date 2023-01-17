@@ -1,22 +1,18 @@
 package com.shuttle.location;
 
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.List;
+
+@Entity
+@Data
 public class Route {
-	private Location departure;
-	private Location destination;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
+	@ManyToMany(fetch = FetchType.EAGER)
+	List<Location> locations;
 	
-	public Location getDeparture() {
-		return departure;
-	}
-	
-	public void setDeparture(Location departure) {
-		this.departure = departure;
-	}
-	
-	public Location getDestination() {
-		return destination;
-	}
-	
-	public void setDestination(Location destination) {
-		this.destination = destination;
-	}
 }

@@ -2,34 +2,27 @@ package com.shuttle.passenger;
 
 import java.util.Set;
 
-import com.shuttle.ride.Ride;
-import com.shuttle.user.User;
-import com.shuttle.vehicle.Route;
+import com.shuttle.location.FavoriteRoute;
+import com.shuttle.location.Route;
+import com.shuttle.user.GenericUser;
+import com.shuttle.verificationToken.VerificationToken;
 
-public class Passenger extends User {
-    private Set<Ride> rides;
-    private Set<Route> favoriteRoutes;
-    
-	public Passenger() {		
-	}
-	
-    public Passenger(Long id, String name, String surname, String profilePicture, String telephoneNumber, String email, String address, String password) {
-        super(id, name, surname, profilePicture, telephoneNumber, email, address, password);
-    }
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    public Set<Ride> getRides() {
-        return rides;
-    }
-
-    public void setRides(Set<Ride> rides) {
-        this.rides = rides;
-    }
-
-    public Set<Route> getFavoriteRoutes() {
-        return favoriteRoutes;
-    }
-
-    public void setFavoriteRoutes(Set<Route> favoriteRoutes) {
-        this.favoriteRoutes = favoriteRoutes;
-    }
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Entity
+public class Passenger extends GenericUser {
+    Double finance;
+    Boolean currentlyRiding;
+    @OneToOne(mappedBy = "passenger", cascade = CascadeType.ALL, orphanRemoval=true)
+    private VerificationToken token;
 }

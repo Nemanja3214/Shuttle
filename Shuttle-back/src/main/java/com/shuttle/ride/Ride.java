@@ -1,117 +1,61 @@
 package com.shuttle.ride;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
-import com.shuttle.common.Entity;
 import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;
 import com.shuttle.passenger.Passenger;
-import com.shuttle.vehicle.Vehicle;
+import com.shuttle.ride.cancellation.Cancellation;
+import com.shuttle.vehicle.vehicleType.VehicleType;
+import com.shuttle.location.Route;
 
-public class Ride extends Entity {
-	private LocalDateTime startTime;
-	private LocalDateTime endTime;
-	private Integer totalCost;
-	private Driver driver;
-	private Set<Passenger> passengers;
-	private Set<Location> locations;
-	private Integer estimatedTimeInMinutes;
-	private Boolean babyTransport;
-	private Boolean petTransport;
-	private Vehicle.Type vehicleType;
-	private Status status;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-	public enum Status {
-		Pending, Accepted, Rejected, Active, Finished
-	}
+@Data
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name="ride")
+public class Ride {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private Double totalCost;
+    @OneToOne
+    private Driver driver;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Passenger> passengers;
+    @OneToOne(cascade = CascadeType.ALL)
+    private Route route;
+    private Integer estimatedTimeInMinutes;
+    private Boolean babyTransport;
+    private Boolean petTransport;
+    @ManyToOne
+    private VehicleType vehicleType;
+    @OneToOne
+    private Cancellation rejection;
+    private Status status;
+    private LocalDateTime scheduledTime; // Can be null.
+    private Double totalLength;
 
-	public LocalDateTime getStartTime() {
-		return startTime;
-	}
+    public enum Status {
+        PENDING, ACCEPTED, STARTED, REJECTED, CANCELED, FINISHED
+    }
 
-	public void setStartTime(LocalDateTime startTime) {
-		this.startTime = startTime;
-	}
-
-	public LocalDateTime getEndTime() {
-		return endTime;
-	}
-
-	public void setEndTime(LocalDateTime endTime) {
-		this.endTime = endTime;
-	}
-
-	public Integer getTotalCost() {
-		return totalCost;
-	}
-
-	public void setTotalCost(Integer totalCost) {
-		this.totalCost = totalCost;
-	}
-
-	public Driver getDriver() {
-		return driver;
-	}
-
-	public void setDriver(Driver driver) {
-		this.driver = driver;
-	}
-
-	public Set<Passenger> getPassengers() {
-		return passengers;
-	}
-
-	public void setPassengers(Set<Passenger> passengers) {
-		this.passengers = passengers;
-	}
-
-	public Set<Location> getLocations() {
-		return locations;
-	}
-
-	public void setLocations(Set<Location> locations) {
-		this.locations = locations;
-	}
-
-	public Integer getEstimatedTimeInMinutes() {
-		return estimatedTimeInMinutes;
-	}
-
-	public void setEstimatedTimeInMinutes(Integer estimatedTimeInMinutes) {
-		this.estimatedTimeInMinutes = estimatedTimeInMinutes;
-	}
-
-	public Boolean getBabyTransport() {
-		return babyTransport;
-	}
-
-	public void setBabyTransport(Boolean babyTransport) {
-		this.babyTransport = babyTransport;
-	}
-
-	public Boolean getPetTransport() {
-		return petTransport;
-	}
-
-	public void setPetTransport(Boolean petTransport) {
-		this.petTransport = petTransport;
-	}
-
-	public Vehicle.Type getVehicleType() {
-		return vehicleType;
-	}
-
-	public void setVehicleType(Vehicle.Type vehicleType) {
-		this.vehicleType = vehicleType;
-	}
-
-	public Status getStatus() {
-		return status;
-	}
-
-	public void setStatus(Status status) {
-		this.status = status;
-	}
+    public List<Location> getLocations() {
+    	return this.route.getLocations();
+    }
+    
+    public LocalDateTime getEstimatedEndTime() {
+    	if (estimatedTimeInMinutes != null && startTime != null) {
+    		return startTime.plusMinutes(estimatedTimeInMinutes.longValue());
+    	}
+    	return null;
+    }
 }

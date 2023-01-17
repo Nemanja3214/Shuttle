@@ -1,15 +1,29 @@
 package com.shuttle.driver;
 
-import com.shuttle.user.User;
+import com.shuttle.user.GenericUser;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-public class Driver extends User {
-
-    public Driver() {
-    }
-
-    public Driver(Long id, String name, String surname, String profilePicture, String telephoneNumber, String email, String address, String password) {
-        super(id, name, surname, profilePicture, telephoneNumber, email, address, password);
-    }
-
-
+@EqualsAndHashCode(callSuper = true)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name="driver")
+public class Driver extends GenericUser {
+    /**
+     * Is the driver currently performing a ride?
+     * Make sure to check if he's active as well.
+     */
+    private boolean available;
+	//boolean blocked;
+    private Long timeWorkedToday;
+	
+	public String getFolderName() {
+		return this.getId().toString();
+	}
 }

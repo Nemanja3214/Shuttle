@@ -2,45 +2,37 @@ package com.shuttle.location.dto;
 
 import com.shuttle.location.Location;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LocationDTO {
 	private String address;
 	private Double latitude;
 	private Double longitude;
 	
-	public LocationDTO(Location l) {
-		this.address = l.getAddress();
-		this.latitude = l.getLatitude();
-		this.longitude = l.getLongitude();
+	public static LocationDTO from(Location l) {
+		return new LocationDTO(l.getAddress(), l.getLatitude(), l.getLongitude());
 	}
 	
-	public LocationDTO() {
-		super();
+	public Location to() {
+		Location l = new Location();
+		l.setAddress(address);
+		l.setLatitude(latitude);
+		l.setLongitude(longitude);
+		return l;
 	}
-	public LocationDTO(String address, double latitude, double longitude) {
-		super();
-		this.address = address;
-		this.latitude = latitude;
-		this.longitude = longitude;
-	}
+	
 	public static LocationDTO getMock() {
 		return new LocationDTO("Bulevar oslobodjenja 46", 45.267136, 19.833549);
 	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String adress) {
-		this.address = adress;
-	}
-	public Double getLatitude() {
-		return latitude;
-	}
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
-	}
-	public Double getLongitude() {
-		return longitude;
-	}
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
+
+	public LocationDTO(Location location) {
+		this.setAddress(location.getAddress());
+		this.setLatitude(location.getLatitude());
+		this.setLongitude(location.getLongitude());
 	}
 }

@@ -1,61 +1,22 @@
 package com.shuttle.ride.dto;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import com.shuttle.location.RouteDTO;
+import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.user.dto.BasicUserInfoDTO;
 
-public class CreateRideDTO {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateRideDTO {
 	private List<BasicUserInfoDTO> passengers;
 	private List<RouteDTO> locations;
 	private String vehicleType;
-	private boolean babyTransport;
-	private boolean petTransport;
-
-	public CreateRideDTO() {
-		super();
-	}
-
-	public List<RouteDTO> getLocations() {
-		return locations;
-	}
-
-	public void setLocations(List<RouteDTO> locations) {
-		this.locations = locations;
-	}
-
-	public String getVehicleType() {
-		return vehicleType;
-	}
-
-	public void setVehicleType(String vehicleType) {
-		this.vehicleType = vehicleType;
-	}
-
-	public boolean isBabyTransport() {
-		return babyTransport;
-	}
-
-	public void setBabyTransport(boolean babyTransport) {
-		this.babyTransport = babyTransport;
-	}
-
-	public boolean isPetTransport() {
-		return petTransport;
-	}
-
-	public void setPetTransport(boolean petTransport) {
-		this.petTransport = petTransport;
-	}
-
-	public List<BasicUserInfoDTO> getPassengers() {
-		return passengers;
-	}
-
-	public void setPassengers(List<BasicUserInfoDTO> passengers) {
-		this.passengers = passengers;
-	}
-
+	private Boolean babyTransport;
+	private Boolean petTransport;
+    private String scheduledTime;
+    private Double distance; // In meters.
 }

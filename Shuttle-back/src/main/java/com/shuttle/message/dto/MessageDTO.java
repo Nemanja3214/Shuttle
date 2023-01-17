@@ -3,84 +3,31 @@ package com.shuttle.message.dto;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
+import com.shuttle.message.Message;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageDTO {
-	private long id;
-	private LocalDateTime timeOfSending;
-	private long senderId;
-	private long receiverId;
+	private Long id;
+	private String timeOfSending;
+	private Long senderId;
+	private Long receiverId;
 	private String message;
-	private String type;
-	private long rideId;
-	
-	
-	
-	public MessageDTO() {
-		super();
-	}
+	private Message.Type type;
+    private Long rideId;
 
-	public MessageDTO(long id, LocalDateTime timeOfSending, long senderId, long receiverId, String message, String type,
-			long rideId) {
-		super();
-		this.id = id;
-		this.timeOfSending = timeOfSending;
-		this.senderId = senderId;
-		this.receiverId = receiverId;
-		this.message = message;
-		this.type = type;
-		this.rideId = rideId;
-	}
-	
-	public static MessageDTO getMock() {
-		return new MessageDTO(123, LocalDateTime.now(), 123, 123, "The driver is going on a longer route on purpose", "RIDE", 123);
-	}
-	
-	public long getId() {
-		return id;
-	}
-	public void setId(long id) {
-		this.id = id;
-	}
-	
-	public LocalDateTime getTimeOfSending() {
-		return timeOfSending;
-	}
-
-	public void setTimeOfSending(LocalDateTime timeOfSending) {
-		this.timeOfSending = timeOfSending;
-	}
-
-	public long getSenderId() {
-		return senderId;
-	}
-	public void setSenderId(long senderId) {
-		this.senderId = senderId;
-	}
-	public long getReceiverId() {
-		return receiverId;
-	}
-	public void setReceiverId(long receiverId) {
-		this.receiverId = receiverId;
-	}
-	public String getMessage() {
-		return message;
-	}
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
-	public long getRideId() {
-		return rideId;
-	}
-	public void setRideId(long rideId) {
-		this.rideId = rideId;
-	}
-	
-	
-	
-	
+    public MessageDTO(Message m) {
+        this.id = m.getId();
+        this.timeOfSending = m.getTime().toString();
+        this.senderId = m.getSender().getId();
+        this.receiverId = m.getReceiver().getId();
+        this.message = m.getMessage();
+        this.type = m.getType();
+        this.rideId = m.getRide() == null ? null : m.getRide().getId();
+    }
 }
