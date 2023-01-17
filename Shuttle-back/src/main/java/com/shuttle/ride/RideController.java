@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -517,7 +518,7 @@ public class RideController {
         Panic p = panicService.add(ride, user, reason.getReason());
         PanicDTO dto = new PanicDTO();
         dto.setReason(p.getReason());
-        dto.setTime(p.getTime().toString());
+        dto.setTime(p.getTime().truncatedTo(ChronoUnit.SECONDS).toString());
         dto.setId(p.getId());
         dto.setRide(to(ride));
         dto.setUser(new UserDTONoPassword(p.getUser()));

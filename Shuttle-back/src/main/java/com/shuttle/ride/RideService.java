@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -279,7 +280,7 @@ public class RideService implements IRideService {
 	@Override
 	public Ride startRide(Ride ride) {
 		ride.setStatus(Status.STARTED);
-		ride.setStartTime(LocalDateTime.now());
+		ride.setStartTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		ride = rideRepository.save(ride);
 		return ride;
@@ -289,7 +290,7 @@ public class RideService implements IRideService {
 	@Override
 	public Ride finishRide(Ride ride) {
 		ride.setStatus(Status.FINISHED);
-		ride.setEndTime(LocalDateTime.now());
+		ride.setEndTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		ride = rideRepository.save(ride);
 		return ride;
@@ -318,7 +319,7 @@ public class RideService implements IRideService {
     @Override
     public Ride cancelRide(Ride ride) {
 		ride.setStatus(Status.CANCELED);
-		ride.setEndTime(LocalDateTime.now());
+		ride.setEndTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		ride = rideRepository.save(ride);
 		return ride;
