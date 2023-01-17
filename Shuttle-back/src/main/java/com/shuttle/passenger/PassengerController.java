@@ -42,6 +42,7 @@ import com.shuttle.user.email.IEmailService;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
 
@@ -57,6 +58,7 @@ public class PassengerController {
 	@Autowired
 	UserService userService;
 	
+	@PermitAll
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody PassengerDTO dto) {
 		try {
@@ -91,7 +93,7 @@ public class PassengerController {
 			return new ResponseEntity<RESTError>(new RESTError("Failed to send verification e-mail!"), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		PassengerDTO result = new PassengerDTO(p);
+		UserDTONoPassword result = new UserDTONoPassword(p);
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
@@ -99,11 +101,12 @@ public class PassengerController {
 	@PreAuthorize("hasAnyAuthority('passenger', 'driver', 'admin')")
 	public ResponseEntity<?> getPaginated(Pageable pageable) {
 		List<Passenger> passengers = this.passengerService.findAll(pageable);
-		List<PassengerDTO> passengersDTO = passengers.stream().map(p -> new PassengerDTO(p)).toList();
-		ListDTO<PassengerDTO> result = new ListDTO<>(passengersDTO);
+		List<UserDTONoPassword> passengersDTO = passengers.stream().map(p -> new UserDTONoPassword(p)).toList();
+		ListDTO<UserDTONoPassword> result = new ListDTO<>(passengersDTO);
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 
+	@PreAuthorize("hasAnyAuthority('passenger', 'driver', 'admin')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getDetails(@PathVariable("id") Long id) {
 		if (id == null) {
@@ -183,7 +186,6 @@ public class PassengerController {
 		}
 		
 		Passenger updatedPassenger = passengerService.findById(id);
-		
 		if (updatedPassenger == null) {
 			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
 		}
@@ -192,10 +194,10 @@ public class PassengerController {
 		if (userService.isAdmin(user____)) {	
 		} else {
 	    	if (!updatedPassenger.getId().equals(user____.getId())) {
-                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
 	    	}
 	    }
-		
+
 		try {
 			updatedPassenger = this.passengerService.updatePassenger(id, newData);
 		} catch (NonExistantUserException e) {
