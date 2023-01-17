@@ -308,7 +308,7 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('passenger')")
     @PostMapping
-    public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
+    public ResponseEntity<?> createRide(@RequestBody(required=false) CreateRideDTO createRideDTO) {
     	LocalDateTime scheduledFor; 
     	try {
 			MyValidator.validateRequired(createRideDTO.getLocations(), "locations");
@@ -484,7 +484,7 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping("/{id}/panic")
-    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody PanicSendDTO reason) {   
+    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody(required=false) PanicSendDTO reason) {   
     	try {
 			MyValidator.validateRequired(reason.getReason(), "reason");
 		} catch (MyValidatorException e1) {
@@ -626,7 +626,7 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('driver')")
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
+    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody(required=false) CancellationBodyDTO reason) {
         if (id == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
@@ -659,7 +659,7 @@ public class RideController {
     
     @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
     @PostMapping("/favorites")
-    public ResponseEntity<?> createFavouriteRoute(@RequestBody FavoriteRouteDTO dto){
+    public ResponseEntity<?> createFavouriteRoute(@RequestBody(required=false) FavoriteRouteDTO dto){
 		try {
 			MyValidator.validateRequired(dto.getFavoriteName(), "favoriteName");
 			MyValidator.validateRequired(dto.getVehicleType(), "vehicleType");
