@@ -137,7 +137,9 @@ public class UserController {
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
     
+  
     //@PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    @PermitAll
     @GetMapping("/{id}/resetPassword")
     public ResponseEntity<?> resetPasswordSendEmail(@PathVariable Long id) {
     	if (id == null) {
