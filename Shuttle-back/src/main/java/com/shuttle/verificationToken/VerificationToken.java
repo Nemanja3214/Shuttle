@@ -38,4 +38,9 @@ public class VerificationToken {
 	public boolean isExpired() {
 		return this.expireDateTime.isBefore(LocalDateTime.now());
 	}
+	
+	@Override
+	public String toString() {
+		return "VerificationToken{id=" + id + ", token=" + token + ", expireDateTime=" + expireDateTime.toString() + ", passengerId=" + passenger.getId() + "}";
+	}
 }

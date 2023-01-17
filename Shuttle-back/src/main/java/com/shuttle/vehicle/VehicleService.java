@@ -102,6 +102,10 @@ public class VehicleService implements IVehicleService {
 		for(Driver activeDriver : activeDrivers) {
 			Vehicle vehicle = vehicleRepository.findByDriver(activeDriver);
 			
+			if (vehicle == null) {
+				continue;
+			}
+			
 			Location driverLocation = vehicle.getCurrentLocation();
 			Random r = new Random();
 			double incrementX = r.nextDouble(-0.001, 0.001);

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -128,7 +129,7 @@ public class RideController {
         route.setLocations(locations);
 
         Ride r = new Ride();
-        r.setStatus(Status.Pending);
+        r.setStatus(Status.PENDING);
         r.setTotalCost(cost);
         r.setDriver(driver);
         r.setVehicleType(vehicleType);
@@ -306,9 +307,9 @@ public class RideController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('admin', 'passenger')")
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @PostMapping
-    public ResponseEntity<?> createRide(@RequestBody CreateRideDTO createRideDTO) {
+    public ResponseEntity<?> createRide(@RequestBody(required=false) CreateRideDTO createRideDTO) {
     	LocalDateTime scheduledFor; 
     	try {
 			MyValidator.validateRequired(createRideDTO.getLocations(), "locations");
@@ -316,7 +317,7 @@ public class RideController {
 			MyValidator.validateRequired(createRideDTO.getVehicleType(), "vehicleType");
 			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "babyTransport");
 			MyValidator.validateRequired(createRideDTO.getBabyTransport(), "petTransport");
-			MyValidator.validateRequired(createRideDTO.getDistance(), "distance");
+			//MyValidator.validateRequired(createRideDTO.getDistance(), "distance");
 			
 			MyValidator.validateUserRef(createRideDTO.getPassengers(), "passengers");
 			MyValidator.validateRouteDTO(createRideDTO.getLocations(), "locations");
@@ -328,7 +329,10 @@ public class RideController {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}	
     	
-    	System.out.println("AAA " + createRideDTO.toString());
+    	if (createRideDTO.getDistance() == null) {
+    		createRideDTO.setDistance(404.0);    	
+    	}
+    	
     	try {
             final Passenger p = (Passenger)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
@@ -363,25 +367,24 @@ public class RideController {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
     	
-        final Driver driver = driverService.get(driverId);
-
-        if (driver == null) {
-            return new ResponseEntity<>("Driver not found.", HttpStatus.NOT_FOUND);
-        } 
-        
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-
         if (userService.isAdmin(user)) {
 	    } else if (userService.isDriver(user)) {
             if (user.getId() != driverId) {
                 return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
-            
-       Ride ride = rideService.findCurrentRideByDriver(driver);
-       if (ride == null) {
-           return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
-       }
+        
+        final Driver driver = driverService.get(driverId);
+
+		if (driver == null) {
+		    return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
+		} 
+  
+		Ride ride = rideService.findCurrentRideByDriver(driver);
+		if (ride == null) {
+			return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
+		}
        
        return new ResponseEntity<>(to(ride), HttpStatus.OK);
     }
@@ -393,12 +396,6 @@ public class RideController {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
         
-
-        final Passenger passenger = passengerService.findById(passengerId);
-        if (passenger == null) {
-            return new ResponseEntity<>("Passenger not found.", HttpStatus.NOT_FOUND);
-        }
-
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         if (userService.isAdmin(user)) {
 	    } else if (userService.isPassenger(user)) {
@@ -406,6 +403,12 @@ public class RideController {
                 return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
             }
         }
+
+        final Passenger passenger = passengerService.findById(passengerId);
+        if (passenger == null) {
+            return new ResponseEntity<>("Active ride does not exist!", HttpStatus.NOT_FOUND);
+        }
+
 
         Ride ride = rideService.findCurrentRideByPassenger(passenger);
         if (ride == null) {
@@ -463,7 +466,7 @@ public class RideController {
             }	
 	    }
 
-        if (ride.getStatus() != Status.Pending && ride.getStatus() != Status.Started) {
+        if (ride.getStatus() != Status.PENDING && ride.getStatus() != Status.STARTED) {
             return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't PENDING or STARTED."), HttpStatus.BAD_REQUEST);
         }
 
@@ -482,7 +485,7 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping("/{id}/panic")
-    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody PanicSendDTO reason) {   
+    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody(required=false) PanicSendDTO reason) {   
     	try {
 			MyValidator.validateRequired(reason.getReason(), "reason");
 		} catch (MyValidatorException e1) {
@@ -515,7 +518,7 @@ public class RideController {
         Panic p = panicService.add(ride, user, reason.getReason());
         PanicDTO dto = new PanicDTO();
         dto.setReason(p.getReason());
-        dto.setTime(p.getTime().toString());
+        dto.setTime(p.getTime().truncatedTo(ChronoUnit.SECONDS).toString());
         dto.setId(p.getId());
         dto.setRide(to(ride));
         dto.setUser(new UserDTONoPassword(p.getUser()));
@@ -545,7 +548,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Accepted) {
+        if (ride.getStatus() != Ride.Status.ACCEPTED) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot start a ride that is not in status ACCEPTED!"), HttpStatus.BAD_REQUEST);
         }
         
@@ -577,7 +580,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Pending) {
+        if (ride.getStatus() != Ride.Status.PENDING) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot accept a ride that is not in status PENDING!"), HttpStatus.BAD_REQUEST);
         }
 
@@ -609,7 +612,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Started) {
+        if (ride.getStatus() != Ride.Status.STARTED) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot end a ride that is not in status STARTED!"), HttpStatus.BAD_REQUEST);
         }
 
@@ -624,7 +627,7 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('driver')")
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
+    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody(required=false) CancellationBodyDTO reason) {
         if (id == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
@@ -641,7 +644,7 @@ public class RideController {
             }
         }
         
-        if (ride.getStatus() != Ride.Status.Pending && ride.getStatus() != Ride.Status.Accepted) {
+        if (ride.getStatus() != Ride.Status.PENDING && ride.getStatus() != Ride.Status.ACCEPTED) {
         	return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that is not in status PENDING or ACCEPTED!"), HttpStatus.BAD_REQUEST);
         }
 
@@ -657,7 +660,7 @@ public class RideController {
     
     @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
     @PostMapping("/favorites")
-    public ResponseEntity<?> createFavouriteRoute(@RequestBody FavoriteRouteDTO dto){
+    public ResponseEntity<?> createFavouriteRoute(@RequestBody(required=false) FavoriteRouteDTO dto){
 		try {
 			MyValidator.validateRequired(dto.getFavoriteName(), "favoriteName");
 			MyValidator.validateRequired(dto.getVehicleType(), "vehicleType");
@@ -685,6 +688,7 @@ public class RideController {
 		}
     }
     
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @GetMapping("/favorites")
     public ResponseEntity<?> getFavouriteRoutes(){
     	List<FavoriteRoute> favoriteRoutes = this.rideService.getFavouriteRoutes();
@@ -706,12 +710,13 @@ public class RideController {
     	
     }
     
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @DeleteMapping("/favorites/{id}")
     public ResponseEntity<?> deleteFavouriteRoute(@PathVariable long id){
     	try {
 			this.rideService.delete(id);
 		} catch (NonExistantFavoriteRoute e) {
-			return new ResponseEntity<RESTError>(new RESTError("Favorite route doesn't exist"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Favorite location does not exist!", HttpStatus.NOT_FOUND);
 		}
     	return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     	

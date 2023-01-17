@@ -107,7 +107,7 @@ public class UserController {
 			MyValidator.validateRequired(passwordDTO.getOldPassword(), "oldPassword");
 			
 			MyValidator.validatePattern(passwordDTO.getNewPassword(), "newPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
-			MyValidator.validatePattern(passwordDTO.getOldPassword(), "oldPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			//MyValidator.validatePattern(passwordDTO.getOldPassword(), "oldPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
@@ -137,7 +137,9 @@ public class UserController {
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
     
+  
     //@PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
+    @PermitAll
     @GetMapping("/{id}/resetPassword")
     public ResponseEntity<?> resetPasswordSendEmail(@PathVariable Long id) {
     	if (id == null) {
@@ -181,10 +183,10 @@ public class UserController {
     @PutMapping("/{id}/resetPassword")
     public ResponseEntity<?> resetPassword(@PathVariable Long id, @RequestBody PasswordResetCodeDTO dto) {
     	try {
-			MyValidator.validateRequired(dto.getNew_password(), "new_password");
+			MyValidator.validateRequired(dto.getNewPassword(), "newPassword");
 			MyValidator.validateRequired(dto.getCode(), "code");
 			
-			MyValidator.validatePattern(dto.getNew_password(), "new_password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
+			MyValidator.validatePattern(dto.getNewPassword(), "newPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
 			MyValidator.validatePattern(dto.getCode(), "code", "^[0-9]{1,6}$");
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
@@ -195,6 +197,7 @@ public class UserController {
 		}
     	
 		GenericUser u = userService.findById(id);	
+		System.out.println(id.toString() + " " + (u == null));
 		if (u == null) {
 			return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 		}
@@ -210,15 +213,16 @@ public class UserController {
 		List<PasswordResetCode> requests = passwordResetService.findByUserMaybeExpired(u);
 		PasswordResetCode req = requests.stream().filter(r -> r.getCode().equals(dto.getCode())).findFirst().orElse(null);
 
+		
 		if (req == null || !req.getActive() || req.getExpires().isBefore(LocalDateTime.now())) {
-			return new ResponseEntity<>("Code is expired or not correct!", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError("Code is expired or not correct!"), HttpStatus.BAD_REQUEST);
 		}
 		
 		for (PasswordResetCode pr : requests) {
 			passwordResetService.invalidate(pr);
 		}
 		
-		userService.changePassword(u, dto.getNew_password());
+		userService.changePassword(u, dto.getNewPassword());
 		
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
@@ -376,13 +380,13 @@ public class UserController {
 		}
     	
     	if (recieverId == null) {
-			return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
         }
 
         GenericUser sender = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         
         if (sender == null) {
-        	return new ResponseEntity<>("User does not exist.", HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
         }
         
         GenericUser reciever = null;
@@ -396,13 +400,13 @@ public class UserController {
         }
         
         if (reciever == null) {
-        	return new ResponseEntity<>("Receiver does not exist.", HttpStatus.NOT_FOUND);
+        	return new ResponseEntity<>("Receiver does not exist!", HttpStatus.NOT_FOUND);
         }
 
         Ride ride = rideService.findById(messageDTO.getRideId());
 
 		if (ride == null && messageDTO.getType() != Type.SUPPORT) {
-			return new ResponseEntity<>("Ride does not exist.", HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
 		}
 
         Message m = new Message(
@@ -432,7 +436,7 @@ public class UserController {
 		}
 		
 		if (u.getBlocked()) {
-			return new ResponseEntity<>(new RESTError("User is already blocked!"), HttpStatus.BAD_REQUEST);	
+			return new ResponseEntity<>(new RESTError("User already blocked!"), HttpStatus.BAD_REQUEST);	
 		}
 		
 		u = userService.setBlocked(u, true);

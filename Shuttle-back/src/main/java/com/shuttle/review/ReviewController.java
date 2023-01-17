@@ -94,7 +94,7 @@ public class ReviewController {
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
-	@PreAuthorize("hasAnyAuthority('admin', 'passenger')")
+	@PreAuthorize("hasAnyAuthority('passenger','admin', 'passenger')")
 	@PostMapping("/api/review/{rideId}/driver")
 	public ResponseEntity<?> leaveDriverRating(@PathVariable("rideId") Long rideId, @RequestBody ReviewMinimalDTO reviewDTO) {
 		try {
@@ -137,7 +137,7 @@ public class ReviewController {
 		return new ResponseEntity<ReviewDTO>(new ReviewDTO(review), HttpStatus.OK);
 	}
 	
-	@PreAuthorize("hasAnyAuthority('driver', 'admin')")
+	@PreAuthorize("hasAnyAuthority('passenger','driver', 'admin')")
 	@GetMapping("/api/review/vehicle/{id}")
 	public ResponseEntity<?> getVehicleRatings(@PathVariable("id") Long vehicleId) {	
 		if (vehicleId == null) {
@@ -164,7 +164,7 @@ public class ReviewController {
 		return new ResponseEntity<ReviewListDTO>(new ReviewListDTO(reviews), HttpStatus.OK);
 	}
 	
-	@PreAuthorize("hasAnyAuthority('driver', 'admin')")
+	@PreAuthorize("hasAnyAuthority('passenger','driver', 'admin')")
 	@GetMapping("/api/review/driver/{id}")
 	public ResponseEntity<?> getDriverRatings(@PathVariable("id") Long driverId) {
 		if (driverId == null) {

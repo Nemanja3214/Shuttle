@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +48,7 @@ public class VehicleController {
      * and availability.
      */
     @Scheduled(fixedDelay = 2000)
-    private void notifyVehicleLocations() {
+    public void notifyVehicleLocations() {
         final String dest = "/vehicle/locations";
         template.convertAndSend(dest, getAllActiveVehicleLocationsDTO());
     }
@@ -56,14 +57,14 @@ public class VehicleController {
      * Notify each driver about his vehicle location and availability.
      */
     @Scheduled(fixedDelay = 3000)
-    private void notifyVehicleLocation() {
+    public void notifyVehicleLocation() {
         for (Vehicle v : getAllActiveVehicles()) {
             final String dest = "/vehicle/locations/" + v.getDriver().getId();
             template.convertAndSend(dest, conv(v));
         }
     }
 
-    private void notifyPassengersVehicleArrived(Ride r) {
+    public void notifyPassengersVehicleArrived(Ride r) {
         for (Passenger p : r.getPassengers()) {
             final String dest = "/vehicle/arrived/" + p.getId();
             template.convertAndSend(dest, "true");
@@ -71,7 +72,7 @@ public class VehicleController {
     }
 
     @Scheduled(fixedDelay = 2000)
-    private void vehicleMovementSimulation() {
+    public void vehicleMovementSimulation() {
         // TODO: Batch update.
 
         for (Vehicle v : vehicleService.findAllCurrentlyActiveWhoseDriverCanWork()) {
@@ -80,11 +81,11 @@ public class VehicleController {
             } else {
                 final Ride r = rideService.findCurrentRideByDriver(v.getDriver());
                 if (r == null) {
-                    throw new IllegalStateException("Driver is ACTIVE and NOT AVAILABLE => He MUST have a ride");
+                    throw new IllegalStateException("Driver " + v.getDriver().getEmail() + " " + v.getDriver().getId() + " is ACTIVE and NOT AVAILABLE => He MUST have a ride");
                 }
 
                 Location target = r.getLocations().get(0);
-                if (r.getStatus() == Status.Accepted || r.getStatus() == Status.Started) {
+                if (r.getStatus() == Status.ACCEPTED || r.getStatus() == Status.STARTED) {
                     target = r.getLocations().get(r.getLocations().size() - 1);
                 }
 
@@ -124,7 +125,7 @@ public class VehicleController {
     }
 
 
-    private VehicleLocationDTO conv(Vehicle vehicle) {
+    public VehicleLocationDTO conv(Vehicle vehicle) {
         VehicleLocationDTO v = new VehicleLocationDTO();
         v.setId(vehicle.getId());
         v.setLocation(LocationDTO.from(vehicle.getCurrentLocation()));
@@ -133,6 +134,7 @@ public class VehicleController {
         return v;
     }
 
+    @PreAuthorize("hasAnyAuthority('driver')")
 	@PutMapping("/{id}/location")
 	public ResponseEntity<?> changeLocation(@PathVariable Long id, @RequestBody LocationDTO location) {
 		try {
@@ -174,7 +176,7 @@ public class VehicleController {
         return new ResponseEntity<>( result, HttpStatus.OK);
     }
 
-	
+	@PreAuthorize("hasAnyAuthority('driver','admin')")
 	@PostMapping
 	public ResponseEntity<VehicleDTO> createVehicle(@RequestBody VehicleDTO vehicleDTO) {
 		Vehicle vehicle = vehicleService.add(vehicleDTO);

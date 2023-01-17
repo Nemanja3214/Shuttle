@@ -105,6 +105,7 @@ public class DriverService implements IDriverService {
 		}catch (InvalidBase64Exception e) {
 //			Nothing just user has default picture
 		}
+		d.setEnabled(true);
 		d = driverRepository.save(d);
 		return d;
 	}
@@ -115,7 +116,7 @@ public class DriverService implements IDriverService {
 		d.setBlocked(false);
 		d.setEnabled(false);
 		d.setAvailable(false);
-		List<Role> driverRole = roleService.findByName("passenger");
+		List<Role> driverRole = roleService.findByName("driver");
 		d.setRoles(driverRole);
 		
 		String encodedPassword = passwordEncoder.encode(driverDTO.getPassword());

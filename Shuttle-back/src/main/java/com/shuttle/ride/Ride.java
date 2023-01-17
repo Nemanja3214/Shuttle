@@ -45,7 +45,7 @@ public class Ride {
     private Double totalLength;
 
     public enum Status {
-        Pending, Accepted, Started, Rejected, Canceled, Finished
+        PENDING, ACCEPTED, STARTED, REJECTED, CANCELED, FINISHED
     }
 
     public List<Location> getLocations() {

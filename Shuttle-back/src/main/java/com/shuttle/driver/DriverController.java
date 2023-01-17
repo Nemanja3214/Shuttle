@@ -157,7 +157,7 @@ public class DriverController {
         return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/api/driver/{id}")
     public ResponseEntity<?> updateDriver(@RequestBody DriverUpdateDTO dto, @PathVariable("id") Long id) {
     	try {

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -151,9 +152,9 @@ public class RideService implements IRideService {
         List<Driver> drivers = new ArrayList<>();
 
         for (Driver d : driverRepository.findAllActive()) {
-            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
-            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
-            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.Started);
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.PENDING);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
+            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.STARTED);
 
             if (pending.size() == 0 && accepted.size() == 0 && accepted.size() == 0)
             drivers.add(d);
@@ -165,9 +166,9 @@ public class RideService implements IRideService {
         List<Driver> drivers = new ArrayList<>();
         
         for (Driver d : driverRepository.findAllActive()) {
-            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
-            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
-            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.Started);
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.PENDING);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
+            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.STARTED);
 
             if (pending.size() == 0 && (accepted.size() > 0 || started.size() > 0))
             drivers.add(d);
@@ -227,7 +228,7 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride rejectRide(Ride ride, Cancellation cancellation) {
-		ride.setStatus(Status.Rejected);
+		ride.setStatus(Status.REJECTED);
         ride.setRejection(cancellation);
 		
 		ride = rideRepository.save(ride);
@@ -237,15 +238,15 @@ public class RideService implements IRideService {
 	@Override
 	public Ride findCurrentRideByDriver(Driver driver) {
 		List<Ride> li;
-		li = rideRepository.findByDriverAndStatus(driver, Status.Started);
+		li = rideRepository.findByDriverAndStatus(driver, Status.STARTED);
 		if (li.size() != 0) {
 			return li.get(0);
 		}
-		li = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
+		li = rideRepository.findByDriverAndStatus(driver, Status.ACCEPTED);
 		if (li.size() != 0) {
 			return li.get(0);
 		}
-		li = rideRepository.findByDriverAndStatus(driver, Status.Pending);
+		li = rideRepository.findByDriverAndStatus(driver, Status.PENDING);
 		if (li.size() != 0) {
 			return li.get(0);
 		}
@@ -256,11 +257,11 @@ public class RideService implements IRideService {
 	@Override
 	public Ride findCurrentRideByDriverStartedAccepted(Driver driver) {
 		List<Ride> li;
-		li = rideRepository.findByDriverAndStatus(driver, Status.Started);
+		li = rideRepository.findByDriverAndStatus(driver, Status.STARTED);
 		if (li.size() != 0) {
 			return li.get(0);
 		}
-		li = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
+		li = rideRepository.findByDriverAndStatus(driver, Status.ACCEPTED);
 		if (li.size() != 0) {
 			return li.get(0);
 		}
@@ -270,7 +271,7 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride acceptRide(Ride ride) {
-		ride.setStatus(Status.Accepted);
+		ride.setStatus(Status.ACCEPTED);
 
 		ride = rideRepository.save(ride);
 		return ride;
@@ -278,8 +279,8 @@ public class RideService implements IRideService {
 	
 	@Override
 	public Ride startRide(Ride ride) {
-		ride.setStatus(Status.Started);
-		ride.setStartTime(LocalDateTime.now());
+		ride.setStatus(Status.STARTED);
+		ride.setStartTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		ride = rideRepository.save(ride);
 		return ride;
@@ -288,8 +289,8 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride finishRide(Ride ride) {
-		ride.setStatus(Status.Finished);
-		ride.setEndTime(LocalDateTime.now());
+		ride.setStatus(Status.FINISHED);
+		ride.setEndTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		ride = rideRepository.save(ride);
 		return ride;
@@ -305,9 +306,9 @@ public class RideService implements IRideService {
         
         Ride bestOne = all.get(0);
         for (Ride r : all) {
-        	if (r.getStatus() == Status.Started) {
+        	if (r.getStatus() == Status.STARTED) {
         		bestOne = r;
-        	} else if (r.getStatus() == Status.Accepted && bestOne.getStatus() != Status.Started) {
+        	} else if (r.getStatus() == Status.ACCEPTED && bestOne.getStatus() != Status.STARTED) {
                 bestOne = r;
             }
         }
@@ -317,8 +318,8 @@ public class RideService implements IRideService {
 
     @Override
     public Ride cancelRide(Ride ride) {
-		ride.setStatus(Status.Canceled);
-		ride.setEndTime(LocalDateTime.now());
+		ride.setStatus(Status.CANCELED);
+		//ride.setEndTime(LocalDateTime.now());
 		
 		ride = rideRepository.save(ride);
 		return ride;
@@ -472,7 +473,7 @@ public class RideService implements IRideService {
      		Ride r = new Ride(null,
      				start, end,
      				new Random().nextDouble(30, 60),
-     				d, passengers, route, 12, false, false, vt, null, Status.Finished, LocalDateTime.now(), new Random().nextDouble(30, 100));
+     				d, passengers, route, 12, false, false, vt, null, Status.FINISHED, LocalDateTime.now(), new Random().nextDouble(30, 100));
      		this.rideRepository.save(r);
     	}
 		

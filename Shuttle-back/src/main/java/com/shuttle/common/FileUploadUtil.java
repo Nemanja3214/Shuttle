@@ -3,7 +3,9 @@ package com.shuttle.common;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -27,22 +29,41 @@ public class FileUploadUtil {
             Files.createDirectories(uploadPath);
         }
          
-        BufferedImage image = null;
         if(imageBase64 == null) {
         	return;
         }
-        byte[] imageByte = Base64.getDecoder().decode(imageBase64);
-        image = ImageIO.read(new ByteArrayInputStream(imageByte));
+        byte[] imageByte;
+        try {
+        	imageByte = Base64.getDecoder().decode(imageBase64);
+        }
+        catch (IllegalArgumentException e) {
+          	throw new InvalidBase64Exception();
+		}
         
-        File outputfile = new File(uploadDir + fileName);
-        if(image == null) {
+        if(!isImage(imageByte)) {
         	throw new InvalidBase64Exception();
         }
-        ImageIO.write(image, "png", outputfile);
+
+        try (OutputStream stream = new FileOutputStream(uploadDir + fileName + ".png")) {
+            stream.write(imageByte);
+        }
+        catch(Exception e) {
+        	throw new InvalidBase64Exception();
+        }
     }
 
+	private static boolean isImage(byte[] imageByte) {
+		BufferedImage image;
+		try {
+			 image = ImageIO.read(new ByteArrayInputStream(imageByte));
+		} catch (IOException e) {
+			return false;
+		}
+		return image != null;
+	}
+
 	public static String getImageBase64(String uploadDir,String pictureName) throws IOException, NonExistantImageException {
-		File inputFile = new File(uploadDir + pictureName);
+		File inputFile = new File(uploadDir + pictureName + ".png");
 		
 		byte[] fileContent;
 		try {
@@ -59,7 +80,7 @@ public class FileUploadUtil {
 	
 	public static String getDefaultImageBase64(){
 		try {
-			return getImageBase64(profilePictureUploadDir, "default.png");
+			return getImageBase64(profilePictureUploadDir, "default");
 		} catch (IOException | NonExistantImageException e) {
 			return null;
 		}
@@ -81,5 +102,4 @@ public class FileUploadUtil {
 		imageSize /= (1000 * 1000);
 		return imageSize;
 	}
-
 }
