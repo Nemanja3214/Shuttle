@@ -125,7 +125,7 @@ public class VehicleController {
     }
 
 
-    private VehicleLocationDTO conv(Vehicle vehicle) {
+    public VehicleLocationDTO conv(Vehicle vehicle) {
         VehicleLocationDTO v = new VehicleLocationDTO();
         v.setId(vehicle.getId());
         v.setLocation(LocationDTO.from(vehicle.getCurrentLocation()));
@@ -134,6 +134,7 @@ public class VehicleController {
         return v;
     }
 
+    @PreAuthorize("hasAnyAuthority('driver')")
 	@PutMapping("/{id}/location")
 	public ResponseEntity<?> changeLocation(@PathVariable Long id, @RequestBody LocationDTO location) {
 		try {
