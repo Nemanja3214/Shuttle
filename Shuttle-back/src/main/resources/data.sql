@@ -14,7 +14,7 @@ insert into role(name) values('admin');
 
 -- Elementary user data
 
-insert into generic_user(email, password, enabled, blocked, active, name) values ('bob@gmail.com', 'bob123', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('bob@gmail.com', 'bob123', true, false, true, 'Bob');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', 'john123', true, false, false, 'John');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'Troytroy123', true, false, false, 'Troy');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', 'admin', true, false, false, 'Admin');
