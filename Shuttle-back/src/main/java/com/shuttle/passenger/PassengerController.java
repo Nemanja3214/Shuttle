@@ -123,7 +123,7 @@ public class PassengerController {
 //	    	}
 //	    }
 		
-        return new ResponseEntity<>(new PassengerDTO(passenger), HttpStatus.OK);
+        return new ResponseEntity<>(new UserDTONoPassword(passenger), HttpStatus.OK);
 	}
 
 	@GetMapping("/activate/{activationId}")

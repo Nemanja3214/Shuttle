@@ -318,7 +318,7 @@ public class RideService implements IRideService {
     @Override
     public Ride cancelRide(Ride ride) {
 		ride.setStatus(Status.CANCELED);
-		ride.setEndTime(LocalDateTime.now());
+		//ride.setEndTime(LocalDateTime.now());
 		
 		ride = rideRepository.save(ride);
 		return ride;
