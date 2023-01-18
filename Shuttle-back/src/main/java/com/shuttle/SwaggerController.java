@@ -5,6 +5,7 @@ import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -16,7 +17,7 @@ public class SwaggerController {
     RoleService roleService;
     @Autowired
     UserService userService;
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping("/password-hash")
     public void index() {
         for (GenericUser user :
                 userService.findAll()) {
