@@ -36,12 +36,13 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable().authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); //will use email as username
-        http.addFilterBefore(new JwtRequestFilter(tokenUtils, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
-        http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint);
-        http.headers().frameOptions().disable();
-        return http.build();
+    	http.cors().and().csrf().disable();
+    	http.authorizeHttpRequests().requestMatchers("/*").permitAll().anyRequest().authenticated();
+    	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    	http.addFilterBefore(new JwtRequestFilter(tokenUtils, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
+    	http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint);
+    	http.headers().frameOptions().disable();
+    	return http.build();
     }
 
     @Bean
