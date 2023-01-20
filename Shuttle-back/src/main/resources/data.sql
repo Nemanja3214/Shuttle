@@ -19,7 +19,6 @@ insert into role(name) values('admin');
 -- john123
 -- Troytroy123
 -- admin
--- expired123
 -- 1234
 -- 1234
 -- 1234
@@ -39,11 +38,11 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver5@gmail.com', '$2a$10$ePVkPF/GxUI2V4kSi8qhi.hRlCX/h5CgZtpdOoy05btsgbfaaCNOC', true, false, false, 'DriverName_5');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver6@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'DriverName_6');
 
+
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
 insert into user_role(user_id, role_id) values (3, 1);
 insert into user_role(user_id, role_id) values (4, 3);
-insert into user_role(user_id, role_id) values (5, 1);
 
 insert into user_role(user_id, role_id) values (5, 2);
 insert into user_role(user_id, role_id) values (6, 2);
@@ -64,7 +63,6 @@ insert into driver(id, available, time_worked_today) values (10, true, 0);
 
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
-insert into passenger(id) values (5);
 
 -- Vehicle
 
@@ -83,10 +81,6 @@ insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transp
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(8, 5, 2, false, true, 5);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(9, 6, 1, false, false, 6);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(10, 7, 3, false, false, 7);
-
--- Expired token case for testing
-
-insert into verification_token(expire_date_time, token, passenger_id) values('2021-01-17 17:11:49.795',  'asdqwdwegegr', 5);
 
 -- insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
 -- insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
