@@ -245,7 +245,7 @@ public class RideController {
         final String dest = String.format("/ride/driver/%d", driverId.longValue());
 
         if (ride != null) {
-            if (ride.getDriver().isAvailable()) {
+            if (ride.getDriver().isAvailable() && ride.getStatus() == Ride.Status.STARTED) {
                 driverService.setAvailable(ride.getDriver(), false);
             }
             template.convertAndSend(dest, to(ride));
@@ -253,6 +253,7 @@ public class RideController {
             if (shouldNotifyPassengersOfThisRideForAnyChanges) {
                 notifyRidePassengers(ride);
             }
+        } else {
         }
     }
 
@@ -350,7 +351,7 @@ public class RideController {
             notifyRidePassengers(ride);
 
             if (driver != null) {
-                driverService.setAvailable(driver, false);
+                //driverService.setAvailable(driver, false);
                 notifyRideDriver(ride);
             }
 
@@ -466,8 +467,8 @@ public class RideController {
             }	
 	    }
 
-        if (ride.getStatus() != Status.PENDING && ride.getStatus() != Status.STARTED) {
-            return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't PENDING or STARTED."), HttpStatus.BAD_REQUEST);
+        if (ride.getStatus() != Status.PENDING && ride.getStatus() != Status.ACCEPTED) {
+            return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that isn't PENDING or ACCEPTED."), HttpStatus.BAD_REQUEST);
         }
 
         this.rideService.cancelRide(ride);
@@ -585,7 +586,7 @@ public class RideController {
         }
 
         rideService.acceptRide(ride);
-        driverService.setAvailable(ride.getDriver(), false);
+        //driverService.setAvailable(ride.getDriver(), false);
 
         notifyRidePassengers(ride);
         notifyRideDriver(ride);
