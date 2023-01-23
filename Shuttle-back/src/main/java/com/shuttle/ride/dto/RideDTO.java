@@ -28,4 +28,5 @@ public class RideDTO {
 	private CancellationDTO rejection;
 	private Ride.Status status;
 	private String scheduledTime;
+	private Double totalLength;
 }

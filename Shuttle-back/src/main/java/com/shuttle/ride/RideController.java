@@ -173,6 +173,7 @@ public class RideController {
         rideDTO.setPetTransport(ride.getPetTransport());
         rideDTO.setVehicleType(ride.getVehicleType().getName());
         rideDTO.setScheduledTime(ride.getScheduledTime() == null ? null : ride.getScheduledTime().toString());
+        rideDTO.setTotalLength(ride.getTotalLength());
         
         if (ride.getRejection() != null) {
             rideDTO.setRejection(new CancellationDTO(ride.getRejection()));
