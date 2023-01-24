@@ -42,11 +42,10 @@ public class Ride {
     private Cancellation rejection;
     private Status status;
     private LocalDateTime scheduledTime; // Can be null.
+    private Double totalLength;
 
     public enum Status {
-        Pending, Accepted, Rejected, Canceled, Finished, Started
-        // TODO: Started - why?! For now it's mock-added as a response.
-        // Don't use the /start end-point.
+        PENDING, ACCEPTED, STARTED, REJECTED, CANCELED, FINISHED
     }
 
     public List<Location> getLocations() {

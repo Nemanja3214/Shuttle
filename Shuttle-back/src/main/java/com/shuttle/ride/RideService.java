@@ -1,13 +1,19 @@
 package com.shuttle.ride;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.TimeZone;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +30,7 @@ import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.IFavouriteRouteRepository;
 import com.shuttle.location.ILocationRepository;
 import com.shuttle.location.Location;
+import com.shuttle.location.Route;
 import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
@@ -32,6 +39,7 @@ import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
@@ -98,23 +106,23 @@ public class RideService implements IRideService {
 
         VehicleType vt = vehicleService.findVehicleTypeByName(createRideDTO.getVehicleType()).orElse(null);
 
-        final List<Driver> noPendingNoAccepted = findDriversWithNoPendingNoAccepted().stream()
+        final List<Driver> noPendingNoAcceptedNoStarted = findDriversWithNoPendingNoAcceptedNoStarted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
             .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
-        final List<Driver> noPendingYesAccepted = findDriversWithNoPendingYesAccepted().stream()
+        final List<Driver> noPendingYesAcceptedOrStarted = findDriversWithNoPendingYesAcceptedOrStarted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
             .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
 
-        if (noPendingNoAccepted.size() > 0) {
+        if (noPendingNoAcceptedNoStarted.size() > 0) {
             // Find nearest one.
-            return findNearestDriver(noPendingNoAccepted, createRideDTO.getLocations().get(0).getDeparture());
-        } else if (noPendingYesAccepted.size() > 0) {
+            return findNearestDriver(noPendingNoAcceptedNoStarted, createRideDTO.getLocations().get(0).getDeparture());
+        } else if (noPendingYesAcceptedOrStarted.size() > 0) {
             // Find the one that'll finish soon.
-            return findDriverAvailableMostSoon(noPendingYesAccepted);
+            return findDriverAvailableMostSoon(noPendingYesAcceptedOrStarted);
         } else {
-            // All logged in drivers have a pending ride. They are busy with a future ride.
+            // All logged in drivers have a current ride and a pending ride.
             throw new NoAvailableDriverException();
         }
     }
@@ -140,39 +148,35 @@ public class RideService implements IRideService {
         return true;
     }
 
-    /**
-     * @return Logged-in drivers with no pending rides and no accepted rides.  
-     */
-    private List<Driver> findDriversWithNoPendingNoAccepted() {
+    private List<Driver> findDriversWithNoPendingNoAcceptedNoStarted() {
         List<Driver> drivers = new ArrayList<>();
 
         for (Driver d : driverRepository.findAllActive()) {
-            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
-            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.PENDING);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
+            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.STARTED);
 
-            if (pending.size() == 0 && accepted.size() == 0)
+            if (pending.size() == 0 && accepted.size() == 0 && accepted.size() == 0)
             drivers.add(d);
         }	
     	return drivers;        
     }
 
-    /**
-     * @return Logged-in drivers with no pending rides but with accepted rides.  
-     */
-    private List<Driver> findDriversWithNoPendingYesAccepted() {
+    private List<Driver> findDriversWithNoPendingYesAcceptedOrStarted() {
         List<Driver> drivers = new ArrayList<>();
         
         for (Driver d : driverRepository.findAllActive()) {
-            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.Pending);
-            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.Accepted);
+            final List<Ride> pending = rideRepository.findByDriverAndStatus(d, Status.PENDING);
+            final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
+            final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.STARTED);
 
-            if (pending.size() == 0 && accepted.size() > 0)
+            if (pending.size() == 0 && (accepted.size() > 0 || started.size() > 0))
             drivers.add(d);
         }	
     	return drivers;        
     }
 
-    
+   
     /**
      * 
      * @param drivers List of drivers from which to pick.
@@ -206,13 +210,13 @@ public class RideService implements IRideService {
 
     /**
      * 
-     * @param drivers List of drivers from which to pick. They *must* all have an ACCEPTED ride.
+     * @param drivers List of drivers from which to pick. They *must* all have an ACCEPTED or STARTED ride.
      * @return Driver who will finish the current ride the soonest.
      */
     private Driver findDriverAvailableMostSoon(List<Driver> drivers) {
         return drivers.stream().sorted((d1, d2) -> {
-            final LocalDateTime ldt1 = findCurrentRideByDriverInProgress(d1).getEstimatedEndTime();
-            final LocalDateTime ldt2 = findCurrentRideByDriverInProgress(d2).getEstimatedEndTime();
+            final LocalDateTime ldt1 = findCurrentRideByDriverStartedAccepted(d1).getEstimatedEndTime();
+            final LocalDateTime ldt2 = findCurrentRideByDriverStartedAccepted(d2).getEstimatedEndTime();
             return ldt1.compareTo(ldt2);
         }).findFirst().get();
     }
@@ -224,7 +228,7 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride rejectRide(Ride ride, Cancellation cancellation) {
-		ride.setStatus(Status.Rejected);
+		ride.setStatus(Status.REJECTED);
         ride.setRejection(cancellation);
 		
 		ride = rideRepository.save(ride);
@@ -233,24 +237,33 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride findCurrentRideByDriver(Driver driver) {
-		List<Ride> accepted = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
-		List<Ride> pending = rideRepository.findByDriverAndStatus(driver, Status.Pending);
-	
-        if (accepted.size() != 0) {
-			return accepted.get(0);
+		List<Ride> li;
+		li = rideRepository.findByDriverAndStatus(driver, Status.STARTED);
+		if (li.size() != 0) {
+			return li.get(0);
 		}
-		if (pending.size() != 0) {
-			return pending.get(0);
+		li = rideRepository.findByDriverAndStatus(driver, Status.ACCEPTED);
+		if (li.size() != 0) {
+			return li.get(0);
+		}
+		li = rideRepository.findByDriverAndStatus(driver, Status.PENDING);
+		if (li.size() != 0) {
+			return li.get(0);
 		}
 		
 		return null;
 	}
 
 	@Override
-	public Ride findCurrentRideByDriverInProgress(Driver driver) {
-		List<Ride> active = rideRepository.findByDriverAndStatus(driver, Status.Accepted);
-		if (active.size() != 0) {
-			return active.get(0);
+	public Ride findCurrentRideByDriverStartedAccepted(Driver driver) {
+		List<Ride> li;
+		li = rideRepository.findByDriverAndStatus(driver, Status.STARTED);
+		if (li.size() != 0) {
+			return li.get(0);
+		}
+		li = rideRepository.findByDriverAndStatus(driver, Status.ACCEPTED);
+		if (li.size() != 0) {
+			return li.get(0);
 		}
 		
 		return null;
@@ -258,32 +271,44 @@ public class RideService implements IRideService {
 
 	@Override
 	public Ride acceptRide(Ride ride) {
-		ride.setStatus(Status.Accepted);
-		ride.setStartTime(LocalDateTime.now());
+		ride.setStatus(Status.ACCEPTED);
+
+		ride = rideRepository.save(ride);
+		return ride;
+	}
+	
+	@Override
+	public Ride startRide(Ride ride) {
+		ride.setStatus(Status.STARTED);
+		ride.setStartTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		ride = rideRepository.save(ride);
 		return ride;
 	}
 
+
 	@Override
 	public Ride finishRide(Ride ride) {
-		ride.setStatus(Status.Finished);
-		ride.setEndTime(LocalDateTime.now());
+		ride.setStatus(Status.FINISHED);
+		ride.setEndTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
 		ride = rideRepository.save(ride);
 		return ride;
 	}
 
     @Override
-    public Ride findActiveOrPendingByPassenger(Passenger passenger) {
-        List<Ride> all = rideRepository.findActiveOrPendingByPassengerId(passenger.getId());
+    public Ride findCurrentRideByPassenger(Passenger passenger) {
+        List<Ride> all = rideRepository.findStartedAcceptedPendingByPassenger(passenger.getId());
         if (all.size() == 0) {
             return null;
         }
         
+        
         Ride bestOne = all.get(0);
         for (Ride r : all) {
-            if (r.getStatus() == Status.Accepted) {
+        	if (r.getStatus() == Status.STARTED) {
+        		bestOne = r;
+        	} else if (r.getStatus() == Status.ACCEPTED && bestOne.getStatus() != Status.STARTED) {
                 bestOne = r;
             }
         }
@@ -293,8 +318,8 @@ public class RideService implements IRideService {
 
     @Override
     public Ride cancelRide(Ride ride) {
-		ride.setStatus(Status.Canceled);
-		ride.setEndTime(LocalDateTime.now());
+		ride.setStatus(Status.CANCELED);
+		//ride.setEndTime(LocalDateTime.now());
 		
 		ride = rideRepository.save(ride);
 		return ride;
@@ -411,4 +436,81 @@ public class RideService implements IRideService {
 		
 	}
 
+	@Override
+	public List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId) throws NonExistantUserException {
+		if(!this.passengerRepository.existsById(passengerId)) {
+			throw new NonExistantUserException();
+		}
+		return this.rideRepository.getPassengerGraphData(start, end, passengerId);
+	}
+	
+	@Override
+	public List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId) throws NonExistantUserException {
+		if(!this.driverRepository.existsById(driverId)) {
+			throw new NonExistantUserException();
+		}
+		return this.rideRepository.getDriverGraphData(start, end, driverId);
+	}
+
+
+	@Override
+	public void generate(Long driverId, Long passengerId) {
+    	for(int i = 0; i < 10; ++i) {
+            LocalDateTime start = generateDateTime(true);
+            LocalDateTime end = generateDateTime(false);            
+            Driver d = this.driverRepository.findById(driverId).get();
+            Passenger p = this.passengerRepository.findById(passengerId).get();
+            
+            List<Passenger> passengers = new ArrayList<>();
+            passengers.add(p);
+            
+            Route route = new Route();
+            List<Location> locations = new ArrayList<>();
+            route.setLocations(locations);
+            
+            VehicleType vt = vehicleTypeRepository.findVehicleTypeByNameIgnoreCase("standard").get();
+            
+     		Ride r = new Ride(null,
+     				start, end,
+     				new Random().nextDouble(30, 60),
+     				d, passengers, route, 12, false, false, vt, null, Status.FINISHED, LocalDateTime.now(), new Random().nextDouble(30, 100));
+     		this.rideRepository.save(r);
+    	}
+		
+	}
+    
+    private LocalDateTime generateDateTime(boolean isStart) {
+		Calendar calendar = Calendar.getInstance();
+        TimeZone tz = calendar.getTimeZone();
+        ZoneId zoneId = tz.toZoneId();     
+        
+        calendar.add(Calendar.DAY_OF_MONTH, -10);
+        LocalDate lowerBound = LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
+        
+        calendar.add(Calendar.DAY_OF_MONTH, 20);
+        LocalDate upperBound= LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
+        
+        if(isStart) {
+        	return between(lowerBound, LocalDate.now());
+        }
+        else {
+        	return between(LocalDate.now(), upperBound);
+        }
+	}
+
+	public static LocalDateTime between(LocalDate startInclusive, LocalDate endExclusive) {
+        long startEpochDay = startInclusive.toEpochDay();
+        long endEpochDay = endExclusive.toEpochDay();
+        long randomDay = ThreadLocalRandom
+          .current()
+          .nextLong(startEpochDay, endEpochDay);
+
+        return LocalDate.ofEpochDay(randomDay).atStartOfDay();
+    }
+    
+
+	@Override
+	public List<Ride> findAll() {
+		return this.rideRepository.findAll();
+	}
 }

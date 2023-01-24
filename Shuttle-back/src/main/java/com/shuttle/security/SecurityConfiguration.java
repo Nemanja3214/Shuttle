@@ -36,13 +36,14 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); //will use email as username
-        http.addFilterBefore(new JwtRequestFilter(tokenUtils, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
-        http.headers().frameOptions().disable();
-        return http.build();
+    	http.cors().and().csrf().disable();
+    	http.authorizeHttpRequests().requestMatchers("/*").permitAll().anyRequest().authenticated();
+    	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    	http.addFilterBefore(new JwtRequestFilter(tokenUtils, userDetailsService()), UsernamePasswordAuthenticationFilter.class);
+    	http.exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint);
+    	http.headers().frameOptions().disable();
+    	return http.build();
     }
-
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -76,9 +77,9 @@ public class SecurityConfiguration {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
 
-        return (web) -> web.ignoring().requestMatchers(HttpMethod.POST, "/api/user/login")
+        return (web) -> web.ignoring().requestMatchers(HttpMethod.POST, "/api/user/login","/api/unregisteredUser/**", "/api/passenger", "/h2-console/**")
                 .requestMatchers(HttpMethod.GET, "/**","/", "/webjars/**", "/*.html", "favicon.ico",
-                        "/**/*.html", "/**/*.css", "/**/*.js");
+                        "/**/*.html", "/**/*.css", "/**/*.js", "/h2-console/**");
 
     }
 

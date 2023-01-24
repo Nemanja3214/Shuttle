@@ -134,7 +134,7 @@ public class DriverController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('driver', 'admin', 'passenger')")
     @GetMapping("/api/driver/{id}")
     public ResponseEntity<?> getDriverDetails(@PathVariable("id") Long id) {
     	if (id == null) {
@@ -148,7 +148,7 @@ public class DriverController {
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
-		} else {
+		} else if (userService.isDriver(user____)) {
 	    	if (!driver.getId().equals(user____.getId())) {
                 return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
@@ -157,7 +157,7 @@ public class DriverController {
         return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/api/driver/{id}")
     public ResponseEntity<?> updateDriver(@RequestBody DriverUpdateDTO dto, @PathVariable("id") Long id) {
     	try {

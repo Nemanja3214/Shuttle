@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.passenger.Passenger;
+import com.shuttle.ride.dto.GraphEntryDTO;
 
 public interface IRideRepository extends JpaRepository<Ride, Long> {
     public List<Ride> findByDriverAndStatus(Driver driver, Ride.Status status);
@@ -18,8 +19,8 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     public Page<Ride> getAllBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long driverId, Pageable pageable);
 
     // If Ride::Status is stored as an int, it must be an int here, too.
-    @Query(value = "from Ride r join r.passengers plist where plist.id = :passengerId and r.status in (0, 1)")
-    public List<Ride> findActiveOrPendingByPassengerId(Long passengerId);
+    @Query(value = "from Ride r join r.passengers plist where plist.id = :passengerId and r.status in (0, 1, 2)")
+    public List<Ride> findStartedAcceptedPendingByPassenger(Long passengerId);
 
     /**
      * @return List of Ride objects whose Driver is null.
@@ -37,4 +38,20 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     
     @Query(value = "from Ride r where (:passenger) IN elements(r.passengers) and ( r.endTime BETWEEN :startDate AND :endDate )")
     public List<Ride> getAllByPassengerAndBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Passenger passenger, Pageable pageable);
+
+    @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
+    		+ " FROM Ride r JOIN r.passengers p"
+    		+ " WHERE (:passengerId) = p.id"
+    		+ " AND (r.endTime BETWEEN :start AND :end )"
+    		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
+    		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
+	public List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId);
+    
+    @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
+    		+ " FROM Ride r JOIN r.driver d"
+    		+ " WHERE (:driverId) = d.id"
+    		+ " AND (r.endTime BETWEEN :start AND :end )"
+    		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
+    		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
+	public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId);
 }

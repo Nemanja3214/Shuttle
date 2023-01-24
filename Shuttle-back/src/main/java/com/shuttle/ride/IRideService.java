@@ -1,7 +1,9 @@
 package com.shuttle.ride;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +17,7 @@ import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
@@ -36,20 +39,26 @@ public interface IRideService {
 	Driver findMostSuitableDriver(CreateRideDTO createRideDTO, boolean forFuture) throws NoAvailableDriverException;
 	
 	/**
-	 * Find ride which is either ACCEPTED or PENDING for this driver.
-	 * Searching is done in the order above with short circuiting.
+     * Find STARTED->ACCEPTED->PENDING ride from the driver.
 	 * @param driver The driver.
 	 * @return The ride or null if none found.
 	 */
 	Ride findCurrentRideByDriver(Driver driver);
 	
 	/**
-	 * Find ride of this driver that's ACTIVE.
-	 * This is a subset of findCurrentRideByDriver
+	 * Find ride of this driver that's STARTED->ACCEPTED.
 	 * @param driver The driver.
 	 * @return The ride or null if none found.
 	 */
-	Ride findCurrentRideByDriverInProgress(Driver driver);
+	Ride findCurrentRideByDriverStartedAccepted(Driver driver);
+
+    /**
+     * Find STARTED->ACCEPTED->PENDING ride from the passenger.
+     * @param passenger The passenger. Must not be null.
+     * @return The ride or null.
+     */
+    Ride findCurrentRideByPassenger(Passenger passenger);
+
 	
 	/**
 	 * Returns the ride from the given ID.
@@ -87,14 +96,13 @@ public interface IRideService {
      * @return The ride.
      */
     Ride cancelRide(Ride ride);
-
+    
     /**
-     * Find PENDING or ACCEPTED Ride from the provided passenger.
-     * If both exist, ACCEPTED is given priority.
-     * @param passenger The passenger. Must not be null.
-     * @return The ride or null.
+     * Start the ride.
+     * @param ride The ride that's started.
+     * @return The ride.
      */
-    Ride findActiveOrPendingByPassenger(Passenger passenger);
+    Ride startRide(Ride ride);
 
     /**
      * Find all rides whose driver is null (scheduled in the future).
@@ -129,17 +137,24 @@ public interface IRideService {
      * @return List of rides.
      */
 	List<Ride> findByUser(GenericUser user, Pageable pageable, LocalDateTime from, LocalDateTime to);
+	
 	List<Ride> findRidesByPassengerInDateRange(Long passengerId, String from, String to, Pageable pageable) throws NonExistantUserException;
 
-	FavoriteRoute createFavoriteRoute(FavoriteRouteDTO dto, long favLimit)
-			throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded;
-
+	FavoriteRoute createFavoriteRoute(FavoriteRouteDTO dto, long favLimit) throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded;
 	List<FavoriteRoute> getFavouriteRoutes();
-
-	void delete(long id) throws NonExistantFavoriteRoute;
-
 	List<FavoriteRoute> getFavouriteRoutesByPassengerId(long passengerId) throws NonExistantUserException;
-
+	// TODO: Rename to deleteFavoriteRoute().
+	void delete(long id) throws NonExistantFavoriteRoute;
 	void delete(List<Long> routesToDelete) throws NonExistantFavoriteRoute;
 
+	List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId)
+			throws NonExistantUserException;
+
+	List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId)
+			throws NonExistantUserException;
+
+	void generate(Long driverId, Long passengerId);
+
+//	TODO remove
+	List<Ride> findAll();
 }

@@ -1,6 +1,7 @@
 package com.shuttle.review.dto;
 
 import com.shuttle.review.Review;
+import com.shuttle.user.dto.BasicUserInfoDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +12,8 @@ public class ReviewDTO {
 	private Long id;
 	private Integer rating;
 	private String comment;
-	private ReviewPassengerDTO passenger;
-	
+	private BasicUserInfoDTO passenger;
+
 	public ReviewDTO(Review r) {
 		if (r == null) {
 			return;
@@ -20,6 +21,6 @@ public class ReviewDTO {
 		this.id = r.getId();
 		this.rating = r.getRating();
 		this.comment = r.getComment();
-		this.passenger = new ReviewPassengerDTO(r.getPassenger());
+		this.passenger = new BasicUserInfoDTO(r.getPassenger());
 	}
 }

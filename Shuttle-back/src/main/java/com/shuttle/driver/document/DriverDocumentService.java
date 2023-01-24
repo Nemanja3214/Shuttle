@@ -41,6 +41,7 @@ public class DriverDocumentService implements IDriverDocumentService {
 		
 		String uploadPath = FileUploadUtil.documentPictureUploadDir + driver.getFolderName() + "/";
 		File f = new File(uploadPath);
+		
 		FileUploadUtil.saveFile(uploadPath, driverDocumentDTO.getName(), driverDocumentDTO.getDocumentImage());
 		
 		doc.setName(driverDocumentDTO.getName());

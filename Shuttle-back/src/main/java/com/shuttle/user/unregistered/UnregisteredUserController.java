@@ -1,5 +1,6 @@
 package com.shuttle.user.unregistered;
 
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -21,7 +22,8 @@ import com.shuttle.util.MyValidatorException;
 public class UnregisteredUserController {
 	@Autowired
 	private IUnregisteredUserService unregiteredUserService;
-	
+
+	@PermitAll
 	@PostMapping
 	public ResponseEntity<?> getEstimatedRide(@RequestBody CreateRideEstimationDTO rideDTO) {
 		try {
