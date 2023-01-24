@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import com.shuttle.security.jwt.JwtTokenUtil;
+import com.shuttle.security.jwt.TokenBasedAuthentication;
+import com.shuttle.user.dto.UserDTONoPassword;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,6 +66,9 @@ public class PassengerController {
 	IRideService rideService;
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	JwtTokenUtil jwtTokenUtil;
 	
 	@PermitAll
 	@PostMapping
