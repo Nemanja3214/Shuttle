@@ -625,4 +625,13 @@ public class DriverController {
 		ListDTO<RideDTO> ridesDTO = new ListDTO<>(rides.stream().map(r -> RideController.to(r)).toList());
         return new ResponseEntity<>(ridesDTO, HttpStatus.OK);
     }
+	@PreAuthorize("hasAnyAuthority('driver', 'admin')")
+	@GetMapping("/api/driver/{id}/stats")
+	public ResponseEntity<?> getDriverStats(@PathVariable Long id,@RequestParam String scope){
+		Driver d = driverService.get(id);
+		if (d == null) {
+			return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(driverService.getDriverStatistics(d,scope),HttpStatus.OK);
+	}
 }

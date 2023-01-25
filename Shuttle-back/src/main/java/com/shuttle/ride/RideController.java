@@ -772,7 +772,7 @@ public class RideController {
 			List<GraphEntryDTO>result = this.rideService.getDrivertGraphData(tFrom, tTo, driverId);
 			return new ResponseEntity<List<GraphEntryDTO>>(result, HttpStatus.OK);
 		} catch (NonExistantUserException e) {
-			return new ResponseEntity<RESTError>(new RESTError("Passenger with that id doesn't exist"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError("Driver with that id doesn't exist"), HttpStatus.NOT_FOUND);
 		}
     }
     
