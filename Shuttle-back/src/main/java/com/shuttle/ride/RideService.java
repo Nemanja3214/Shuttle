@@ -445,7 +445,7 @@ public class RideService implements IRideService {
 	}
 	
 	@Override
-	public List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId) throws NonExistantUserException {
+	public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId) throws NonExistantUserException {
 		if(!this.driverRepository.existsById(driverId)) {
 			throw new NonExistantUserException();
 		}
