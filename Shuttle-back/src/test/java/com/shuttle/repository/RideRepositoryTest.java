@@ -82,7 +82,6 @@ public class RideRepositoryTest {
 	}
 	
 	@Test
-	@Sql("classpath:test-data-1.sql")
 	public void findById_works() {
 		Optional<Ride> ride = rideRepository.findById(1L);
 		assertThat(ride).isNotEmpty();
