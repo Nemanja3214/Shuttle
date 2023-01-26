@@ -769,10 +769,10 @@ public class RideController {
 			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
 		}
 		try {
-			List<GraphEntryDTO>result = this.rideService.getDrivertGraphData(tFrom, tTo, driverId);
+			List<GraphEntryDTO>result = this.rideService.getDriverGraphData(tFrom, tTo, driverId);
 			return new ResponseEntity<List<GraphEntryDTO>>(result, HttpStatus.OK);
 		} catch (NonExistantUserException e) {
-			return new ResponseEntity<RESTError>(new RESTError("Passenger with that id doesn't exist"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError("Driver with that id doesn't exist"), HttpStatus.NOT_FOUND);
 		}
     }
     

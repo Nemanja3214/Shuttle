@@ -147,7 +147,7 @@ public interface IRideService {
 	void delete(long id) throws NonExistantFavoriteRoute;
 	void delete(List<Long> routesToDelete) throws NonExistantFavoriteRoute;
 
-	List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId)
+	List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId)
 			throws NonExistantUserException;
 
 	List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId)
