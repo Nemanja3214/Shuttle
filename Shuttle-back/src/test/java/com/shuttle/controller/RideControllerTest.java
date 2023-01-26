@@ -1,81 +1,103 @@
 package com.shuttle.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-import com.shuttle.driver.Driver;
-import com.shuttle.driver.IDriverService;
-import com.shuttle.location.ILocationService;
-import com.shuttle.panic.IPanicService;
-import com.shuttle.passenger.IPassengerRepository;
-import com.shuttle.passenger.IPassengerService;
-import com.shuttle.ride.IRideService;
-import com.shuttle.ride.Ride;
-import com.shuttle.ride.RideController;
-import com.shuttle.ride.cancellation.ICancellationService;
-import com.shuttle.security.contextfetcher.IUserContextFetcher;
-import com.shuttle.security.jwt.JwtTokenUtil;
-import com.shuttle.user.UserService;
-import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import com.shuttle.credentials.dto.CredentialsDTO;
+import com.shuttle.credentials.dto.TokenDTO;
 
-@WebMvcTest(RideController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
+@ExtendWith(SpringExtension.class)
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@TestInstance(Lifecycle.PER_CLASS)
 public class RideControllerTest {
-    @MockBean
-    private IRideService rideService;
-    @MockBean
-    private IDriverService driverService;
-    @MockBean
-    private IVehicleTypeRepository vehicleTypeRepository;
-    @MockBean
-    private IPassengerRepository passengerRepository;
-    @MockBean
-    private ILocationService locationService;
-    @MockBean
-    private ICancellationService cancellationService;
-    @MockBean
-    private SimpMessagingTemplate template;
-    @MockBean
-    private IPassengerService passengerService;
-    @MockBean
-    private IPanicService panicService;
-    @MockBean
-    private UserService userService;
-    @MockBean
-    private IUserContextFetcher userContextFetcher;
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
-    
-    @Autowired
-    private MockMvc mockMvc;
-
-    
-    @Test
-    @DisplayName("Accept ride that is pending")
-    @WithMockUser(roles = "admin")
-    public void acceptRide_isPending() throws Exception {
-    	final long DRIVER_ID = 1;
-    	final Driver driver = MockProvider.driver(DRIVER_ID, "bob@gmail.com", UserService.ROLE_DRIVER);
-    
-    	final long RIDE_ID = 1;
-    	final Ride.Status RIDE_STATUS = Ride.Status.PENDING;
-    	Ride ride = MockProvider.rideBase(RIDE_ID, RIDE_STATUS);
-    	ride.setDriver(driver);
-    	
-    	Mockito.when(userService.isDriver(driver)).thenReturn(true);
-    	Mockito.when(userContextFetcher.getUserFromContext()).thenReturn(driver);
-    	Mockito.when(rideService.findById(RIDE_ID)).thenReturn(ride);
-    	
-    	mockMvc.perform(put("/api/ride/{id}/accept", RIDE_ID)).andDo(print());
-    }
+	@Autowired
+	private TestRestTemplate restTemplate;
+	
+	private String JWT_DRIVER = "";
+	private String JWT_PASSENGER = "";
+	
+	private HttpHeaders getHeader(String jwt) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		if (jwt != null) {
+			headers.setBearerAuth(jwt);
+		}
+		
+		return headers;
+	}
+	
+	@BeforeAll
+	public void setup() {
+		login();
+		
+		assertNotNull(JWT_DRIVER);
+		assertNotNull(JWT_PASSENGER);
+	}
+	
+	public void login() {
+		final String URL = "/api/user/login";
+		CredentialsDTO payload = null;
+		HttpEntity<CredentialsDTO> requestBody = null;
+		ResponseEntity<TokenDTO> response = null;
+		
+		payload = new CredentialsDTO("bob@gmail.com", "bob123");
+		requestBody = new HttpEntity<CredentialsDTO>(payload, getHeader(null));
+		response = restTemplate.exchange(
+				URL, 
+				HttpMethod.POST,
+				requestBody,
+				new ParameterizedTypeReference<TokenDTO>() {}
+		);
+		JWT_DRIVER = response.getBody().getAccessToken();
+		
+		payload = new CredentialsDTO("john@gmail.com", "john123");
+		requestBody = new HttpEntity<CredentialsDTO>(payload, getHeader(null));
+		response = restTemplate.exchange(
+				URL, 
+				HttpMethod.POST,
+				requestBody,
+				new ParameterizedTypeReference<TokenDTO>() {}
+		);
+		JWT_PASSENGER = response.getBody().getAccessToken();
+	}
+	
+	@ParameterizedTest
+	@ValueSource(longs = {-74389, -1, 0, 38923829})
+	public void acceptRide_noRide(Long rideId) {
+		final String URL = "/api/ride/{id}/accept";
+		HttpEntity<Void> requestBody = new HttpEntity<Void>((Void)(null), getHeader(JWT_DRIVER));
+		
+		ResponseEntity<String> response = restTemplate.exchange(
+				URL,
+				HttpMethod.PUT,
+				requestBody,
+				new ParameterizedTypeReference<String>() {},
+				rideId
+		);
+		
+		assertEquals(response.getStatusCode(), HttpStatus.NOT_FOUND);
+		assertEquals(response.getBody(), "Ride does not exist!");
+	}
 }
