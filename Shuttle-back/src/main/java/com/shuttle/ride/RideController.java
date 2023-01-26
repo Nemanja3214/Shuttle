@@ -64,6 +64,7 @@ import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.security.contextfetcher.IUserContextFetcher;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
 import com.shuttle.user.dto.UserDTONoPassword;
@@ -95,6 +96,9 @@ public class RideController {
     private IPanicService panicService;
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private IUserContextFetcher userContextFetcher;
 
     /**
      * DTO Mapper function.
@@ -581,7 +585,10 @@ public class RideController {
         	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
         }
         
-        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        final GenericUser user = userContextFetcher.getUserFromContext();
+        //(GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        System.out.println(user.getEmail());
+        
         if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
             	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);

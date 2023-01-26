@@ -2,11 +2,16 @@ package com.shuttle.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
 import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serial;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Role implements GrantedAuthority {
 
 
