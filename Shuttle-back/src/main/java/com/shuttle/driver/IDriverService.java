@@ -3,6 +3,7 @@ package com.shuttle.driver;
 import java.util.List;
 import java.util.Optional;
 
+import com.shuttle.driver.dto.DriverStatDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
@@ -36,12 +37,12 @@ public interface IDriverService {
         
     /**
      * Check if driver worked more than 8 hours in the last 24 hours.
-     * @param driver The driver
+     * @param d The driver
      * @return True if so.
      */
     public boolean workedMoreThan8Hours(Driver d);
     
 	public List<Driver> findAll(Pageable pageable);
 	public Driver update(Driver driver, DriverUpdateDTO dto) throws IOException;
-	
+	DriverStatDTO getDriverStatistics(Driver driver, String scope);
 }
