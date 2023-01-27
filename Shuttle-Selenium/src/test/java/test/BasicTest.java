@@ -21,8 +21,7 @@ public class BasicTest {
 	
 	@BeforeAll
 	public void init() {
-		DriverSetup.useEdge();
-		webdriver = new EdgeDriver();
+		webdriver = DriverSetup.useEdge();
 		webdriver.manage().window().maximize();
 	}
 	
