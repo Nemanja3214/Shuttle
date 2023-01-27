@@ -95,7 +95,7 @@ public class RideController {
     private IPanicService panicService;
     @Autowired
     private UserService userService;
-
+    
     /**
      * DTO Mapper function.
      * @param rideDTO DTO object.
@@ -308,7 +308,13 @@ public class RideController {
             template.convertAndSend(dest, to(ride));
         }
     }
+ 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    
+    
     @PreAuthorize("hasAnyAuthority('passenger')")
     @PostMapping
     public ResponseEntity<?> createRide(@RequestBody(required=false) CreateRideDTO createRideDTO) {
@@ -576,6 +582,7 @@ public class RideController {
         }
         
         final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
         if (userService.isDriver(user)) {
             if (!ride.getDriver().getId().equals(user.getId())) {
             	return new ResponseEntity<>("Ride does not exist!", HttpStatus.NOT_FOUND);
@@ -724,6 +731,11 @@ public class RideController {
     	
     }
     
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      
     @GetMapping("/graph/passenger/{passengerId}")
     public ResponseEntity<?> getPassengerGraphData(@PathVariable Long passengerId, @RequestParam(required = true) String from, @RequestParam(required = true) String to){
 		if (passengerId == null) {
@@ -775,7 +787,7 @@ public class RideController {
 			return new ResponseEntity<RESTError>(new RESTError("Driver with that id doesn't exist"), HttpStatus.NOT_FOUND);
 		}
     }
-    
+      
 //    TODO remove
     @GetMapping
     public ResponseEntity<?> getRides(){
