@@ -30,7 +30,7 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', '$2a$10$XrWH9VDQR2aCn9tThclQJOrNwhKYs525HG3X.9zI1MlG21F8mKw/2', true, false, false, 'John');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', '$2a$10$RNBI5BuqlU8iUFoOCdeGc.V.afrcNyQSEs1t43JJ5TdXu9/wz86mi', true, false, false, 'Troy');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', '$2a$10$GxRpGz0dRDEK52.VeoiDA.azoCStgfAZjficcK/El5hxKCDtUWHBm', true, false, false, 'Admin');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('expired@gmail.com', '$2a$10$d28fDwXeRrWMGtNGkIW0duhm0OZCRmeUz8nYpWP6r3C2OBmceDJHe', false, false, false, 'Exp');
+--insert into generic_user(email, password, enabled, blocked, active, name) values ('expired@gmail.com', '$2a$10$d28fDwXeRrWMGtNGkIW0duhm0OZCRmeUz8nYpWP6r3C2OBmceDJHe', false, false, false, 'Exp');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver1@gmail.com', '$2a$10$TSGeDlyusssAVvBnr//IpegdbvSHcmWwcjHc9dew1SIsT.3N8Uoda', true, false, false, 'DriverName_1');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver2@gmail.com', '$2a$10$2jxtILDGfYS9lUtuIMHDB.fZIx7JrAV/9ELBnkCTWaIisnuuP2Oo6', true, false, false, 'DriverName_2');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver3@gmail.com', '$2a$10$krk0jTL1y0eFbRqBB1jO9eZv.gSZkZ/vPzXwnZG1W3WDh/xZs8OIC', true, false, false, 'DriverName_3');

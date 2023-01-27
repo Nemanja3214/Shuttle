@@ -335,7 +335,7 @@ public class RideController {
 			MyValidator.validateLength(createRideDTO.getVehicleType(), "vehicleType", 50);
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
-		}	
+		}
     	
     	if (createRideDTO.getDistance() == null) {
     		createRideDTO.setDistance(404.0);    	
@@ -353,7 +353,8 @@ public class RideController {
             final Ride ride = from(createRideDTO, driver);
 
             ride.setScheduledTime(scheduledFor);
-            ride.setTotalLength(createRideDTO.getLocations().stream().mapToDouble(route -> route.getDistance()).sum());
+            ride.setTotalLength(createRideDTO.getDistance());
+            //ride.setTotalLength(createRideDTO.getLocations().stream().mapToDouble(route -> route.getDistance()).sum());
             rideService.save(ride);
             notifyRidePassengers(ride);
 

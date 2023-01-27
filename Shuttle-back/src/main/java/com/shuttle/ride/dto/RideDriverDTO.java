@@ -19,4 +19,8 @@ public class RideDriverDTO {
             this.email = driver.getEmail();
         }
 	}
+	
+	public RideDriverDTO() {
+		
+	}
 }
