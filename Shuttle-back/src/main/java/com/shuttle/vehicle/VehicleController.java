@@ -157,7 +157,7 @@ public class VehicleController {
 			return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
-		this.vehicleService.changeCurrentLocation(id, location);
+		this.vehicleService.changeCurrentLocation(v.getDriver(), location);
 		
 		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isDriver(user)) {
