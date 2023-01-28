@@ -22,6 +22,11 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 
 insert into generic_user(email, password, enabled, blocked, active, name) values ('p1@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
 
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p2@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p3@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p4@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p5@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
+
 
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
@@ -37,6 +42,10 @@ insert into user_role(user_id, role_id) values (10, 2);
 
 insert into user_role(user_id, role_id) values (11, 1);
 
+insert into user_role(user_id, role_id) values (12, 1);
+insert into user_role(user_id, role_id) values (13, 1);
+insert into user_role(user_id, role_id) values (14, 1);
+insert into user_role(user_id, role_id) values (15, 1);
 
 insert into driver(id, available, time_worked_today) values (1, true, 0);
 insert into driver(id, available, time_worked_today) values (5, true, 0);
@@ -49,6 +58,10 @@ insert into driver(id, available, time_worked_today) values (10, true, 0);
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 insert into passenger(id) values (11);
+insert into passenger(id) values (12);
+insert into passenger(id) values (13);
+insert into passenger(id) values (14);
+insert into passenger(id) values (15);
 
 insert into location(latitude, longitude, address) values (45.235820, 19.803677, 'Novi Sad 1');
 insert into location(latitude, longitude, address) values (45.233752, 19.816665, 'Novi Sad 2');
@@ -68,17 +81,21 @@ insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transp
 
 --------------- Ride, location, etc.
 
--- DON'T TOUCH THIS RIDE!!!
--- DON'T MODIFY IT IN THE INTEGRATION TEST!!!
-
-insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
-insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
+-- Ride 1: used for getRide*(), readonly
 
 insert into route default values;
 insert into route_locations(route_id, locations_id) values(1, 1);
 insert into route_locations(route_id, locations_id) values(1, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (0, 1, 1, 1, true, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (1, 2);
+
+-- Ride 2: used for accept
+
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(2, 1);
+insert into route_locations(route_id, locations_id) values(2, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (0, 7, 1, 1, true, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (2, 12);
 
 --------------- Reports(?)
 

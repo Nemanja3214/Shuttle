@@ -54,12 +54,14 @@ public class RideControllerTest {
 	
 	private String JWT_DRIVER_BOB = "";
 	private String JWT_DRIVER_1 = "";
+	private String JWT_DRIVER_3 = "";
 	private String JWT_PASSENGER_JOHN = "";
 	private String JWT_PASSENGER_TROY = "";
 	private String JWT_ADMIN = "";
 	private String JWT_PASSENGER_1 = "";
-	
+
 	private RideDTO ride1;
+	private RideDTO ride2;
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -116,6 +118,7 @@ public class RideControllerTest {
 	public void login() {
 		JWT_DRIVER_BOB = login("bob@gmail.com", "bob123");
 		JWT_DRIVER_1 = login("driver1@gmail.com", "1234");
+		JWT_DRIVER_3 = login("driver3@gmail.com", "1234");
 		JWT_PASSENGER_JOHN = login("john@gmail.com", "john123");
 		JWT_PASSENGER_TROY = login("troy@gmail.com", "Troytroy123");
 		JWT_ADMIN = login("admin@gmail.com", "admin");
@@ -124,6 +127,7 @@ public class RideControllerTest {
 	
 	private void initRides() {
 		ride1 = new RideDTO();
+		ride1.setId(1L);
 		ride1.setEstimatedTimeInMinutes(100);
 		ride1.setBabyTransport(false);
 		ride1.setPetTransport(true);
@@ -135,10 +139,26 @@ public class RideControllerTest {
 		ride1.setScheduledTime(null);
 		ride1.setStartTime(null);
 		ride1.setEndTime(null);
-		ride1.setId(1L);
 		ride1.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
 		ride1.setPassengers(Arrays.asList(new RidePassengerDTO(2L, "john@gmail.com")));
 		ride1.setDriver(new RideDriverDTO(1L, "bob@gmail.com"));
+		
+		ride2 = new RideDTO();
+		ride2.setId(2L);
+		ride2.setEstimatedTimeInMinutes(100);
+		ride2.setBabyTransport(false);
+		ride2.setPetTransport(true);
+		ride2.setVehicleType("STANDARD");
+		ride2.setStatus(Status.PENDING);
+		ride2.setTotalCost(123.4);
+		ride2.setTotalLength(5.6);
+		ride2.setRejection(null);
+		ride2.setScheduledTime(null);
+		ride2.setStartTime(null);
+		ride2.setEndTime(null);
+		ride2.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		ride2.setPassengers(Arrays.asList(new RidePassengerDTO(12L, "p2@gmail.com")));
+		ride2.setDriver(new RideDriverDTO(7L, "driver3@gmail.com"));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,7 +464,7 @@ public class RideControllerTest {
 		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
 	}
 	
-	///////////////////////////////////////////////////////////////////////////////////////////////	
+	///////////////////////////////////////////////////////////////////////////////////////////////
 	
 	@Test
 	public void getRide_unauthorized() {
@@ -466,6 +486,7 @@ public class RideControllerTest {
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, rideId);
 		
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
 	}
 	
 	@Test
@@ -535,45 +556,89 @@ public class RideControllerTest {
 		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
 	}
 	
+	///////////////////////////////////////////////////////////////////////////////////////////////
 	
-//	@ParameterizedTest
-//	@ValueSource(longs = {-74389, -1, 38923829})
-//	public void acceptRide_noRide(Long rideId) {
-//		final String URL = "/api/ride/{id}/accept";
-//		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
-//		
-//		ResponseEntity<String> response = restTemplate.exchange(
-//				URL,
-//				HttpMethod.PUT,
-//				requestBody,
-//				new ParameterizedTypeReference<String>() {},
-//				rideId
-//		);
-//		
-//		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//		assertEquals("Ride does not exist!", response.getBody());
-//	}
-//
-//	@Test
-//	public void acceptRide_unauthorized() {
-//		final String URL = "/api/ride/{id}/accept";
-//
-//		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
-//			@Override
-//			public void execute() throws Throwable {
-//				ResponseEntity<RESTError> response = post(URL, 1L, null, null);
-//			}
-//		});
-//	}
-//	
-//	@Test
-//	public void acceptRide_forbidden() {
-//		final String URL = "/api/ride/{id}/accept";
-//		ResponseEntity<String> response = put(URL, 1L, null, JWT_PASSENGER_JOHN);
-//		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-//	}
-//	
-//	@Test
-//	public void acceptRide_ofOtherDriver() {
-//	}
+	@Test
+	public void acceptRide_unauthorized() {
+		final String URL = "/api/ride/{id}/accept";
+		Long rideId = 2L;
+
+		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+			@Override
+			public void execute() throws Throwable {	
+				HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+			}
+		});
+	}
+	
+	@Test
+	public void acceptRide_forbidden_admin() {
+		final String URL = "/api/ride/{id}/accept";
+		Long rideId = 2L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void acceptRide_forbidden_passenger() {
+		final String URL = "/api/ride/{id}/accept";
+		Long rideId = 2L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void acceptRide_notFound() {
+		final String URL = "/api/ride/{id}/accept";
+		Long rideId = 0L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_3));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void acceptRide_driverCannotAcceptRideOfOtherDriver() {
+		final String URL = "/api/ride/{id}/accept";
+		Long rideId = 2L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_1));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void acceptRide_notPending() {
+		
+	}
+	
+	@Test
+	public void acceptRide() {
+		final String URL = "/api/ride/{id}/accept";
+		Long rideId = 2L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_3));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);	
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		RideDTO expected = ride2;
+		RideDTO result = response.getBody();
+		
+		assertThat(result).usingRecursiveComparison().ignoringFields("status").isEqualTo(expected);
+		assertThat(result.getStatus()).isEqualTo(Status.ACCEPTED);
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
 }
