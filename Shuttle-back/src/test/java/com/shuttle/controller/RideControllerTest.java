@@ -15,6 +15,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -443,11 +444,96 @@ public class RideControllerTest {
 		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
 	}
 	
+	///////////////////////////////////////////////////////////////////////////////////////////////	
 	
+	@Test
+	public void getRide_unauthorized() {
+		final String URL = "/api/ride/{id}";
+		Long rideId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);
+		
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
 	
+	@ParameterizedTest
+	@ValueSource(longs = {-5, 0, 47389})
+	public void getRide_notFound(Long rideId) {
+		final String URL = "/api/ride/{id}";
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, rideId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+	}
 	
+	@Test
+	public void getRide_driverCannotSeeRidesOfOtherUsers() {
+		final String URL = "/api/ride/{id}";
+		Long rideId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_1));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, rideId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+	}
 	
+	@Test
+	public void getRide_passengerCannotSeeRidesOfOtherUsers() {
+		final String URL = "/api/ride/{id}";
+		Long rideId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_TROY));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, rideId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+	}
 	
+	@Test
+	public void getRide_asDriver() {
+		final String URL = "/api/ride/{id}";
+		Long rideId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		RideDTO result = response.getBody();
+		RideDTO expected = ride1;
+		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
+	}
+	
+	@Test
+	public void getRide_asPassenger() {
+		final String URL = "/api/ride/{id}";
+		Long rideId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		RideDTO result = response.getBody();
+		RideDTO expected = ride1;
+		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
+	}
+	
+	@Test
+	public void getRide_asAdmin() {
+		final String URL = "/api/ride/{id}";
+		Long rideId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		RideDTO result = response.getBody();
+		RideDTO expected = ride1;
+		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
+	}
 	
 	
 //	@ParameterizedTest
