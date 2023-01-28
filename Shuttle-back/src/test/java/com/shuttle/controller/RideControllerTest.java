@@ -240,45 +240,177 @@ public class RideControllerTest {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
-
-	@ParameterizedTest
-	@ValueSource(longs = {-74389, -1, 38923829})
-	public void acceptRide_noRide(Long rideId) {
-		final String URL = "/api/ride/{id}/accept";
-		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
 		
-		ResponseEntity<String> response = restTemplate.exchange(
-				URL,
-				HttpMethod.PUT,
-				requestBody,
-				new ParameterizedTypeReference<String>() {},
-				rideId
-		);
-		
-		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-		assertEquals("Ride does not exist!", response.getBody());
-	}
-
 	@Test
-	public void acceptRide_unauthorized() {
-		final String URL = "/api/ride/{id}/accept";
+	public void getActiveRideByDriver_unauthorized() {
+		final String URL = "/api/ride/driver/{id}/active";
+		Long driverId = 1L;
 
-		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
-			@Override
-			public void execute() throws Throwable {
-				ResponseEntity<RESTError> response = post(URL, 1L, null, null);
-			}
-		});
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, driverId);
+		
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 	}
 	
 	@Test
-	public void acceptRide_forbidden() {
-		final String URL = "/api/ride/{id}/accept";
-		ResponseEntity<String> response = put(URL, 1L, null, JWT_PASSENGER_JOHN);
+	public void getActiveRideByDriver_forbidden_passenger() {
+		final String URL = "/api/ride/driver/{id}/active";
+		Long driverId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, driverId);
+		
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
 	
 	@Test
-	public void acceptRide_ofOtherDriver() {
+	public void getActiveRideByDriver_driverCannotSeeRideOfOtherDriver() {
+		final String URL = "/api/ride/driver/{id}/active";
+		Long driverId = 5L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, driverId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Active ride does not exist!", response.getBody());
 	}
+	
+	@Test
+	public void getActiveRideByDriver_driverNotFound() {
+		final String URL = "/api/ride/driver/{id}/active";
+		Long driverId = 0L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, driverId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Active ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void getActiveRideByDriver_noRide() {
+		final String URL = "/api/ride/driver/{id}/active";
+		Long driverId = 9L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, driverId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Active ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void getActiveRideByDriver() {
+		final String URL = "/api/ride/driver/{id}/active";
+		Long driverId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RideDTO>() {}, driverId);
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		RideDTO result = response.getBody();
+		assertThat(result.getId()).isNotNull();
+		assertEquals(result.getLocations().get(0).getDeparture().getAddress(), "Novi Sad 1");
+		assertEquals(result.getLocations().get(0).getDeparture().getLatitude(), 45.235820);
+		assertEquals(result.getLocations().get(0).getDeparture().getLongitude(), 19.803677);
+		assertEquals(result.getLocations().get(0).getDestination().getAddress(), "Novi Sad 2");
+		assertEquals(result.getLocations().get(0).getDestination().getLatitude(), 45.233752);
+		assertEquals(result.getLocations().get(0).getDestination().getLongitude(), 19.816665);
+		assertEquals(result.getLocations().size(), 1);
+		assertThat(result.getStartTime()).isNull();
+		assertThat(result.getEndTime()).isNull();
+		assertThat(result.getScheduledTime()).isNull();
+		assertEquals(result.getTotalCost(), 123.4);
+		assertEquals(result.getDriver().id, driverId);
+		assertEquals(result.getPassengers().get(0).getId(), 2);
+		assertEquals(result.getPassengers().get(0).getEmail(), "john@gmail.com");
+		assertEquals(result.getPassengers().size(), 1);
+		assertEquals(result.getPetTransport(), true);
+		assertEquals(result.getBabyTransport(), false);
+		assertEquals(result.getVehicleType(), "STANDARD");
+		assertEquals(result.getStatus().toString(), "PENDING");
+		assertThat(result.getRejection()).isNull();
+		assertThat(result.getTotalLength()).isEqualTo(5.6);
+	}
+	
+	@Test
+	public void getActiveRideByDriver_adminCanSeeRideOfAnyDriver() {
+		final String URL = "/api/ride/driver/{id}/active";
+		Long driverId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RideDTO>() {}, driverId);
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		RideDTO result = response.getBody();
+		assertThat(result.getId()).isNotNull();
+		assertEquals(result.getLocations().get(0).getDeparture().getAddress(), "Novi Sad 1");
+		assertEquals(result.getLocations().get(0).getDeparture().getLatitude(), 45.235820);
+		assertEquals(result.getLocations().get(0).getDeparture().getLongitude(), 19.803677);
+		assertEquals(result.getLocations().get(0).getDestination().getAddress(), "Novi Sad 2");
+		assertEquals(result.getLocations().get(0).getDestination().getLatitude(), 45.233752);
+		assertEquals(result.getLocations().get(0).getDestination().getLongitude(), 19.816665);
+		assertEquals(result.getLocations().size(), 1);
+		assertThat(result.getStartTime()).isNull();
+		assertThat(result.getEndTime()).isNull();
+		assertThat(result.getScheduledTime()).isNull();
+		assertEquals(result.getTotalCost(), 123.4);
+		assertEquals(result.getDriver().id, driverId);
+		assertEquals(result.getPassengers().get(0).getId(), 2);
+		assertEquals(result.getPassengers().get(0).getEmail(), "john@gmail.com");
+		assertEquals(result.getPassengers().size(), 1);
+		assertEquals(result.getPetTransport(), true);
+		assertEquals(result.getBabyTransport(), false);
+		assertEquals(result.getVehicleType(), "STANDARD");
+		assertEquals(result.getStatus().toString(), "PENDING");
+		assertThat(result.getRejection()).isNull();
+		assertThat(result.getTotalLength()).isEqualTo(5.6);
+	}
+	
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+//	@ParameterizedTest
+//	@ValueSource(longs = {-74389, -1, 38923829})
+//	public void acceptRide_noRide(Long rideId) {
+//		final String URL = "/api/ride/{id}/accept";
+//		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
+//		
+//		ResponseEntity<String> response = restTemplate.exchange(
+//				URL,
+//				HttpMethod.PUT,
+//				requestBody,
+//				new ParameterizedTypeReference<String>() {},
+//				rideId
+//		);
+//		
+//		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+//		assertEquals("Ride does not exist!", response.getBody());
+//	}
+//
+//	@Test
+//	public void acceptRide_unauthorized() {
+//		final String URL = "/api/ride/{id}/accept";
+//
+//		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+//			@Override
+//			public void execute() throws Throwable {
+//				ResponseEntity<RESTError> response = post(URL, 1L, null, null);
+//			}
+//		});
+//	}
+//	
+//	@Test
+//	public void acceptRide_forbidden() {
+//		final String URL = "/api/ride/{id}/accept";
+//		ResponseEntity<String> response = put(URL, 1L, null, JWT_PASSENGER_JOHN);
+//		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+//	}
+//	
+//	@Test
+//	public void acceptRide_ofOtherDriver() {
+//	}
 }

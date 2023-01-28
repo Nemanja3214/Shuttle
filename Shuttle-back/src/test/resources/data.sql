@@ -50,13 +50,13 @@ insert into passenger(id) values (2);
 insert into passenger(id) values (3);
 insert into passenger(id) values (11);
 
-insert into location(latitude, longitude, address) values (45.235820, 19.803677, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.233752, 19.816665, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.244830, 19.846957, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.249211, 19.816746, 'Novi Sad');
-insert into location(latitude, longitude, address) values (45.260781, 19.832454, 'Futog');
-insert into location(latitude, longitude, address) values (45.238922, 19.693419, 'Futog');
-insert into location(latitude, longitude, address) values (45.236354, 19.715382, 'Futog');
+insert into location(latitude, longitude, address) values (45.235820, 19.803677, 'Novi Sad 1');
+insert into location(latitude, longitude, address) values (45.233752, 19.816665, 'Novi Sad 2');
+insert into location(latitude, longitude, address) values (45.244830, 19.846957, 'Novi Sad 3');
+insert into location(latitude, longitude, address) values (45.249211, 19.816746, 'Novi Sad 4');
+insert into location(latitude, longitude, address) values (45.260781, 19.832454, 'Futog 1');
+insert into location(latitude, longitude, address) values (45.238922, 19.693419, 'Futog 2');
+insert into location(latitude, longitude, address) values (45.236354, 19.715382, 'Futog 3');
 
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(1, 1, 1, true, true, 1);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(5, 2, 2, true, true, 2);
@@ -68,13 +68,16 @@ insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transp
 
 --------------- Ride, location, etc.
 
+-- DON'T TOUCH THIS RIDE!!!
+-- DON'T MODIFY IT IN THE INTEGRATION TEST!!!
+
 insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
 insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);
 
 insert into route default values;
 insert into route_locations(route_id, locations_id) values(1, 1);
 insert into route_locations(route_id, locations_id) values(1, 2);
-insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, end_time) values (0, 1, 1, 1, true, false, CURRENT_TIMESTAMP);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length) values (0, 1, 1, 1, true, false, 123.4, 5.6);
 insert into ride_passengers(ride_id, passengers_id) values (1, 2);
 
 --------------- Reports(?)
