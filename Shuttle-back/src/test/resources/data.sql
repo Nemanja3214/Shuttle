@@ -77,7 +77,7 @@ insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB',
 insert into route default values;
 insert into route_locations(route_id, locations_id) values(1, 1);
 insert into route_locations(route_id, locations_id) values(1, 2);
-insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length) values (0, 1, 1, 1, true, false, 123.4, 5.6);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (0, 1, 1, 1, true, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (1, 2);
 
 --------------- Reports(?)

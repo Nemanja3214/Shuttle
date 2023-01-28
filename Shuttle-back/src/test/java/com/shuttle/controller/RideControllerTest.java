@@ -38,6 +38,8 @@ import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
+import com.shuttle.ride.dto.RideDriverDTO;
+import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.dto.BasicUserInfoDTO;
 
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
@@ -55,6 +57,8 @@ public class RideControllerTest {
 	private String JWT_PASSENGER_TROY = "";
 	private String JWT_ADMIN = "";
 	private String JWT_PASSENGER_1 = "";
+	
+	private RideDTO ride1;
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -93,6 +97,7 @@ public class RideControllerTest {
 	@BeforeAll
 	public void setup() {
 		login();
+		initRides();
 	}
 	
 	private String login(String email, String password) {
@@ -114,6 +119,25 @@ public class RideControllerTest {
 		JWT_PASSENGER_TROY = login("troy@gmail.com", "Troytroy123");
 		JWT_ADMIN = login("admin@gmail.com", "admin");
 		JWT_PASSENGER_1 = login("p1@gmail.com", "1234");
+	}
+	
+	private void initRides() {
+		ride1 = new RideDTO();
+		ride1.setEstimatedTimeInMinutes(100);
+		ride1.setBabyTransport(false);
+		ride1.setPetTransport(true);
+		ride1.setVehicleType("STANDARD");
+		ride1.setStatus(Status.PENDING);
+		ride1.setTotalCost(123.4);
+		ride1.setTotalLength(5.6);
+		ride1.setRejection(null);
+		ride1.setScheduledTime(null);
+		ride1.setStartTime(null);
+		ride1.setEndTime(null);
+		ride1.setId(1L);
+		ride1.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		ride1.setPassengers(Arrays.asList(new RidePassengerDTO(2L, "john@gmail.com")));
+		ride1.setDriver(new RideDriverDTO(1L, "bob@gmail.com"));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -310,28 +334,8 @@ public class RideControllerTest {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 
 		RideDTO result = response.getBody();
-		assertThat(result.getId()).isNotNull();
-		assertEquals(result.getLocations().get(0).getDeparture().getAddress(), "Novi Sad 1");
-		assertEquals(result.getLocations().get(0).getDeparture().getLatitude(), 45.235820);
-		assertEquals(result.getLocations().get(0).getDeparture().getLongitude(), 19.803677);
-		assertEquals(result.getLocations().get(0).getDestination().getAddress(), "Novi Sad 2");
-		assertEquals(result.getLocations().get(0).getDestination().getLatitude(), 45.233752);
-		assertEquals(result.getLocations().get(0).getDestination().getLongitude(), 19.816665);
-		assertEquals(result.getLocations().size(), 1);
-		assertThat(result.getStartTime()).isNull();
-		assertThat(result.getEndTime()).isNull();
-		assertThat(result.getScheduledTime()).isNull();
-		assertEquals(result.getTotalCost(), 123.4);
-		assertEquals(result.getDriver().id, driverId);
-		assertEquals(result.getPassengers().get(0).getId(), 2);
-		assertEquals(result.getPassengers().get(0).getEmail(), "john@gmail.com");
-		assertEquals(result.getPassengers().size(), 1);
-		assertEquals(result.getPetTransport(), true);
-		assertEquals(result.getBabyTransport(), false);
-		assertEquals(result.getVehicleType(), "STANDARD");
-		assertEquals(result.getStatus().toString(), "PENDING");
-		assertThat(result.getRejection()).isNull();
-		assertThat(result.getTotalLength()).isEqualTo(5.6);
+		RideDTO expected = ride1;
+		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
 	}
 	
 	@Test
@@ -345,34 +349,107 @@ public class RideControllerTest {
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 
 		RideDTO result = response.getBody();
-		assertThat(result.getId()).isNotNull();
-		assertEquals(result.getLocations().get(0).getDeparture().getAddress(), "Novi Sad 1");
-		assertEquals(result.getLocations().get(0).getDeparture().getLatitude(), 45.235820);
-		assertEquals(result.getLocations().get(0).getDeparture().getLongitude(), 19.803677);
-		assertEquals(result.getLocations().get(0).getDestination().getAddress(), "Novi Sad 2");
-		assertEquals(result.getLocations().get(0).getDestination().getLatitude(), 45.233752);
-		assertEquals(result.getLocations().get(0).getDestination().getLongitude(), 19.816665);
-		assertEquals(result.getLocations().size(), 1);
-		assertThat(result.getStartTime()).isNull();
-		assertThat(result.getEndTime()).isNull();
-		assertThat(result.getScheduledTime()).isNull();
-		assertEquals(result.getTotalCost(), 123.4);
-		assertEquals(result.getDriver().id, driverId);
-		assertEquals(result.getPassengers().get(0).getId(), 2);
-		assertEquals(result.getPassengers().get(0).getEmail(), "john@gmail.com");
-		assertEquals(result.getPassengers().size(), 1);
-		assertEquals(result.getPetTransport(), true);
-		assertEquals(result.getBabyTransport(), false);
-		assertEquals(result.getVehicleType(), "STANDARD");
-		assertEquals(result.getStatus().toString(), "PENDING");
-		assertThat(result.getRejection()).isNull();
-		assertThat(result.getTotalLength()).isEqualTo(5.6);
+		RideDTO expected = ride1;
+		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test
+	public void getActiveRideByPassenger_unauthorized() {
+		final String URL = "/api/ride/passenger/{id}/active";
+		Long passengerId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, passengerId);
+		
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+	
+	@Test
+	public void getActiveRideByPassenger_forbidden_driver() {
+		final String URL = "/api/ride/passenger/{id}/active";
+		Long passengerId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, passengerId);
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void getActiveRideByPassenger_driverCannotSeeRideOfOtherPassenger() {
+		final String URL = "/api/ride/passenger/{id}/active";
+		Long passengerId = 3L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, passengerId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Active ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void getActiveRideByPassenger_passengerNotFound() {
+		final String URL = "/api/ride/passenger/{id}/active";
+		Long passengerId = 0L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, passengerId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Active ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void getActiveRideByPassenger_noRide() {
+		final String URL = "/api/ride/passenger/{id}/active";
+		Long passengerId = 3L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, passengerId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Active ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void getActiveRideByPassenger() {
+		final String URL = "/api/ride/passenger/{id}/active";
+		Long passengerId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RideDTO>() {}, passengerId);
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		
+		RideDTO result = response.getBody();
+		RideDTO expected = ride1;
+		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
+	}
+	
+	@Test
+	public void getActiveRideByPassenger_adminCanSeeRideOfAnyPassenger() {
+		final String URL = "/api/ride/passenger/{id}/active";
+		Long passengerId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RideDTO>() {}, passengerId);
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		RideDTO result = response.getBody();
+		RideDTO expected = ride1;
+		assertThat(result).usingRecursiveComparison().isEqualTo(expected);
 	}
 	
 	
 	
-	///////////////////////////////////////////////////////////////////////////////////////////////
-
+	
+	
+	
+	
+	
 //	@ParameterizedTest
 //	@ValueSource(longs = {-74389, -1, 38923829})
 //	public void acceptRide_noRide(Long rideId) {
