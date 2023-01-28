@@ -669,6 +669,90 @@ public class RideControllerTest {
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
+	public void startRide_unauthorized() {
+		final String URL = "/api/ride/{id}/start";
+		Long rideId = 3L;
+
+		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+			@Override
+			public void execute() throws Throwable {	
+				HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+			}
+		});
+	}
+	
+	public void startRide_forbidden_admin() {
+		final String URL = "/api/ride/{id}/start";
+		Long rideId = 3L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	public void startRide_forbidden_passenger() {
+		final String URL = "/api/ride/{id}/start";
+		Long rideId = 3L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	public void startRide_notFound() {
+		final String URL = "/api/ride/{id}/start";
+		Long rideId = 0L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_2));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	public void startRide_driverCannotAcceptRideOfOtherDriver() {
+		final String URL = "/api/ride/{id}/start";
+		Long rideId = 3L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_3));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	public void startRide_notAccepted() {
+		final String URL = "/api/ride/{id}/start";
+		Long rideId = 1L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Cannot start a ride that is not in status ACCEPTED!", response.getBody().getMessage());
+	}
+	
+	public void startRide() {
+		final String URL = "/api/ride/{id}/start";
+		Long rideId = 3L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_2));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);	
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		
+		RideDTO expected = ride3;
+		RideDTO result = response.getBody();
+		
+		assertThat(result).usingRecursiveComparison().ignoringFields("status", "startTime").isEqualTo(expected);
+		assertThat(result.getStatus()).isEqualTo(Status.STARTED);
+		assertThat(result.getStartTime()).isNotNull();
+		
+		// Check if driver is set to not available? No endpoint for that...
+	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 }
