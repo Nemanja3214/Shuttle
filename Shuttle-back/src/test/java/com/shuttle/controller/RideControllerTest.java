@@ -54,6 +54,7 @@ public class RideControllerTest {
 	private String JWT_PASSENGER_JOHN = "";
 	private String JWT_PASSENGER_TROY = "";
 	private String JWT_ADMIN = "";
+	private String JWT_PASSENGER_1 = "";
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -92,12 +93,6 @@ public class RideControllerTest {
 	@BeforeAll
 	public void setup() {
 		login();
-		
-		assertNotNull(JWT_DRIVER_BOB);
-		assertNotNull(JWT_DRIVER_1);
-		assertNotNull(JWT_PASSENGER_JOHN);
-		assertNotNull(JWT_PASSENGER_TROY);
-		assertNotNull(JWT_ADMIN);
 	}
 	
 	private String login(String email, String password) {
@@ -118,6 +113,7 @@ public class RideControllerTest {
 		JWT_PASSENGER_JOHN = login("john@gmail.com", "john123");
 		JWT_PASSENGER_TROY = login("troy@gmail.com", "Troytroy123");
 		JWT_ADMIN = login("admin@gmail.com", "admin");
+		JWT_PASSENGER_1 = login("p1@gmail.com", "1234");
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +201,44 @@ public class RideControllerTest {
 		assertEquals("Cannot create a ride while you have one already pending!", response.getBody().getMessage());
 	}
 	
+	@Test
+	public void createRide_noDriverAvailable_unsupportedParams() { 
+		final String URL = "/api/ride";
+
+		RouteDTO route = new RouteDTO(new LocationDTO("ABC", 45.21, 19.8), new LocationDTO("DEF", 45.22, 19.79));
+		CreateRideDTO dto = new CreateRideDTO(
+				Arrays.asList(new BasicUserInfoDTO(11, "p1@gmail.com")), 
+				Arrays.asList(route),
+				"VAN", true, true, null, 123.0); // There is no van with babies and pets.
+		
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(
+				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
+		);
+
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("No driver available!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createRide_noDriverAvailable_supportedParamsBusy() { 
+		final String URL = "/api/ride";
+
+		RouteDTO route = new RouteDTO(new LocationDTO("ABC", 45.21, 19.8), new LocationDTO("DEF", 45.22, 19.79));
+		CreateRideDTO dto = new CreateRideDTO(
+				Arrays.asList(new BasicUserInfoDTO(11, "p1@gmail.com")), 
+				Arrays.asList(route),
+				"STANDARD", true, false, null, 123.0); // Standard vehicle - bob - busy
+		
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(
+				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
+		);
+
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("No driver available!", response.getBody().getMessage());
+	}
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	@ParameterizedTest
@@ -221,9 +255,6 @@ public class RideControllerTest {
 				rideId
 		);
 		
-		//ResponseEntity<String> response = put(URL, requestBody, rideId);
-		// TODO: put here throws an error.
-	
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 		assertEquals("Ride does not exist!", response.getBody());
 	}

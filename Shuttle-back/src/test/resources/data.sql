@@ -20,6 +20,9 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver5@gmail.com', '$2a$10$ePVkPF/GxUI2V4kSi8qhi.hRlCX/h5CgZtpdOoy05btsgbfaaCNOC', true, false, false, 'DriverName_5');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver6@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'DriverName_6');
 
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p1@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
+
+
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
 insert into user_role(user_id, role_id) values (3, 1);
@@ -32,6 +35,9 @@ insert into user_role(user_id, role_id) values (8, 2);
 insert into user_role(user_id, role_id) values (9, 2);
 insert into user_role(user_id, role_id) values (10, 2);
 
+insert into user_role(user_id, role_id) values (11, 1);
+
+
 insert into driver(id, available, time_worked_today) values (1, true, 0);
 insert into driver(id, available, time_worked_today) values (5, true, 0);
 insert into driver(id, available, time_worked_today) values (6, true, 0);
@@ -42,6 +48,7 @@ insert into driver(id, available, time_worked_today) values (10, true, 0);
 
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
+insert into passenger(id) values (11);
 
 insert into location(latitude, longitude, address) values (45.235820, 19.803677, 'Novi Sad');
 insert into location(latitude, longitude, address) values (45.233752, 19.816665, 'Novi Sad');
