@@ -54,6 +54,7 @@ public class RideControllerTest {
 	
 	private String JWT_DRIVER_BOB = "";
 	private String JWT_DRIVER_1 = "";
+	private String JWT_DRIVER_2 = "";
 	private String JWT_DRIVER_3 = "";
 	private String JWT_PASSENGER_JOHN = "";
 	private String JWT_PASSENGER_TROY = "";
@@ -62,6 +63,7 @@ public class RideControllerTest {
 
 	private RideDTO ride1;
 	private RideDTO ride2;
+	private RideDTO ride3;
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -119,6 +121,7 @@ public class RideControllerTest {
 		JWT_DRIVER_BOB = login("bob@gmail.com", "bob123");
 		JWT_DRIVER_1 = login("driver1@gmail.com", "1234");
 		JWT_DRIVER_3 = login("driver3@gmail.com", "1234");
+		JWT_DRIVER_2 = login("driver2@gmail.com", "1234");
 		JWT_PASSENGER_JOHN = login("john@gmail.com", "john123");
 		JWT_PASSENGER_TROY = login("troy@gmail.com", "Troytroy123");
 		JWT_ADMIN = login("admin@gmail.com", "admin");
@@ -159,6 +162,23 @@ public class RideControllerTest {
 		ride2.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
 		ride2.setPassengers(Arrays.asList(new RidePassengerDTO(12L, "p2@gmail.com")));
 		ride2.setDriver(new RideDriverDTO(7L, "driver3@gmail.com"));
+		
+		ride3 = new RideDTO();
+		ride3.setId(3L);
+		ride3.setEstimatedTimeInMinutes(100);
+		ride3.setBabyTransport(false);
+		ride3.setPetTransport(false);
+		ride3.setVehicleType("STANDARD");
+		ride3.setStatus(Status.ACCEPTED);
+		ride3.setTotalCost(123.4);
+		ride3.setTotalLength(5.6);
+		ride3.setRejection(null);
+		ride3.setScheduledTime(null);
+		ride3.setStartTime(null);
+		ride3.setEndTime(null);
+		ride3.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		ride3.setPassengers(Arrays.asList(new RidePassengerDTO(12L, "p2@gmail.com")));
+		ride3.setDriver(new RideDriverDTO(6L, "driver2@gmail.com"));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -620,7 +640,14 @@ public class RideControllerTest {
 	
 	@Test
 	public void acceptRide_notPending() {
+		final String URL = "/api/ride/{id}/accept";
+		Long rideId = 3L;
 		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_2));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Cannot accept a ride that is not in status PENDING!", response.getBody().getMessage());
 	}
 	
 	@Test
@@ -639,6 +666,9 @@ public class RideControllerTest {
 		assertThat(result).usingRecursiveComparison().ignoringFields("status").isEqualTo(expected);
 		assertThat(result.getStatus()).isEqualTo(Status.ACCEPTED);
 	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 }

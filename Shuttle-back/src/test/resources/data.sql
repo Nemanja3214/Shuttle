@@ -97,6 +97,14 @@ insert into route_locations(route_id, locations_id) values(2, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (0, 7, 1, 1, true, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (2, 12);
 
+-- Ride 2: used for start
+
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(3, 1);
+insert into route_locations(route_id, locations_id) values(3, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 6, 1, 1, false, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (3, 13);
+
 --------------- Reports(?)
 
 
