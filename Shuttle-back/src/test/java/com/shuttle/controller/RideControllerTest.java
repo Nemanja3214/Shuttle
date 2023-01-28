@@ -2,8 +2,6 @@ package com.shuttle.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -15,7 +13,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -56,6 +53,7 @@ public class RideControllerTest {
 	private String JWT_DRIVER_1 = "";
 	private String JWT_DRIVER_2 = "";
 	private String JWT_DRIVER_3 = "";
+	private String JWT_DRIVER_5 = "";
 	private String JWT_PASSENGER_JOHN = "";
 	private String JWT_PASSENGER_TROY = "";
 	private String JWT_ADMIN = "";
@@ -64,6 +62,7 @@ public class RideControllerTest {
 	private RideDTO ride1;
 	private RideDTO ride2;
 	private RideDTO ride3;
+	private RideDTO ride4;
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -122,6 +121,7 @@ public class RideControllerTest {
 		JWT_DRIVER_1 = login("driver1@gmail.com", "1234");
 		JWT_DRIVER_3 = login("driver3@gmail.com", "1234");
 		JWT_DRIVER_2 = login("driver2@gmail.com", "1234");
+		JWT_DRIVER_5 = login("driver5@gmail.com", "1234");
 		JWT_PASSENGER_JOHN = login("john@gmail.com", "john123");
 		JWT_PASSENGER_TROY = login("troy@gmail.com", "Troytroy123");
 		JWT_ADMIN = login("admin@gmail.com", "admin");
@@ -177,8 +177,25 @@ public class RideControllerTest {
 		ride3.setStartTime(null);
 		ride3.setEndTime(null);
 		ride3.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
-		ride3.setPassengers(Arrays.asList(new RidePassengerDTO(12L, "p2@gmail.com")));
+		ride3.setPassengers(Arrays.asList(new RidePassengerDTO(13L, "p3@gmail.com")));
 		ride3.setDriver(new RideDriverDTO(6L, "driver2@gmail.com"));
+		
+		ride4 = new RideDTO();
+		ride4.setId(4L);
+		ride4.setEstimatedTimeInMinutes(100);
+		ride4.setBabyTransport(false);
+		ride4.setPetTransport(false);
+		ride4.setVehicleType("STANDARD");
+		ride4.setStatus(Status.STARTED);
+		ride4.setTotalCost(123.4);
+		ride4.setTotalLength(5.6);
+		ride4.setRejection(null);
+		ride4.setScheduledTime(null);
+		ride4.setStartTime(""); // doesn't matter.
+		ride4.setEndTime(null);
+		ride4.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		ride4.setPassengers(Arrays.asList(new RidePassengerDTO(14L, "p4@gmail.com")));
+		ride4.setDriver(new RideDriverDTO(9L, "driver5@gmail.com"));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -355,7 +372,7 @@ public class RideControllerTest {
 	@Test
 	public void getActiveRideByDriver_noRide() {
 		final String URL = "/api/ride/driver/{id}/active";
-		Long driverId = 9L;
+		Long driverId = 10L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, driverId);
@@ -669,6 +686,7 @@ public class RideControllerTest {
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
+	@Test
 	public void startRide_unauthorized() {
 		final String URL = "/api/ride/{id}/start";
 		Long rideId = 3L;
@@ -681,7 +699,8 @@ public class RideControllerTest {
 			}
 		});
 	}
-	
+
+	@Test
 	public void startRide_forbidden_admin() {
 		final String URL = "/api/ride/{id}/start";
 		Long rideId = 3L;
@@ -691,7 +710,8 @@ public class RideControllerTest {
 		
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
-	
+
+	@Test
 	public void startRide_forbidden_passenger() {
 		final String URL = "/api/ride/{id}/start";
 		Long rideId = 3L;
@@ -701,7 +721,8 @@ public class RideControllerTest {
 		
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 	}
-	
+
+	@Test
 	public void startRide_notFound() {
 		final String URL = "/api/ride/{id}/start";
 		Long rideId = 0L;
@@ -712,8 +733,9 @@ public class RideControllerTest {
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 		assertEquals("Ride does not exist!", response.getBody());
 	}
-	
-	public void startRide_driverCannotAcceptRideOfOtherDriver() {
+
+	@Test
+	public void startRide_driverCannotStartRideOfOtherDriver() {
 		final String URL = "/api/ride/{id}/start";
 		Long rideId = 3L;
 		
@@ -723,7 +745,8 @@ public class RideControllerTest {
 		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 		assertEquals("Ride does not exist!", response.getBody());
 	}
-	
+
+	@Test
 	public void startRide_notAccepted() {
 		final String URL = "/api/ride/{id}/start";
 		Long rideId = 1L;
@@ -734,7 +757,8 @@ public class RideControllerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("Cannot start a ride that is not in status ACCEPTED!", response.getBody().getMessage());
 	}
-	
+
+	@Test
 	public void startRide() {
 		final String URL = "/api/ride/{id}/start";
 		Long rideId = 3L;
@@ -751,7 +775,101 @@ public class RideControllerTest {
 		assertThat(result.getStatus()).isEqualTo(Status.STARTED);
 		assertThat(result.getStartTime()).isNotNull();
 		
-		// Check if driver is set to not available? No endpoint for that...
+		// TODO: Check if driver is set to not available? No endpoint for that...
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Test
+	public void endRide_unauthorized() {
+		final String URL = "/api/ride/{id}/end";
+		Long rideId = 4L;
+
+		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+			@Override
+			public void execute() throws Throwable {	
+				HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+			}
+		});
+	}
+
+	@Test
+	public void endRide_forbidden_admin() {
+		final String URL = "/api/ride/{id}/end";
+		Long rideId = 4L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+
+	@Test
+	public void endRide_forbidden_passenger() {
+		final String URL = "/api/ride/{id}/end";
+		Long rideId = 4L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+
+	@Test
+	public void endRide_notFound() {
+		final String URL = "/api/ride/{id}/end";
+		Long rideId = 0L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_2));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void endRide_driverCannotEndRideOfOtherDriver() {
+		final String URL = "/api/ride/{id}/end";
+		Long rideId = 4L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_1));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void endRide_notStarted() {
+		final String URL = "/api/ride/{id}/end";
+		Long rideId = 1L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_BOB));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Cannot end a ride that is not in status STARTED!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void endRide() {
+		final String URL = "/api/ride/{id}/end";
+		Long rideId = 4L;
+		
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_5));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);	
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		
+		RideDTO expected = ride4;
+		RideDTO result = response.getBody();
+		
+		assertThat(result).usingRecursiveComparison().ignoringFields("status", "startTime", "endTime").isEqualTo(expected);
+		assertThat(result.getStatus()).isEqualTo(Status.FINISHED);
+		assertThat(result.getEndTime()).isNotNull();
+		
+		// TODO: Check if driver is set to available? No endpoint for that...
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
