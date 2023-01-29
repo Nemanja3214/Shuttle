@@ -34,6 +34,7 @@ import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.ride.Ride.Status;
+import com.shuttle.ride.cancellation.dto.CancellationBodyDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
@@ -54,6 +55,7 @@ public class RideControllerTest {
 	private String JWT_DRIVER_2 = "";
 	private String JWT_DRIVER_3 = "";
 	private String JWT_DRIVER_5 = "";
+	private String JWT_DRIVER_4 = "";
 	private String JWT_PASSENGER_JOHN = "";
 	private String JWT_PASSENGER_TROY = "";
 	private String JWT_ADMIN = "";
@@ -63,6 +65,7 @@ public class RideControllerTest {
 	private RideDTO ride2;
 	private RideDTO ride3;
 	private RideDTO ride4;
+	private RideDTO ride5;
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -122,6 +125,7 @@ public class RideControllerTest {
 		JWT_DRIVER_3 = login("driver3@gmail.com", "1234");
 		JWT_DRIVER_2 = login("driver2@gmail.com", "1234");
 		JWT_DRIVER_5 = login("driver5@gmail.com", "1234");
+		JWT_DRIVER_4 = login("driver4@gmail.com", "1234");
 		JWT_PASSENGER_JOHN = login("john@gmail.com", "john123");
 		JWT_PASSENGER_TROY = login("troy@gmail.com", "Troytroy123");
 		JWT_ADMIN = login("admin@gmail.com", "admin");
@@ -196,6 +200,25 @@ public class RideControllerTest {
 		ride4.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
 		ride4.setPassengers(Arrays.asList(new RidePassengerDTO(14L, "p4@gmail.com")));
 		ride4.setDriver(new RideDriverDTO(9L, "driver5@gmail.com"));
+		
+		ride5 = new RideDTO();
+		ride5.setId(5L);
+		ride5.setEstimatedTimeInMinutes(100);
+		ride5.setBabyTransport(false);
+		ride5.setPetTransport(false);
+		ride5.setVehicleType("LUXURY");
+		ride5.setStatus(Status.STARTED);
+		ride5.setTotalCost(123.4);
+		ride5.setTotalLength(5.6);
+		ride5.setRejection(null);
+		ride5.setScheduledTime(null);
+		ride5.setStartTime(null); // doesn't matter.
+		ride5.setEndTime(null);
+		ride5.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		ride5.setPassengers(Arrays.asList(new RidePassengerDTO(15L, "p5@gmail.com")));
+		ride5.setDriver(new RideDriverDTO(8L, "driver4@gmail.com"));
+		
+		// skip ride 6
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -873,4 +896,136 @@ public class RideControllerTest {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Test
+	public void rejectRide_unauthorized() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 5L;
+		
+		CancellationBodyDTO reason = new CancellationBodyDTO("I don't like this passenger.");
+
+		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+			@Override
+			public void execute() throws Throwable {	
+				HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(null));
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+			}
+		});
+	}
+	
+	@Test
+	public void rejectRide_forbidden_admin() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 5L;
+		CancellationBodyDTO reason = new CancellationBodyDTO("I don't like this passenger.");
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void rejectRide_forbidden_passenger() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 5L;
+		CancellationBodyDTO reason = new CancellationBodyDTO("I don't like this passenger.");
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void rejectRide_notFound() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 0L;
+		CancellationBodyDTO reason = new CancellationBodyDTO("I don't like this passenger.");
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_DRIVER_4));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void rejectRide_driverCannotRejectRideOfOtherDriver() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 5L;
+		CancellationBodyDTO reason = new CancellationBodyDTO("I don't like this passenger.");
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_DRIVER_5));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void rejectRide_notPendingOrAccepted() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 6L;
+		CancellationBodyDTO reason = new CancellationBodyDTO("I don't like this passenger.");
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_DRIVER_4));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Cannot cancel a ride that is not in status PENDING or ACCEPTED!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void rejectRide_reasonNull() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 5L;
+		CancellationBodyDTO reason = new CancellationBodyDTO();
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_DRIVER_4));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Field (reason) is required!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void rejectRide_reasonTooLong() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 5L;
+		
+		String longerThan500Ch = " ".repeat(501); // Needs java 11
+		CancellationBodyDTO reason = new CancellationBodyDTO(longerThan500Ch);
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_DRIVER_4));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Field (reason) cannot be longer than 500 characters!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void rejectRide() {
+		final String URL = "/api/ride/{id}/cancel";
+		Long rideId = 5L;
+		
+		CancellationBodyDTO reason = new CancellationBodyDTO("I don't like this passenger.");
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_DRIVER_4));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);	
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		
+		RideDTO expected = ride5;
+		RideDTO result = response.getBody();
+		
+		assertThat(result).usingRecursiveComparison().ignoringFields("status", "rejection").isEqualTo(expected);
+		assertThat(result.getStatus()).isEqualTo(Status.REJECTED);
+		assertThat(result.getRejection()).isNotNull();
+		assertThat(result.getRejection().getReason()).isEqualTo("I don't like this passenger.");
+		assertThat(result.getRejection().getTimeOfRejection()).isNotNull();
+		
+		// TODO: Check if driver is set to available? No endpoint for that...
+	}
+	
 }

@@ -97,7 +97,7 @@ insert into route_locations(route_id, locations_id) values(2, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (0, 7, 1, 1, true, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (2, 12);
 
--- Ride 2: used for start
+-- Ride 3: used for start
 
 insert into route default values;
 insert into route_locations(route_id, locations_id) values(3, 1);
@@ -105,13 +105,29 @@ insert into route_locations(route_id, locations_id) values(3, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 6, 1, 1, false, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (3, 13);
 
--- Ride 3: used for finish
+-- Ride 4: used for finish
 
 insert into route default values;
 insert into route_locations(route_id, locations_id) values(4, 1);
 insert into route_locations(route_id, locations_id) values(4, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes, start_time) values (2, 9, 1, 1, false, false, 123.4, 5.6, 100, CURRENT_TIMESTAMP);
 insert into ride_passengers(ride_id, passengers_id) values (4, 14);
+
+-- Ride 5: used for reject
+
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(5, 1);
+insert into route_locations(route_id, locations_id) values(5, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 8, 1, 2, false, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (5, 15);
+
+-- Ride 6: used for reject which is in a bad state, read only! The data is bad because there's multiple passengers-drivers for one ride. TODO
+
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(6, 1);
+insert into route_locations(route_id, locations_id) values(6, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (3, 8, 1, 2, false, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (6, 15);
 
 --------------- Reports(?)
 

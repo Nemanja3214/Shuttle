@@ -637,7 +637,14 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('driver')")
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody(required=false) CancellationBodyDTO reason) {
+    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
+    	try {
+			MyValidator.validateRequired(reason.getReason(), "reason");
+			MyValidator.validateLength(reason.getReason(), "reason", 500);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
         if (id == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
