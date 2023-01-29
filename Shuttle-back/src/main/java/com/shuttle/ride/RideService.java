@@ -484,17 +484,23 @@ public class RideService implements IRideService {
         TimeZone tz = calendar.getTimeZone();
         ZoneId zoneId = tz.toZoneId();     
         
-        calendar.add(Calendar.DAY_OF_MONTH, -10);
+        calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -1000);
         LocalDate lowerBound = LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
         
-        calendar.add(Calendar.DAY_OF_MONTH, 20);
+        calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -500);
+        LocalDate middleBound = LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
+        
+        calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -10);
         LocalDate upperBound= LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
         
         if(isStart) {
-        	return between(lowerBound, LocalDate.now());
+        	return between(lowerBound, middleBound);
         }
         else {
-        	return between(LocalDate.now(), upperBound);
+        	return between(middleBound, upperBound);
         }
 	}
 
