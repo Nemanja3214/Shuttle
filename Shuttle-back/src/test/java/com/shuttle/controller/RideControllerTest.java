@@ -60,12 +60,15 @@ public class RideControllerTest {
 	private String JWT_PASSENGER_TROY = "";
 	private String JWT_ADMIN = "";
 	private String JWT_PASSENGER_1 = "";
+	private String JWT_PASSENGER_5 = "";
+	private String JWT_PASSENGER_6 = "";
 
 	private RideDTO ride1;
 	private RideDTO ride2;
 	private RideDTO ride3;
 	private RideDTO ride4;
 	private RideDTO ride5;
+	private RideDTO ride7;
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -130,6 +133,8 @@ public class RideControllerTest {
 		JWT_PASSENGER_TROY = login("troy@gmail.com", "Troytroy123");
 		JWT_ADMIN = login("admin@gmail.com", "admin");
 		JWT_PASSENGER_1 = login("p1@gmail.com", "1234");
+		JWT_PASSENGER_5 = login("p5@gmail.com", "1234");
+		JWT_PASSENGER_6 = login("p6@gmail.com", "1234");
 	}
 	
 	private void initRides() {
@@ -219,6 +224,23 @@ public class RideControllerTest {
 		ride5.setDriver(new RideDriverDTO(8L, "driver4@gmail.com"));
 		
 		// skip ride 6
+		
+		ride7 = new RideDTO();
+		ride7.setId(7L);
+		ride7.setEstimatedTimeInMinutes(100);
+		ride7.setBabyTransport(false);
+		ride7.setPetTransport(false);
+		ride7.setVehicleType("STANDARD");
+		ride7.setStatus(Status.STARTED);
+		ride7.setTotalCost(123.4);
+		ride7.setTotalLength(5.6);
+		ride7.setRejection(null);
+		ride7.setScheduledTime(null);
+		ride7.setStartTime(null); // doesn't matter.
+		ride7.setEndTime(null);
+		ride7.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		ride7.setPassengers(Arrays.asList(new RidePassengerDTO(16L, "p6@gmail.com"), new RidePassengerDTO(17L, "p7@gmail.com")));
+		ride7.setDriver(new RideDriverDTO(21L, "d1@gmail.com"));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1027,5 +1049,98 @@ public class RideControllerTest {
 		
 		// TODO: Check if driver is set to available? No endpoint for that...
 	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
 	
+	@Test
+	public void withdrawRide_unauthorized() {
+		final String URL = "/api/ride/{id}/withdraw";
+		Long rideId = 7L;
+		
+		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+			@Override
+			public void execute() throws Throwable {	
+				HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+			}
+		});	
+	}
+	
+	@Test
+	public void withdrawRide_forbidden_admin() {
+		final String URL = "/api/ride/{id}/withdraw";
+		Long rideId = 7L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void withdrawRide_forbidden_driver() {
+		final String URL = "/api/ride/{id}/withdraw";
+		Long rideId = 7L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void withdrawRide_notFound() {
+		final String URL = "/api/ride/{id}/withdraw";
+		Long rideId = 0L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void withdrawRide_passengerCannotWithdrawRideThatIsNotHis() {
+		final String URL = "/api/ride/{id}/withdraw";
+		Long rideId = 0L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void withdrawRide_notPendingOrCancelled() {
+		final String URL = "/api/ride/{id}/withdraw";
+		Long rideId = 6L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_5));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Cannot cancel a ride that isn't PENDING or ACCEPTED.", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void withdrawRide() {
+		final String URL = "/api/ride/{id}/withdraw";
+		Long rideId = 7L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_6));
+		ResponseEntity<RideDTO> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RideDTO>() {}, rideId);	
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		
+		RideDTO expected = ride7;
+		RideDTO result = response.getBody();
+		
+		assertThat(result).usingRecursiveComparison().ignoringFields("status").isEqualTo(expected);
+		assertThat(result.getStatus()).isEqualTo(Status.CANCELED);
+		
+		// TODO: Check if driver is set to available? No endpoint for that...
+	}
+	// TODO: Unauthorized PUT requests should not be POST!!!
 }
