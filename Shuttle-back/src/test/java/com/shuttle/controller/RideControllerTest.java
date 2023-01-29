@@ -649,7 +649,7 @@ public class RideControllerTest {
 			@Override
 			public void execute() throws Throwable {	
 				HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
-				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
 			}
 		});
 	}
@@ -740,7 +740,7 @@ public class RideControllerTest {
 			@Override
 			public void execute() throws Throwable {	
 				HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
-				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
 			}
 		});
 	}
@@ -834,7 +834,7 @@ public class RideControllerTest {
 			@Override
 			public void execute() throws Throwable {	
 				HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
-				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
 			}
 		});
 	}
@@ -930,7 +930,7 @@ public class RideControllerTest {
 			@Override
 			public void execute() throws Throwable {	
 				HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(null));
-				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
 			}
 		});
 	}
@@ -1142,5 +1142,8 @@ public class RideControllerTest {
 		
 		// TODO: Check if driver is set to available? No endpoint for that...
 	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////	
+	
 	// TODO: Unauthorized PUT requests should not be POST!!!
 }
