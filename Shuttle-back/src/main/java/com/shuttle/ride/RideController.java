@@ -682,7 +682,8 @@ public class RideController {
 		try {
 			MyValidator.validateRequired(dto.getFavoriteName(), "favoriteName");
 			MyValidator.validateRequired(dto.getVehicleType(), "vehicleType");
-			MyValidator.validateRequired(dto.isBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(dto.getBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(dto.getPetTransport(), "petTransport");
 			MyValidator.validateRequired(dto.getLocations(), "locations");
 			MyValidator.validateRequired(dto.getPassengers(), "passengers");
 //			MyValidator.validateRequired(dto.getScheduledTime(), "scheduledTime");
@@ -698,9 +699,9 @@ public class RideController {
 			 FavoriteRoute favoriteRoute = this.rideService.createFavoriteRoute(dto, 10);
 			 return new ResponseEntity<FavoriteRouteDTO>(FavoriteRouteDTO.from(favoriteRoute), HttpStatus.OK);
 		} catch (NonExistantVehicleType e) {
-			return new ResponseEntity<RESTError>(new RESTError("Vehicle type doesn't exist"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError("Vehicle type doesn't exist!"), HttpStatus.BAD_REQUEST);
 		} catch (NonExistantUserException e) {
-			return new ResponseEntity<RESTError>(new RESTError("User doesn't exist"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError("User doesn't exist!"), HttpStatus.BAD_REQUEST);
 		} catch (FavoriteRideLimitExceeded e) {
 			return new ResponseEntity<RESTError>(new RESTError("Number of favorite rides cannot exceed 10!"), HttpStatus.BAD_REQUEST);
 		}

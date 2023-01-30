@@ -403,9 +403,9 @@ public class RideService implements IRideService {
     	favoriteRoute.setLocations(locations);
     	
     	favoriteRoute.setVehicleType(vehicleType.get());
-    	favoriteRoute.setBabyTransport(dto.isBabyTransport());
+    	favoriteRoute.setBabyTransport(dto.getBabyTransport());
     	favoriteRoute.setFavoriteName(dto.getFavoriteName());
-    	favoriteRoute.setPetTransport(dto.isPetTransport());
+    	favoriteRoute.setPetTransport(dto.getPetTransport());
     	favoriteRoute = this.favouriteRouteRepository.save(favoriteRoute);
     	return favoriteRoute;
     }

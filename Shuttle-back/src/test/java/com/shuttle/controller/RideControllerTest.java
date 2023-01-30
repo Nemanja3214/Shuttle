@@ -31,6 +31,7 @@ import org.springframework.web.client.ResourceAccessException;
 import com.shuttle.common.RESTError;
 import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
+import com.shuttle.location.dto.FavoriteRouteDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.panic.PanicDTO;
@@ -1294,9 +1295,121 @@ public class RideControllerTest {
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////	
 	
+	@Test
+	public void createFavouriteRoute_unauthorized() {
+		final String URL = "/api/ride/favorites";
+		
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(null));
+
+		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+			@Override
+			public void execute() throws Throwable {
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+			}
+		});
+	}
+	
+	@Test
+	public void createFavouriteRoute_forbidden_driver() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName("My fav");
+		dto.setVehicleType("STANDARD");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(2, "john@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));;
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_DRIVER_BOB));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void createFavouriteRoute_badVehicleType() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName("My fav");
+		dto.setVehicleType("dhksjHDFKJHRF389dh9we8hdc298h");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(2, "john@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Vehicle type doesn't exist!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createFavouriteRoute_userNotFound() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName("My fav");
+		dto.setVehicleType("dhksjHDFKJHRF389dh9we8hdc298h");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(2, "john@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Vehicle type doesn't exist!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createFavouriteRoute_moreThan10Rides() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName("My fav");
+		dto.setVehicleType("STANDARD");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(2, "john@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Number of favorite rides cannot exceed 10!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createFavouriteRoute() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName("My fav");
+		dto.setVehicleType("STANDARD");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(3, "troy@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_TROY));
+		ResponseEntity<FavoriteRouteDTO> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<FavoriteRouteDTO>() {});	
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		FavoriteRouteDTO result = response.getBody();
+		
+		assertThat(result).usingRecursiveComparison().ignoringFields("id").isEqualTo(dto);
+		assertThat(result.getId()).isNotNull();
+	}
 	
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////	
 	
+	// TODO: createFavouriteRoute - should not allow creating routes not featuring myself?
 	// TODO: createRide_noDriverAvailable_supportedParamsBusy() 
 }
