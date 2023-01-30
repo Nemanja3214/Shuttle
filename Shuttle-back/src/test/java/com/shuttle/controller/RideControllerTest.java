@@ -1454,6 +1454,90 @@ public class RideControllerTest {
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	
+	@Test
+	public void getFavouriteRoutesByPassenger_unauthorized() {
+		final String URL = "/api/ride/favorites/passenger/{passengerId}";
+		final Long passengerId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, passengerId);
+		
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());	
+	}
+	
+	@Test
+	public void getFavouriteRoutesByPassenger_forbidden_driver() {
+		final String URL = "/api/ride/favorites/passenger/{passengerId}";
+		final Long passengerId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, passengerId);
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());		
+	}
+	
+	@Test
+	public void getFavouriteRoutesByPassenger_forbidden_admin() {
+		final String URL = "/api/ride/favorites/passenger/{passengerId}";
+		final Long passengerId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, passengerId);
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());	
+	}
+	
+	@Test
+	public void getFavouriteRoutesByPassenger_passengerNotFound() {
+		final String URL = "/api/ride/favorites/passenger/{passengerId}";
+		final Long passengerId = 0L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, passengerId);
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());	
+		assertEquals("User does not exist!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void getFavouriteRoutesByPassenger_passengerCannotViewFavoriteRoutesOfOtherPassenger() {
+		final String URL = "/api/ride/favorites/passenger/{passengerId}";
+		final Long passengerId = 3L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, passengerId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());	
+		assertEquals("User does not exist!", response.getBody());
+	}
+
+	@Test
+	public void getFavouriteRoutesByPassenger() {
+		final String URL = "/api/ride/favorites/passenger/{passengerId}";
+		final Long passengerId = 11L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<List<FavoriteRouteDTO>> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<List<FavoriteRouteDTO>>() {}, passengerId);
+		
+		List<FavoriteRouteDTO> routes = response.getBody();
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(routes.size() == 1);
+		
+		FavoriteRouteDTO f = new FavoriteRouteDTO();
+		f.setId(20L);
+		f.setFavoriteName("abc");
+		f.setVehicleType("STANDARD");
+		f.setBabyTransport(false);
+		f.setPetTransport(true);
+		f.setPassengers(Arrays.asList(new BasicUserInfoDTO(11, "p1@gmail.com")));
+		f.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		
+		assertThat(routes.get(0)).usingRecursiveComparison().ignoringFields("scheduledTime").isEqualTo(f);
+		assertThat(routes.get(0).getScheduledTime()).isNotNull();
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
 	// TODO: createFavouriteRoute - should not allow creating routes not featuring myself?
 	// TODO: createRide_noDriverAvailable_supportedParamsBusy() 
 }

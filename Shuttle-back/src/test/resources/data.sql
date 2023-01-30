@@ -190,14 +190,14 @@ insert into ride_passengers(ride_id, passengers_id) values (8, 18);
 
 
 insert into favorite_route(vehicle_type_id) values (1);
+insert into favorite_route(vehicle_type_id) values (2);
+insert into favorite_route(vehicle_type_id) values (3);
 insert into favorite_route(vehicle_type_id) values (1);
+insert into favorite_route(vehicle_type_id) values (2);
+insert into favorite_route(vehicle_type_id) values (3);
 insert into favorite_route(vehicle_type_id) values (1);
-insert into favorite_route(vehicle_type_id) values (1);
-insert into favorite_route(vehicle_type_id) values (1);
-insert into favorite_route(vehicle_type_id) values (1);
-insert into favorite_route(vehicle_type_id) values (1);
-insert into favorite_route(vehicle_type_id) values (1);
-insert into favorite_route(vehicle_type_id) values (1);
+insert into favorite_route(vehicle_type_id) values (2);
+insert into favorite_route(vehicle_type_id) values (3);
 insert into favorite_route(vehicle_type_id) values (1);
 
 insert into favorite_route(vehicle_type_id) values (1);
@@ -209,6 +209,8 @@ insert into favorite_route(vehicle_type_id) values (1);
 insert into favorite_route(vehicle_type_id) values (1);
 insert into favorite_route(vehicle_type_id) values (1);
 insert into favorite_route(vehicle_type_id) values (1);
+
+insert into favorite_route(vehicle_type_id, favorite_name, baby_transport, pet_transport, scheduled_time) values (1, 'abc', false, true, CURRENT_TIMESTAMP);
 
 insert into favorite_route_passengers(favorite_route_id, passengers_id) values (1, 2);
 insert into favorite_route_passengers(favorite_route_id, passengers_id) values (2, 2);
@@ -230,6 +232,10 @@ insert into favorite_route_passengers(favorite_route_id, passengers_id) values (
 insert into favorite_route_passengers(favorite_route_id, passengers_id) values (17, 3);
 insert into favorite_route_passengers(favorite_route_id, passengers_id) values (18, 3);
 insert into favorite_route_passengers(favorite_route_id, passengers_id) values (19, 3);
+
+insert into favorite_route_passengers(favorite_route_id, passengers_id) values (20, 11);
+insert into favorite_route_locations(favorite_route_id, locations_id) values(20, 1);
+insert into favorite_route_locations(favorite_route_id, locations_id) values(20, 2);
 
 --------------- Reports(?)
 

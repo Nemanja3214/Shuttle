@@ -718,12 +718,19 @@ public class RideController {
     
     @PreAuthorize("hasAnyAuthority('passenger')")
     @GetMapping("/favorites/passenger/{passengerId}")
-    public ResponseEntity<?> getFavouriteRoutesByPassenger(@PathVariable long passengerId){
+    public ResponseEntity<?> getFavouriteRoutesByPassenger(@PathVariable Long passengerId) {
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isPassenger(user)) {
+            if (user.getId() != passengerId) {
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
+            }
+        }
+        
     	List<FavoriteRoute> favoriteRoutes;
 		try {
 			favoriteRoutes = this.rideService.getFavouriteRoutesByPassengerId(passengerId);
 		} catch (NonExistantUserException e) {
-			return new ResponseEntity<RESTError>(new RESTError("Passenger with this id doesn't exist!"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.BAD_REQUEST);
 		}
     	List<FavoriteRouteDTO> favoriteRouteDTOs = favoriteRoutes.stream().map(fav -> FavoriteRouteDTO.from(fav)).toList();
     	return new ResponseEntity<List<FavoriteRouteDTO>>(favoriteRouteDTOs, HttpStatus.OK);
