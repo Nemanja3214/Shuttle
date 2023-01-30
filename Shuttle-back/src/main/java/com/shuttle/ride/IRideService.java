@@ -157,4 +157,7 @@ public interface IRideService {
 
 //	TODO remove
 	List<Ride> findAll();
+
+	List<GraphEntryDTO> getOverallGraphData(LocalDateTime start, LocalDateTime end);
+
 }

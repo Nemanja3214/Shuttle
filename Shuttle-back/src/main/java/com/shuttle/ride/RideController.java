@@ -735,7 +735,7 @@ public class RideController {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      
+    @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
     @GetMapping("/graph/passenger/{passengerId}")
     public ResponseEntity<?> getPassengerGraphData(@PathVariable Long passengerId, @RequestParam(required = true) String from, @RequestParam(required = true) String to){
 		if (passengerId == null) {
@@ -762,6 +762,7 @@ public class RideController {
 		}
     }
     
+  @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/graph/driver/{driverId}")
     public ResponseEntity<?> getDriverGraphData(@PathVariable Long driverId, @RequestParam(required = true) String from, @RequestParam(required = true) String to){
 		if (driverId == null) {
@@ -787,6 +788,26 @@ public class RideController {
 			return new ResponseEntity<RESTError>(new RESTError("Driver with that id doesn't exist"), HttpStatus.NOT_FOUND);
 		}
     }
+    
+  @PreAuthorize("hasAnyAuthority('admin')")
+  @GetMapping("/graph/admin")
+  public ResponseEntity<?> getDriverGraphData(@RequestParam(required = true) String from, @RequestParam(required = true) String to){
+		LocalDateTime tFrom = null, tTo = null;
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			tFrom = LocalDateTime.parse(from, formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (from) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"));
+			tTo = LocalDateTime.parse(to, formatter);
+		} catch (DateTimeParseException e) {
+			return new ResponseEntity<RESTError>(new RESTError("Field (to) format is not valid!"), HttpStatus.BAD_REQUEST);
+		}
+		List<GraphEntryDTO>result = this.rideService.getOverallGraphData(tFrom, tTo);
+		return new ResponseEntity<List<GraphEntryDTO>>(result, HttpStatus.OK);
+  }
       
 //    TODO remove
     @GetMapping
