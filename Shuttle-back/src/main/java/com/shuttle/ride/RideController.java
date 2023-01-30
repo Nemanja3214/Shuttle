@@ -494,9 +494,10 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping("/{id}/panic")
-    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody(required=false) PanicSendDTO reason) {   
+    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody PanicSendDTO reason) {   
     	try {
 			MyValidator.validateRequired(reason.getReason(), "reason");
+			MyValidator.validateLength(reason.getReason(), "reason", 500);
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
@@ -521,7 +522,7 @@ public class RideController {
             }
         }
         
-        rideService.cancelRide(ride);
+        rideService.panicRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
         
         Panic p = panicService.add(ride, user, reason.getReason());

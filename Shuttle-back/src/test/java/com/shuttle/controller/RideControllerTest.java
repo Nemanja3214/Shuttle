@@ -33,6 +33,8 @@ import com.shuttle.credentials.dto.CredentialsDTO;
 import com.shuttle.credentials.dto.TokenDTO;
 import com.shuttle.location.dto.LocationDTO;
 import com.shuttle.location.dto.RouteDTO;
+import com.shuttle.panic.PanicDTO;
+import com.shuttle.panic.PanicSendDTO;
 import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.dto.CancellationBodyDTO;
 import com.shuttle.ride.dto.CreateRideDTO;
@@ -40,6 +42,7 @@ import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RideDriverDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.dto.BasicUserInfoDTO;
+import com.shuttle.user.dto.UserDTONoPassword;
 
 @SpringBootTest(webEnvironment=WebEnvironment.RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
@@ -56,12 +59,14 @@ public class RideControllerTest {
 	private String JWT_DRIVER_3 = "";
 	private String JWT_DRIVER_5 = "";
 	private String JWT_DRIVER_4 = "";
+	private String JWT_D_2 = "";
 	private String JWT_PASSENGER_JOHN = "";
 	private String JWT_PASSENGER_TROY = "";
 	private String JWT_ADMIN = "";
 	private String JWT_PASSENGER_1 = "";
 	private String JWT_PASSENGER_5 = "";
 	private String JWT_PASSENGER_6 = "";
+	private String JWT_PASSENGER_9 = "";
 
 	private RideDTO ride1;
 	private RideDTO ride2;
@@ -69,6 +74,7 @@ public class RideControllerTest {
 	private RideDTO ride4;
 	private RideDTO ride5;
 	private RideDTO ride7;
+	private RideDTO ride8;
 	
 	private HttpHeaders getHeader(String jwt) {
 		HttpHeaders headers = new HttpHeaders();
@@ -135,6 +141,8 @@ public class RideControllerTest {
 		JWT_PASSENGER_1 = login("p1@gmail.com", "1234");
 		JWT_PASSENGER_5 = login("p5@gmail.com", "1234");
 		JWT_PASSENGER_6 = login("p6@gmail.com", "1234");
+		JWT_PASSENGER_9 = login("p9@gmail.com", "1234");
+		JWT_D_2 = login("d2@gmail.com", "1234");
 	}
 	
 	private void initRides() {
@@ -241,6 +249,23 @@ public class RideControllerTest {
 		ride7.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
 		ride7.setPassengers(Arrays.asList(new RidePassengerDTO(16L, "p6@gmail.com"), new RidePassengerDTO(17L, "p7@gmail.com")));
 		ride7.setDriver(new RideDriverDTO(21L, "d1@gmail.com"));
+		
+		ride8 = new RideDTO();
+		ride8.setId(8L);
+		ride8.setEstimatedTimeInMinutes(100);
+		ride8.setBabyTransport(false);
+		ride8.setPetTransport(false);
+		ride8.setVehicleType("STANDARD");
+		ride8.setStatus(Status.STARTED);
+		ride8.setTotalCost(123.4);
+		ride8.setTotalLength(5.6);
+		ride8.setRejection(null);
+		ride8.setScheduledTime(null);
+		ride8.setStartTime(null); // doesn't matter.
+		ride8.setEndTime(null);
+		ride8.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("Novi Sad 1", 45.235820, 19.803677), new LocationDTO("Novi Sad 2", 45.233752, 19.816665))));
+		ride8.setPassengers(Arrays.asList(new RidePassengerDTO(16L, "p8@gmail.com")));
+		ride8.setDriver(new RideDriverDTO(22L, "d2@gmail.com"));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -338,7 +363,7 @@ public class RideControllerTest {
 				Arrays.asList(route),
 				"VAN", true, true, null, 123.0); // There is no van with babies and pets.
 		
-		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_1));
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_9));
 		ResponseEntity<RESTError> response = restTemplate.exchange(
 				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
 		);
@@ -357,7 +382,7 @@ public class RideControllerTest {
 				Arrays.asList(route),
 				"STANDARD", true, false, null, 123.0); // Standard vehicle - bob - busy
 		
-		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_1));
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_9));
 		ResponseEntity<RESTError> response = restTemplate.exchange(
 				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
 		);
@@ -1144,6 +1169,134 @@ public class RideControllerTest {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////	
+
+	@Test
+	public void panicRide_unauthorized() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 8L;
+		
+		PanicSendDTO dto = new PanicSendDTO("The passenger is hitting me.");
+		
+		Assertions.assertThrows(ResourceAccessException.class, new Executable() {	
+			@Override
+			public void execute() throws Throwable {	
+				HttpEntity<PanicSendDTO> requestBody = new HttpEntity<PanicSendDTO>(dto, getHeader(null));
+				ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);			
+			}
+		});			
+	}
 	
-	// TODO: Unauthorized PUT requests should not be POST!!!
+	@Test
+	public void panicRide_forbidden_admin() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 8L;
+		PanicSendDTO dto = new PanicSendDTO("The passenger is hitting me.");
+		
+		HttpEntity<PanicSendDTO> requestBody = new HttpEntity<PanicSendDTO>(dto, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+	}
+	
+	@Test
+	public void panicRide_notFound() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 0L;
+		PanicSendDTO dto = new PanicSendDTO("The passenger is hitting me.");
+
+		HttpEntity<PanicSendDTO> requestBody = new HttpEntity<PanicSendDTO>(dto, getHeader(JWT_D_2));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void panicRide_cannotPanicRideThatIsNotMineDriver() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 7L;
+		PanicSendDTO dto = new PanicSendDTO("The passenger is hitting me.");
+
+		HttpEntity<PanicSendDTO> requestBody = new HttpEntity<PanicSendDTO>(dto, getHeader(JWT_D_2));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());	
+	}
+	
+	@Test
+	public void panicRide_cannotPanicRideThatIsNotMinePassenger() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 7L;
+		PanicSendDTO dto = new PanicSendDTO("The driver is hitting me.");
+
+		HttpEntity<PanicSendDTO> requestBody = new HttpEntity<PanicSendDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+		assertEquals("Ride does not exist!", response.getBody());	
+	}
+	
+	@Test
+	public void panicRide_reasonNull() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 8L;
+		PanicSendDTO dto = new PanicSendDTO();
+
+		HttpEntity<PanicSendDTO> requestBody = new HttpEntity<PanicSendDTO>(dto, getHeader(JWT_D_2));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Field (reason) is required!", response.getBody().getMessage());	
+	}
+	
+	@Test
+	public void panicRide_reasonTooLong() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 8L;
+		
+		String longerThan500Ch = " ".repeat(501); // Needs java 11
+		PanicSendDTO dto = new PanicSendDTO(longerThan500Ch);
+
+		HttpEntity<PanicSendDTO> requestBody = new HttpEntity<PanicSendDTO>(dto, getHeader(JWT_D_2));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<RESTError>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Field (reason) cannot be longer than 500 characters!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void panicRide() {
+		final String URL = "/api/ride/{id}/panic";
+		Long rideId = 8L;
+		
+		CancellationBodyDTO reason = new CancellationBodyDTO("The driver is hitting me.");
+
+		HttpEntity<CancellationBodyDTO> requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_D_2));
+		ResponseEntity<PanicDTO> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<PanicDTO>() {}, rideId);	
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		
+		PanicDTO expected = new PanicDTO();
+		expected.setId(1L);
+		expected.setReason(reason.getReason());
+		expected.setRide(ride8);
+		expected.setUser(new UserDTONoPassword(22L, "D2", null, null, null, "d2@gmail.com", null));
+		PanicDTO result = response.getBody();
+		
+		assertThat(result).usingRecursiveComparison().ignoringFields("ride", "user", "time").isEqualTo(expected);
+		assertThat(result.getRide().getId()).isEqualTo(rideId);
+		assertThat(result.getRide().getStatus()).isEqualTo(Status.CANCELED);
+		assertThat(result.getRide().getEndTime()).isNotNull();
+		assertThat(result.getTime()).isNotNull();
+		assertThat(result.getUser()).usingRecursiveComparison().ignoringFields("profilePicture").isEqualTo(expected.getUser());
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////	
+	
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////	
+	
+	// TODO: createRide_noDriverAvailable_supportedParamsBusy() 
 }

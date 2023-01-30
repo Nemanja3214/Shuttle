@@ -32,11 +32,11 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 insert into generic_user(email, password, enabled, blocked, active, name) values ('p9@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('p10@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
 
-insert into generic_user(email, password, enabled, blocked, active, name) values ('d1@gmail.com', '$2a$10$krk0jTL1y0eFbRqBB1jO9eZv.gSZkZ/vPzXwnZG1W3WDh/xZs8OIC', true, false, false, 'DriverName_3');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('d2@gmail.com', '$2a$10$wEK.5n29HkO3NEJxVfPaYODNmRIPCfSHwwv77KrJ5JXKHWGdINPee', true, false, false, 'DriverName_4');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('d3@gmail.com', '$2a$10$ePVkPF/GxUI2V4kSi8qhi.hRlCX/h5CgZtpdOoy05btsgbfaaCNOC', true, false, false, 'DriverName_5');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('d4@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'DriverName_6');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('d5@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'DriverName_6');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('d1@gmail.com', '$2a$10$krk0jTL1y0eFbRqBB1jO9eZv.gSZkZ/vPzXwnZG1W3WDh/xZs8OIC', true, false, false, 'D1');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('d2@gmail.com', '$2a$10$wEK.5n29HkO3NEJxVfPaYODNmRIPCfSHwwv77KrJ5JXKHWGdINPee', true, false, false, 'D2');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('d3@gmail.com', '$2a$10$ePVkPF/GxUI2V4kSi8qhi.hRlCX/h5CgZtpdOoy05btsgbfaaCNOC', true, false, false, 'D3');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('d4@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'D4');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('d5@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'D5');
 
 
 
@@ -176,6 +176,14 @@ insert into route_locations(route_id, locations_id) values(7, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 21, 1, 1, false, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (7, 16);
 insert into ride_passengers(ride_id, passengers_id) values (7, 17);
+
+-- Ride 8: used for panic
+
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(8, 1);
+insert into route_locations(route_id, locations_id) values(8, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 22, 1, 1, false, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (8, 18);
 
 --------------- Reports(?)
 

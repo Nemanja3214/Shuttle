@@ -324,6 +324,16 @@ public class RideService implements IRideService {
 		ride = rideRepository.save(ride);
 		return ride;
     }
+    
+
+	@Override
+	public Ride panicRide(Ride ride) {
+		ride.setStatus(Status.CANCELED);
+		ride.setEndTime(LocalDateTime.now());
+		
+		ride = rideRepository.save(ride);
+		return ride;
+	}
 
     @Override
     public List<Ride> findRidesWithNoDriver() {
@@ -451,7 +461,6 @@ public class RideService implements IRideService {
 		}
 		return this.rideRepository.getDriverGraphData(start, end, driverId);
 	}
-
 
 	@Override
 	public void generate(Long driverId, Long passengerId) {
