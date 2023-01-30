@@ -519,4 +519,9 @@ public class RideService implements IRideService {
 	public List<Ride> findAll() {
 		return this.rideRepository.findAll();
 	}
+
+	@Override
+	public List<GraphEntryDTO> getOverallGraphData(LocalDateTime start, LocalDateTime end) {
+		return this.rideRepository.getOverallGraphData(start, end);
+	}
 }
