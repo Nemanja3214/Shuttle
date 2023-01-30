@@ -173,4 +173,6 @@ public interface IRideService {
 	public FavoriteRoute findFavoriteRouteById(Long id);
 
 	
+	List<GraphEntryDTO> getOverallGraphData(LocalDateTime start, LocalDateTime end);
+
 }
