@@ -735,7 +735,7 @@ public class RideController {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//    @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+    @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
     @GetMapping("/graph/passenger/{passengerId}")
     public ResponseEntity<?> getPassengerGraphData(@PathVariable Long passengerId, @RequestParam(required = true) String from, @RequestParam(required = true) String to){
 		if (passengerId == null) {
@@ -762,7 +762,7 @@ public class RideController {
 		}
     }
     
-//  @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+  @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/graph/driver/{driverId}")
     public ResponseEntity<?> getDriverGraphData(@PathVariable Long driverId, @RequestParam(required = true) String from, @RequestParam(required = true) String to){
 		if (driverId == null) {
@@ -789,7 +789,7 @@ public class RideController {
 		}
     }
     
-//  @PreAuthorize("hasAnyAuthority('passenger')")
+  @PreAuthorize("hasAnyAuthority('admin')")
   @GetMapping("/graph/admin")
   public ResponseEntity<?> getDriverGraphData(@RequestParam(required = true) String from, @RequestParam(required = true) String to){
 		LocalDateTime tFrom = null, tTo = null;
