@@ -3,6 +3,8 @@ package com.shuttle.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -1407,8 +1409,50 @@ public class RideControllerTest {
 		assertThat(result.getId()).isNotNull();
 	}
 	
+	///////////////////////////////////////////////////////////////////////////////////////////////
 	
-	///////////////////////////////////////////////////////////////////////////////////////////////	
+	@Test
+	public void getFavouriteRoutes_unauthorized() {
+		final String URL = "/api/ride/favorites";
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {});
+		
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());	
+	}
+	
+	@Test
+	public void getFavouriteRoutes_forbidden_driver() {
+		final String URL = "/api/ride/favorites";
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {});
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());		
+	}
+	
+	@Test
+	public void getFavouriteRoutes_forbidden_admin() {
+		final String URL = "/api/ride/favorites";
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {});
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());	
+	}
+	
+	@Test
+	public void getFavouriteRoutes() {
+		final String URL = "/api/ride/favorites";
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
+		ResponseEntity<List<FavoriteRouteDTO>> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<List<FavoriteRouteDTO>>() {});
+		
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertThat(response.getBody().stream().map(r -> r.getId()).distinct().count() == response.getBody().size());
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
 	
 	// TODO: createFavouriteRoute - should not allow creating routes not featuring myself?
 	// TODO: createRide_noDriverAvailable_supportedParamsBusy() 

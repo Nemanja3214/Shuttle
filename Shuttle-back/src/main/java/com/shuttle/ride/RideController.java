@@ -716,6 +716,7 @@ public class RideController {
     	
     }
     
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @GetMapping("/favorites/passenger/{passengerId}")
     public ResponseEntity<?> getFavouriteRoutesByPassenger(@PathVariable long passengerId){
     	List<FavoriteRoute> favoriteRoutes;
