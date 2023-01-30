@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.shuttle.driver.dto.DriverStatDTO;
+import com.shuttle.vehicle.VehicleLocationDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ public interface IDriverService {
 	 */
 	public Driver setAvailable(Driver driver, boolean available);
 	public List<LocationDTO> getActiveDriversLocations();
+	public List<VehicleLocationDTO> getActiveDriversVehicleLocations();
 	public List<Driver> findAllActive();
     /**
      * Get duration of work done in the last 24 hours.

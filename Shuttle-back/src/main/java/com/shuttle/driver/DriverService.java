@@ -13,6 +13,7 @@ import com.shuttle.driver.dto.DriverStatDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.RideService;
+import com.shuttle.vehicle.VehicleLocationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -78,6 +79,13 @@ public class DriverService implements IDriverService {
         List<Driver> activeDrivers = driverRepository.findAllActive();
         List<Vehicle> driversVehicles = vehicleRepository.findByDriverIn(activeDrivers);
         return driversVehicles.stream().map(vehicle -> LocationDTO.from(vehicle.getCurrentLocation())).toList();
+    }
+
+    @Override
+    public List<VehicleLocationDTO> getActiveDriversVehicleLocations() {
+        List<Driver> activeDrivers = driverRepository.findAllActive();
+        List<Vehicle> driversVehicles = vehicleRepository.findByDriverIn(activeDrivers);
+        return driversVehicles.stream().map(VehicleLocationDTO::new).toList();
     }
 
     @Override
