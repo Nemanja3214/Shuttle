@@ -739,7 +739,20 @@ public class RideController {
     
     @PreAuthorize("hasAnyAuthority('passenger')")
     @DeleteMapping("/favorites/{id}")
-    public ResponseEntity<?> deleteFavouriteRoute(@PathVariable long id){
+    public ResponseEntity<?> deleteFavouriteRoute(@PathVariable Long id){
+    	final FavoriteRoute fr = rideService.findFavoriteRouteById(id);  
+    	
+    	if (fr == null) {
+    		return new ResponseEntity<>("Favorite location does not exist!", HttpStatus.NOT_FOUND);
+    	}
+    			
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isPassenger(user)) {
+            if (!fr.getPassengers().stream().anyMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<>("Favorite location does not exist!", HttpStatus.NOT_FOUND);
+            }
+        }
+        
     	try {
 			this.rideService.delete(id);
 		} catch (NonExistantFavoriteRoute e) {

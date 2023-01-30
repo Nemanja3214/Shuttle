@@ -165,5 +165,12 @@ public interface IRideService {
 //	TODO remove
 	List<Ride> findAll();
 
+	/**
+	 * Get favourite route by ID
+	 * @param id
+	 * @return The route or null if none found
+	 */
+	public FavoriteRoute findFavoriteRouteById(Long id);
+
 	
 }

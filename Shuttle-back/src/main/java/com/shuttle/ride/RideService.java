@@ -522,4 +522,9 @@ public class RideService implements IRideService {
 	public List<Ride> findAll() {
 		return this.rideRepository.findAll();
 	}
+
+	@Override
+	public FavoriteRoute findFavoriteRouteById(Long id) {
+		return this.favouriteRouteRepository.findById(id).orElse(null);
+	}
 }

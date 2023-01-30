@@ -1493,10 +1493,10 @@ public class RideControllerTest {
 		final Long passengerId = 0L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
-		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<RESTError>() {}, passengerId);
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, passengerId);
 		
-		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());	
-		assertEquals("User does not exist!", response.getBody().getMessage());
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());	
+		assertEquals("User does not exist!", response.getBody());
 	}
 	
 	@Test
@@ -1537,6 +1537,83 @@ public class RideControllerTest {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	@Test
+	public void deleteFavouriteRoute_unauthorized() {
+		final String URL = "/api/ride/favorites/{favId}";
+		final Long routeId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(null));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.DELETE, requestBody, new ParameterizedTypeReference<RESTError>() {}, routeId);
+		
+		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+	}
+	
+	@Test
+	public void deleteFavouriteRoute_forbidden_driver() {
+		final String URL = "/api/ride/favorites/{favId}";
+		final Long routeId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_DRIVER_1));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.DELETE, requestBody, new ParameterizedTypeReference<RESTError>() {}, routeId);
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());		
+	}
+	
+	@Test
+	public void deleteFavouriteRoute_forbidden_admin() {
+		final String URL = "/api/ride/favorites/{favId}";
+		final Long routeId = 2L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.DELETE, requestBody, new ParameterizedTypeReference<RESTError>() {}, routeId);
+		
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());	
+	}
+	
+	@Test
+	public void deleteFavouriteRoute_notFound() {
+		final String URL = "/api/ride/favorites/{favId}";
+		final Long routeId = 0L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.DELETE, requestBody, new ParameterizedTypeReference<String>() {}, routeId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());	
+		assertEquals("Favorite location does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void deleteFavouriteRoute_passengerCannotDeleteFavoriteRouteOfOtherPassenger() {
+		final String URL = "/api/ride/favorites/{favId}";
+		final Long routeId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_TROY));
+		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.DELETE, requestBody, new ParameterizedTypeReference<String>() {}, routeId);
+		
+		assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());	
+		assertEquals("Favorite location does not exist!", response.getBody());
+	}
+	
+	@Test
+	public void deleteFavouriteRoute() {
+		final String URL = "/api/ride/favorites/{favId}";
+		final Long routeId = 1L;
+
+		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<Void> response = restTemplate.exchange(URL, HttpMethod.DELETE, requestBody, new ParameterizedTypeReference<Void>() {}, routeId);
+		
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+		
+		// If we try to delete it again it'll return NOT_FOUND.
+		// This breaks SRP but we don't have no other way of accessing the entity.
+		
+		requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<String> response2 = restTemplate.exchange(URL, HttpMethod.DELETE, requestBody, new ParameterizedTypeReference<String>() {}, routeId);
+		assertEquals(HttpStatus.NOT_FOUND, response2.getStatusCode());	
+		assertEquals("Favorite location does not exist!", response2.getBody());
+	}
+	
 	
 	// TODO: createFavouriteRoute - should not allow creating routes not featuring myself?
 	// TODO: createRide_noDriverAvailable_supportedParamsBusy() 
