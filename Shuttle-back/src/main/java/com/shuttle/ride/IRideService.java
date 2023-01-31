@@ -103,6 +103,13 @@ public interface IRideService {
      * @return The ride.
      */
     Ride startRide(Ride ride);
+    
+    /**
+     * Panic the ride. Effectively it's like cancel() + sets the end time.
+     * @param ride The ride.
+     * @return The ride.
+     */
+    Ride panicRide(Ride ride);
 
     /**
      * Find all rides whose driver is null (scheduled in the future).
@@ -158,6 +165,14 @@ public interface IRideService {
 //	TODO remove
 	List<Ride> findAll();
 
+	/**
+	 * Get favourite route by ID
+	 * @param id
+	 * @return The route or null if none found
+	 */
+	public FavoriteRoute findFavoriteRouteById(Long id);
+
+	
 	List<GraphEntryDTO> getOverallGraphData(LocalDateTime start, LocalDateTime end);
 
 }

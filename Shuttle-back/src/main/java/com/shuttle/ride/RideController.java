@@ -335,7 +335,7 @@ public class RideController {
 			MyValidator.validateLength(createRideDTO.getVehicleType(), "vehicleType", 50);
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
-		}	
+		}
     	
     	if (createRideDTO.getDistance() == null) {
     		createRideDTO.setDistance(404.0);    	
@@ -353,7 +353,8 @@ public class RideController {
             final Ride ride = from(createRideDTO, driver);
 
             ride.setScheduledTime(scheduledFor);
-            ride.setTotalLength(createRideDTO.getLocations().stream().mapToDouble(route -> route.getDistance()).sum());
+            ride.setTotalLength(createRideDTO.getDistance());
+            //ride.setTotalLength(createRideDTO.getLocations().stream().mapToDouble(route -> route.getDistance()).sum());
             rideService.save(ride);
             notifyRidePassengers(ride);
 
@@ -493,9 +494,10 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('passenger', 'driver')")
     @PutMapping("/{id}/panic")
-    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody(required=false) PanicSendDTO reason) {   
+    public ResponseEntity<?> panicRide(@PathVariable Long id, @RequestBody PanicSendDTO reason) {   
     	try {
 			MyValidator.validateRequired(reason.getReason(), "reason");
+			MyValidator.validateLength(reason.getReason(), "reason", 500);
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
@@ -520,7 +522,7 @@ public class RideController {
             }
         }
         
-        rideService.cancelRide(ride);
+        rideService.panicRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
         
         Panic p = panicService.add(ride, user, reason.getReason());
@@ -636,7 +638,14 @@ public class RideController {
 
     @PreAuthorize("hasAnyAuthority('driver')")
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody(required=false) CancellationBodyDTO reason) {
+    public ResponseEntity<?> rejectRide(@PathVariable Long id, @RequestBody CancellationBodyDTO reason) {
+    	try {
+			MyValidator.validateRequired(reason.getReason(), "reason");
+			MyValidator.validateLength(reason.getReason(), "reason", 500);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
         if (id == null) {
             return new ResponseEntity<RESTError>(new RESTError("Bad ID format."), HttpStatus.BAD_REQUEST);
         }
@@ -673,7 +682,8 @@ public class RideController {
 		try {
 			MyValidator.validateRequired(dto.getFavoriteName(), "favoriteName");
 			MyValidator.validateRequired(dto.getVehicleType(), "vehicleType");
-			MyValidator.validateRequired(dto.isBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(dto.getBabyTransport(), "babyTransport");
+			MyValidator.validateRequired(dto.getPetTransport(), "petTransport");
 			MyValidator.validateRequired(dto.getLocations(), "locations");
 			MyValidator.validateRequired(dto.getPassengers(), "passengers");
 //			MyValidator.validateRequired(dto.getScheduledTime(), "scheduledTime");
@@ -689,9 +699,9 @@ public class RideController {
 			 FavoriteRoute favoriteRoute = this.rideService.createFavoriteRoute(dto, 10);
 			 return new ResponseEntity<FavoriteRouteDTO>(FavoriteRouteDTO.from(favoriteRoute), HttpStatus.OK);
 		} catch (NonExistantVehicleType e) {
-			return new ResponseEntity<RESTError>(new RESTError("Vehicle type doesn't exist"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError("Vehicle type doesn't exist!"), HttpStatus.BAD_REQUEST);
 		} catch (NonExistantUserException e) {
-			return new ResponseEntity<RESTError>(new RESTError("User doesn't exist"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError("User doesn't exist!"), HttpStatus.BAD_REQUEST);
 		} catch (FavoriteRideLimitExceeded e) {
 			return new ResponseEntity<RESTError>(new RESTError("Number of favorite rides cannot exceed 10!"), HttpStatus.BAD_REQUEST);
 		}
@@ -706,13 +716,21 @@ public class RideController {
     	
     }
     
+    @PreAuthorize("hasAnyAuthority('passenger')")
     @GetMapping("/favorites/passenger/{passengerId}")
-    public ResponseEntity<?> getFavouriteRoutesByPassenger(@PathVariable long passengerId){
+    public ResponseEntity<?> getFavouriteRoutesByPassenger(@PathVariable Long passengerId) {
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isPassenger(user)) {
+            if (user.getId() != passengerId) {
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
+            }
+        }
+        
     	List<FavoriteRoute> favoriteRoutes;
 		try {
 			favoriteRoutes = this.rideService.getFavouriteRoutesByPassengerId(passengerId);
 		} catch (NonExistantUserException e) {
-			return new ResponseEntity<RESTError>(new RESTError("Passenger with this id doesn't exist!"), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError("User does not exist!"), HttpStatus.BAD_REQUEST);
 		}
     	List<FavoriteRouteDTO> favoriteRouteDTOs = favoriteRoutes.stream().map(fav -> FavoriteRouteDTO.from(fav)).toList();
     	return new ResponseEntity<List<FavoriteRouteDTO>>(favoriteRouteDTOs, HttpStatus.OK);
@@ -721,7 +739,20 @@ public class RideController {
     
     @PreAuthorize("hasAnyAuthority('passenger')")
     @DeleteMapping("/favorites/{id}")
-    public ResponseEntity<?> deleteFavouriteRoute(@PathVariable long id){
+    public ResponseEntity<?> deleteFavouriteRoute(@PathVariable Long id){
+    	final FavoriteRoute fr = rideService.findFavoriteRouteById(id);  
+    	
+    	if (fr == null) {
+    		return new ResponseEntity<>("Favorite location does not exist!", HttpStatus.NOT_FOUND);
+    	}
+    			
+        final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isPassenger(user)) {
+            if (!fr.getPassengers().stream().anyMatch(p -> p.getId().equals(user.getId()))) {
+                return new ResponseEntity<>("Favorite location does not exist!", HttpStatus.NOT_FOUND);
+            }
+        }
+        
     	try {
 			this.rideService.delete(id);
 		} catch (NonExistantFavoriteRoute e) {
