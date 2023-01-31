@@ -56,7 +56,7 @@ public class ModalReviewRide {
 	 */
 	public void rateVehicle(String rating) {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(selectVehicleRating)).click();
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("modal-review-driver-" + rating))).click();
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("modal-review-vehicle-" + rating))).click();
 	}
 	
 	public void commentDriver(String comment) {
