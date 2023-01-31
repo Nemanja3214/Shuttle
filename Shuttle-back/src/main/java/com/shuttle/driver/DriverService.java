@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.shuttle.ProfileChangeRequest.IProfileChangeRepository;
+import com.shuttle.ProfileChangeRequest.ProfileChangeRequest;
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.common.exception.NonExistantUserException;
@@ -37,6 +39,8 @@ import com.shuttle.vehicle.Vehicle;
 import com.shuttle.workhours.IWorkHoursService;
 import com.shuttle.workhours.WorkHours;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class DriverService implements IDriverService {
     @Autowired
@@ -51,6 +55,8 @@ public class DriverService implements IDriverService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private IProfileChangeRepository profileChangeRepository;
 
     @Autowired
     private IRideRepository rideRepository;
@@ -206,4 +212,48 @@ public class DriverService implements IDriverService {
         }
         return new DriverStatDTO(0, 0, 0, 0);
     }
+
+	@Override
+	@Transactional
+	public ProfileChangeRequest requestUpdate(Driver driver, DriverUpdateDTO dto) {
+		ProfileChangeRequest request = new ProfileChangeRequest();
+		request.setAddress(dto.getAddress());
+		request.setName(dto.getName());
+        request.setSurname(dto.getSurname());
+        request.setTelephoneNumber(dto.getTelephoneNumber());
+        if (dto.getProfilePicture() != null) request.setProfilePicture(dto.getProfilePicture());
+		request.setUser(driver);
+        request = profileChangeRepository.save(request);
+        return request;
+	}
+
+	@Override
+	public ProfileChangeRequest getProfileChange(Long id) {
+		return this.profileChangeRepository.getById(id);
+	}
+
+	@Override
+	@Transactional
+	public Driver applyRequest(ProfileChangeRequest request) throws IOException {
+		request = this.profileChangeRepository.save(request);
+		 if (request.getProfilePicture() != null) {
+            FileUploadUtil.deleteFile(FileUploadUtil.profilePictureUploadDir, request.getUser().getProfilePictureName());
+        }
+		Driver driver = this.driverRepository.getById(request.getUser().getId());
+		driver.setName(request.getName());
+		driver.setAddress(request.getAddress());
+		driver.setSurname(request.getSurname());
+		driver.setTelephoneNumber(request.getTelephoneNumber());
+
+        driver = driverRepository.save(driver);
+
+        if (request.getProfilePicture() != null) {
+            try {
+                FileUploadUtil.saveFile(FileUploadUtil.profilePictureUploadDir, driver.getProfilePictureName(), request.getProfilePicture());
+            } catch (InvalidBase64Exception e) {
+//					Nothing just user has default picture
+            }
+        }
+		return driver;
+	}
 }

@@ -3,37 +3,23 @@ package com.shuttle.user;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-
-import com.shuttle.security.jwt.JwtTokenUtil;
-
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.regex.Pattern;
-
-import com.shuttle.user.dto.*;
-import org.aspectj.apache.bcel.classfile.ExceptionTable;
-import jakarta.annotation.security.PermitAll;
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,23 +43,24 @@ import com.shuttle.note.INoteService;
 import com.shuttle.note.Note;
 import com.shuttle.note.NoteMessage;
 import com.shuttle.note.dto.NoteDTO;
-import com.shuttle.passenger.Passenger;
-import com.shuttle.security.jwt.JwtTokenUtil;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
 import com.shuttle.ride.RideController;
-import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.RideDTO;
-import com.shuttle.ride.dto.RidePassengerDTO;
+import com.shuttle.security.jwt.JwtTokenUtil;
+import com.shuttle.user.dto.BasicUserInfoDTO;
+import com.shuttle.user.dto.PasswordDTO;
+import com.shuttle.user.dto.UserChatDataDTO;
+import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.email.IEmailService;
 import com.shuttle.user.passwordReset.IPasswordResetService;
 import com.shuttle.user.passwordReset.PasswordResetCode;
 import com.shuttle.user.passwordReset.dto.PasswordResetCodeDTO;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
-import com.shuttle.vehicle.Vehicle;
 
-import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.annotation.security.PermitAll;
+import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
 
 @RestController
