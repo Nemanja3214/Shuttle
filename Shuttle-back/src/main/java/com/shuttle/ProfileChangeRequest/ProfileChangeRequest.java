@@ -3,6 +3,7 @@ package com.shuttle.ProfileChangeRequest;
 
 import com.shuttle.driver.Driver;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +22,7 @@ public class ProfileChangeRequest {
     Long id;
     private String name;
     private String surname;
+    @Column(name = "profile_picture", length = 10000)
     private String profilePicture;
     private String telephoneNumber;
     @OneToOne(fetch = FetchType.EAGER)
