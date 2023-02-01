@@ -68,14 +68,14 @@ public class PassengerHomeOrderRide {
 	}
 	
 	public void setBabies(boolean b) {
-		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbBabies)).isSelected();
+		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbBabies)).findElement(By.cssSelector("input")).isSelected();
 		if (curr != b) {
 			cbBabies.click();
 		}
 	}
 	
 	public void setPets(boolean b) {
-		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbPets)).isSelected();
+		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbPets)).findElement(By.cssSelector("input")).isSelected();
 		if (curr != b) {
 			cbPets.click();
 		}

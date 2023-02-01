@@ -2,6 +2,7 @@ package pages;
 
 import java.util.List;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -83,11 +84,11 @@ public class PassengerHomeCurrentRide {
 	}
 	
 	public boolean getBabies() {
-		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbBabies)).isSelected();
+		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbBabies)).findElement(By.cssSelector("input")).isSelected();
 	}
 	
 	public boolean getPets() {
-		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbPets)).isSelected();
+		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbPets)).findElement(By.cssSelector("input")).isSelected();
 	}
 	
 	public String getDriverInfo() {

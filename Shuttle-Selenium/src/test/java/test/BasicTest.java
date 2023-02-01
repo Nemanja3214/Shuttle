@@ -107,7 +107,7 @@ public class BasicTest {
 		boolean petsPCurrentRide = passengerCurrentRide.getPets();
 		
 		assertThat(babiesPCurrentRide).isFalse();
-		//assertThat(petsPCurrentRide).isTrue(); // TODO: Why is it returning false? It's checked in the GUI...
+		assertThat(petsPCurrentRide).isTrue();
 		
 		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
 		List<String> passengers = driverCurrentRide.getPassengers();
@@ -125,7 +125,7 @@ public class BasicTest {
 		boolean isPets = driverCurrentRide.getPetsCheck();
 		
 		assertThat(isBabies).isFalse();
-		//assertThat(isPets).isTrue(); // TODO: Why is it returning false? It's checked in the GUI...
+		assertThat(isPets).isTrue();
 		
 		driverCurrentRide.acceptRide();
 		
@@ -147,12 +147,6 @@ public class BasicTest {
 		
 		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
 		toolbarCommonPassenger.logOut();
-		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 //	
 //	@Test
@@ -221,52 +215,52 @@ public class BasicTest {
 //		
 //	}
 //	
-//	@Test
-//	@DisplayName("Login test: wrong email.")
-//	public void t13() {
-//		LoginPage loginPage = new LoginPage(webdriver);
-//		loginPage.btnToolbarLogin_click();
-//		
-//		loginPage.login("g@gmail.com", "bob123");
-//		String err = loginPage.getLoginErrorText();
-//		assertThat(err.equals("Wrong username or password!"));
-//	}
-//	
-//	@Test
-//	@DisplayName("Login test: mismatched email and password.")
-//	public void t14() {
-//		LoginPage loginPage = new LoginPage(webdriver);
-//		loginPage.btnToolbarLogin_click();
-//		
-//		loginPage.login("bob@gmail.com", "john123");
-//		String err = loginPage.getLoginErrorText();
-//		assertThat(err.equals("Wrong username or password!"));
-//	}
-//	
-//	@Test
-//	@DisplayName("Login test: wrong password.")
-//	public void t15() {
-//		LoginPage loginPage = new LoginPage(webdriver);
-//		loginPage.btnToolbarLogin_click();
-//		
-//		loginPage.login("bob@gmail.com", "bob112");
-//		String err = loginPage.getLoginErrorText();
-//		assertThat(err.equals("Wrong username or password!"));
-//	}
-//	
-//	@Test
-//	@DisplayName("Login test: bad field (empty field or email is bad), cannot click on login.")
-//	public void t16() {
-//		LoginPage loginPage = new LoginPage(webdriver);
-//		loginPage.btnToolbarLogin_click();
-//		
-//		loginPage.enterEmailPasswordButDontClickOnLogin("", "bob112");
-//		assertThat(loginPage.isLoginButtonEnabled() == false);
-//		
-//		loginPage.enterEmailPasswordButDontClickOnLogin("bob@gmail.com", "");
-//		assertThat(loginPage.isLoginButtonEnabled() == false);
-//		
-//		loginPage.enterEmailPasswordButDontClickOnLogin("bob_gmail.com", "bob123");
-//		assertThat(loginPage.isLoginButtonEnabled() == false);
-//	}
+	@Test
+	@DisplayName("Login test: wrong email.")
+	public void t13() {
+		LoginPage loginPage = new LoginPage(webdriver);
+		loginPage.btnToolbarLogin_click();
+		
+		loginPage.login("g@gmail.com", "bob123");
+		String err = loginPage.getLoginErrorText();
+		assertThat(err.equals("Wrong username or password!"));
+	}
+	
+	@Test
+	@DisplayName("Login test: mismatched email and password.")
+	public void t14() {
+		LoginPage loginPage = new LoginPage(webdriver);
+		loginPage.btnToolbarLogin_click();
+		
+		loginPage.login("bob@gmail.com", "john123");
+		String err = loginPage.getLoginErrorText();
+		assertThat(err.equals("Wrong username or password!"));
+	}
+	
+	@Test
+	@DisplayName("Login test: wrong password.")
+	public void t15() {
+		LoginPage loginPage = new LoginPage(webdriver);
+		loginPage.btnToolbarLogin_click();
+		
+		loginPage.login("bob@gmail.com", "bob112");
+		String err = loginPage.getLoginErrorText();
+		assertThat(err.equals("Wrong username or password!"));
+	}
+	
+	@Test
+	@DisplayName("Login test: bad field (empty field or email is bad), cannot click on login.")
+	public void t16() {
+		LoginPage loginPage = new LoginPage(webdriver);
+		loginPage.btnToolbarLogin_click();
+		
+		loginPage.enterEmailPasswordButDontClickOnLogin("", "bob112");
+		assertThat(loginPage.isLoginButtonEnabled() == false);
+		
+		loginPage.enterEmailPasswordButDontClickOnLogin("bob@gmail.com", "");
+		assertThat(loginPage.isLoginButtonEnabled() == false);
+		
+		loginPage.enterEmailPasswordButDontClickOnLogin("bob_gmail.com", "bob123");
+		assertThat(loginPage.isLoginButtonEnabled() == false);
+	}
 }
