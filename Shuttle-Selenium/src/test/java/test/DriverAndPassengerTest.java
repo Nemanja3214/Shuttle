@@ -14,13 +14,13 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.openqa.selenium.WebDriver;
 
-import pages.DriverHomeCurrentRide;
 import pages.LoginPage;
-import pages.ModalRejectRide;
-import pages.ModalReviewRide;
-import pages.PassengerHomeCurrentRide;
-import pages.PassengerHomeOrderRide;
-import pages.ToolbarCommon;
+import pages.driver.DriverHomeCurrentRide;
+import pages.modal.ModalRejectRide;
+import pages.modal.ModalReviewRide;
+import pages.passenger.PassengerHomeCurrentRide;
+import pages.passenger.PassengerHomeOrderRide;
+import pages.toolbar.ToolbarCommon;
 import util.DriverSetup;
 
 @TestInstance(Lifecycle.PER_CLASS)

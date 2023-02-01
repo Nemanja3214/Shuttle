@@ -1,4 +1,4 @@
-package pages;
+package pages.driver;
 
 import java.util.List;
 

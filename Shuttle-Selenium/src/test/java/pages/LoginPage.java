@@ -15,7 +15,7 @@ public class LoginPage {
 	
 	public LoginPage(WebDriver webdriver) {
 		this.driver = webdriver;
-		driver.get(Util.ShuttleURL);
+		driver.get(Util.ShuttleURL); // This only goes here since login page is the first one in the web-app. REMOVE FOR OTHER PAGES!!!
         PageFactory.initElements(driver, this);
 	}
 	
