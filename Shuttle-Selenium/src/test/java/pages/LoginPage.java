@@ -15,7 +15,7 @@ public class LoginPage {
 	
 	public LoginPage(WebDriver webdriver) {
 		this.driver = webdriver;
-		driver.get(Util.ShuttleURL);
+		driver.get(Util.ShuttleURL); // This only goes here since login page is the first one in the web-app. REMOVE FOR OTHER PAGES!!!
         PageFactory.initElements(driver, this);
 	}
 	
@@ -39,12 +39,20 @@ public class LoginPage {
 	}
 	
 	public void login(String email, String password) {
+		enterEmailPasswordButDontClickOnLogin(email, password);
+		
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnSubmitLogin)).click();
+	}
+	
+	public void enterEmailPasswordButDontClickOnLogin(String email, String password) {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(inputEmail)).clear();
 		inputEmail.sendKeys(email);
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(inputPassword)).clear();
 		inputPassword.sendKeys(password);
-		
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnSubmitLogin)).click();
+	}
+	
+	public boolean isLoginButtonEnabled() {
+		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(btnSubmitLogin)).isEnabled();
 	}
 	
 	public String getLoginErrorText() {
