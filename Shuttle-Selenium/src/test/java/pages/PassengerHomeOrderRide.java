@@ -98,4 +98,8 @@ public class PassengerHomeOrderRide {
 	public void orderRide() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnOrder)).click();
 	}
+	
+	public boolean canClickOnFindRoute() {
+		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(btnFindRoute)).isEnabled();
+	}
 }

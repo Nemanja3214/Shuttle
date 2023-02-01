@@ -211,4 +211,31 @@ public class DriverAndPassengerTest {
 		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
 		toolbarCommonPassenger.logOut();
 	}
+	
+	@Test
+	@DisplayName("Passenger cannot search for a route if either location is blank.")
+	public void t4() {
+		WebDriver wdDriver = webdriver;
+		WebDriver wdPassenger = webdriver2;
+		
+		LoginPage loginDriver = new LoginPage(wdDriver);
+		LoginPage loginPassenger = new LoginPage(wdPassenger);
+
+		loginDriver.btnToolbarLogin_click();
+		loginDriver.login("bob@gmail.com", "bob123");
+		
+		loginPassenger.btnToolbarLogin_click();
+		loginPassenger.login("john@gmail.com", "john123");
+		
+		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
+		
+		homePassenger.enterDepartureDestination("Novi Sad", "");
+		assertThat(homePassenger.canClickOnFindRoute() == false);
+
+		homePassenger.enterDepartureDestination("", "Beograd");
+		assertThat(homePassenger.canClickOnFindRoute() == false);
+		
+		homePassenger.enterDepartureDestination("", "");
+		assertThat(homePassenger.canClickOnFindRoute() == false);
+	}
 }
