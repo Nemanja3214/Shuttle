@@ -75,22 +75,18 @@ public class DriverHomeCurrentRide {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnAccept)).click();
 	}
 	
-	public void rejectRide(String reason) {
+	public void openRejectDialog() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnAccept));
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnReject)).click();
-		
-		// TODO: Specify reason. Modal window.
 	}
 	
 	public void startRide() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnStart)).click();
 	}
 	
-	public void panicRide(String reason) {
+	public void openPanicDialog() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnFinish));
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnPanic)).click();
-		
-		// TODO: Specify reason. Modal window.
 	}
 	
 	public void finishRide() {

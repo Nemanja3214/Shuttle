@@ -53,7 +53,9 @@ public class PassengerHomeOrderRide {
 		inputDeparture.sendKeys(departure);
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(inputDestination)).clear();
 		inputDestination.sendKeys(destination);
-		
+	}
+	
+	public void clickOnFindRoute() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnFindRoute)).click();
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(spinnerLoadingRoute));
 	}

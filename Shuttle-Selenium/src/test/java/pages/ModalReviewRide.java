@@ -10,14 +10,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class ModalReviewRide {
-
-//	modal-review-driver-select
-//	modal-review-driver-{{r}}
-//	modal-review-driver-comment
-//	modal-review-vehicle-select
-//	modal-review-vehicle-{{r}}
-//	modal-review-vehicle-comment
-	
 	private WebDriver driver;
 	
 	@FindBy(how = How.CSS, using = "#modal-review-driver-select")
