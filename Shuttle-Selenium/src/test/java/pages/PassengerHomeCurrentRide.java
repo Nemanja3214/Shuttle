@@ -1,5 +1,7 @@
 package pages;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -101,5 +103,9 @@ public class PassengerHomeCurrentRide {
 	
 	public String getAcceptedText() {
 		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(txtAccepted)).getText();
+	}
+	
+	public void cancelRide() {
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnCancel)).click();
 	}
 }

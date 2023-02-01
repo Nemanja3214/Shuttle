@@ -35,6 +35,13 @@ public class ModalReviewRide {
         PageFactory.initElements(driver, this);
 	}
 	
+	public void enterFields(String driverRating, String driverComment, String vehicleRating, String vehicleComment) {
+		rateDriver(driverRating);
+		commentDriver(driverComment);
+		rateVehicle(vehicleRating);
+		commentVehicle(vehicleComment);
+	}
+	
 	/**
 	 * @param rating Possible ratings are: "", "1", "2", "3", "4", "5"
 	 */

@@ -54,12 +54,7 @@ public class BasicTest {
 //		}
 //	}
 
-//	
-//	@Test
-//	@DisplayName("Orders a ride that the driver can perform. For himself. Not scheduled. Driver rejects, leaving a reason.")
-//	public void t2() {
-//		
-//	}
+
 //	
 //	@Test
 //	@DisplayName("Orders a ride that the driver can perform. For himself. Not scheduled. Driver accepts. Passenger cancels.")

@@ -2,6 +2,8 @@ package test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
@@ -41,9 +43,53 @@ public class DriverAndPassengerTest {
 		webdriver2.close();
 	}
 	
+	
+	// This uses assertThat so we can't put it in PassengerHomeCurrentRide because it preaks SRP.
+	private void _verifyCurrentRide(PassengerHomeCurrentRide p, String me, List<String> others, String driver, String distance, String vehicle, boolean babies, boolean pets) {
+		List<String> otherPassList = p.getOtherPassengers();
+		assertThat(otherPassList.size() == others.size());
+		assertThat(otherPassList.stream().sorted().toList().equals(others.stream().sorted().toList()));
+
+		String passMe = p.getMe();
+		assertThat(passMe.equals(me));
+		
+		String driverInfo = p.getDriverInfo();
+		assertThat(driverInfo).isEqualTo(driver);
+		
+		String distanceCurrentRide = p.getDistance();
+		assertThat(distance).isEqualTo(distanceCurrentRide);
+		
+		String vehicleTypeCurrentRide = p.getVehicleType();
+		assertThat(vehicleTypeCurrentRide).isEqualTo(vehicle);
+		
+		boolean babiesPCurrentRide = p.getBabies();
+		boolean petsPCurrentRide = p.getPets();
+		
+		assertThat(babiesPCurrentRide == babies);
+		assertThat(petsPCurrentRide == pets);
+	}
+	
+	private void _verifyDriverCurrentRide(DriverHomeCurrentRide p, List<String> passengers, String dep, String dest, boolean babies, boolean pets) {
+		List<String> plist = p.getPassengers();
+		
+		assertThat(plist.size()).isEqualTo(passengers.size());
+		assertThat(plist.stream().sorted().toList().equals(passengers.stream().sorted().toList()));
+
+		List<String> locations = p.getLocations();
+		assertThat(locations.size()).isEqualTo(2);
+		assertThat(locations.get(0)).isEqualTo(dep);
+		assertThat(locations.get(1)).isEqualTo(dest);
+		
+		boolean isBabies = p.getBabiesCheck();
+		boolean isPets = p.getPetsCheck();
+		
+		assertThat(isBabies == babies);
+		assertThat(isPets == pets);
+	}
+	
 
 	@Test
-	@DisplayName("Orders a ride that the driver can perform. For himself. Not scheduled. Driver accepts, starts and finishes. Passenger reviews.")
+	@DisplayName("Happy flow - basic test.")
 	public void t1() {
 		WebDriver wdDriver = webdriver;
 		WebDriver wdPassenger = webdriver2;
@@ -58,70 +104,24 @@ public class DriverAndPassengerTest {
 		loginPassenger.login("john@gmail.com", "john123");
 		
 		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
-		homePassenger.enterDepartureDestination("Novi Sad", "Beograd");
-		homePassenger.clickOnFindRoute();
-		homePassenger.selectVehicle("STANDARD");
-		homePassenger.setBabies(false);
-		homePassenger.setPets(true);
-		
-		final String distance = homePassenger.getDistanceFromOrderPanel();
-		final String price = homePassenger.getPriceFromOrderPanel();
-
+		homePassenger.enterFields("Novi Sad", "Beograd", "STANDARD", false, true);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
 		homePassenger.orderRide();
 		
 		PassengerHomeCurrentRide passengerCurrentRide = new PassengerHomeCurrentRide(wdPassenger);
-		
-		List<String> otherPassList = passengerCurrentRide.getOtherPassengers();
-		assertThat(otherPassList.size() == 0);
-		final String passMe = passengerCurrentRide.getMe();
-		assertThat(passMe.equals("john@gmail.com"));
-		
-		String driverInfo = passengerCurrentRide.getDriverInfo();
-		assertThat(driverInfo).isEqualTo("bob@gmail.com");
-		
-		String distanceCurrentRide = passengerCurrentRide.getDistance();
-		assertThat(distance).isEqualTo(distanceCurrentRide);
-		
-		String vehicleTypeCurrentRide = passengerCurrentRide.getVehicleType();
-		assertThat(vehicleTypeCurrentRide).isEqualTo("STANDARD");
-		
-		boolean babiesPCurrentRide = passengerCurrentRide.getBabies();
-		boolean petsPCurrentRide = passengerCurrentRide.getPets();
-		
-		assertThat(babiesPCurrentRide).isFalse();
-		assertThat(petsPCurrentRide).isTrue();
-		
+		_verifyCurrentRide(passengerCurrentRide, "john@gmail.com", new ArrayList<String>(), "bob@gmail.com", distance, "STANDARD", false, true);
+
 		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
-		List<String> passengers = driverCurrentRide.getPassengers();
-		
-		assertThat(passengers.size()).isEqualTo(1);
-		assertThat(passengers.get(0)).isEqualTo("john@gmail.com");
-		
-		List<String> locations = driverCurrentRide.getLocations();
-		System.out.println(locations);
-		assertThat(locations.size()).isEqualTo(2);
-		assertThat(locations.get(0)).isEqualTo("Novi Sad");
-		assertThat(locations.get(1)).isEqualTo("Beograd");
-		
-		boolean isBabies = driverCurrentRide.getBabiesCheck();
-		boolean isPets = driverCurrentRide.getPetsCheck();
-		
-		assertThat(isBabies).isFalse();
-		assertThat(isPets).isTrue();
+		_verifyDriverCurrentRide(driverCurrentRide, Arrays.asList("john@gmail.com"), "Novi Sad", "Beograd", false, true);
 		
 		driverCurrentRide.acceptRide();
-		
-		String acceptedTextPassengerCurrentRide = passengerCurrentRide.getAcceptedText();
-		assertThat(acceptedTextPassengerCurrentRide).isNotBlank();
+		assertThat(passengerCurrentRide.getAcceptedText()).isNotBlank();
 		
 		driverCurrentRide.startRide();
 		driverCurrentRide.finishRide();
 		
 		ModalReviewRide passengerReview = new ModalReviewRide(wdPassenger);
-		passengerReview.rateDriver("3");
-		passengerReview.commentDriver("He drove me for less than a second. This is unacceptable.");
-		passengerReview.rateVehicle("5");
-		passengerReview.commentVehicle("It alright. It not subtle or nuanced, but it alright.");
+		passengerReview.enterFields("3", "He drove me for less than a second. This is unacceptable.", "5", "It alright. It not subtle or nuanced, but it alright.");
 		passengerReview.clickOk();
 		
 		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
@@ -132,7 +132,7 @@ public class DriverAndPassengerTest {
 	}
 		
 	@Test
-	@DisplayName("Orders a ride that the driver can perform. For himself. Not scheduled. Driver rejects, leaving a reason.")
+	@DisplayName("Driver can reject a ride.")
 	public void t2() {
 		WebDriver wdDriver = webdriver;
 		WebDriver wdPassenger = webdriver2;
@@ -147,56 +147,15 @@ public class DriverAndPassengerTest {
 		loginPassenger.login("john@gmail.com", "john123");
 		
 		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
-		homePassenger.enterDepartureDestination("Novi Sad", "Beograd");
-		homePassenger.clickOnFindRoute();
-		homePassenger.selectVehicle("STANDARD");
-		homePassenger.setBabies(false);
-		homePassenger.setPets(true);
-		
-		final String distance = homePassenger.getDistanceFromOrderPanel();
-		final String price = homePassenger.getPriceFromOrderPanel();
-
+		homePassenger.enterFields("Novi Sad", "Beograd", "STANDARD", false, true);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
 		homePassenger.orderRide();
 		
 		PassengerHomeCurrentRide passengerCurrentRide = new PassengerHomeCurrentRide(wdPassenger);
-		
-		List<String> otherPassList = passengerCurrentRide.getOtherPassengers();
-		assertThat(otherPassList.size() == 0);
-		final String passMe = passengerCurrentRide.getMe();
-		assertThat(passMe.equals("john@gmail.com"));
-		
-		String driverInfo = passengerCurrentRide.getDriverInfo();
-		assertThat(driverInfo).isEqualTo("bob@gmail.com");
-		
-		String distanceCurrentRide = passengerCurrentRide.getDistance();
-		assertThat(distance).isEqualTo(distanceCurrentRide);
-		
-		String vehicleTypeCurrentRide = passengerCurrentRide.getVehicleType();
-		assertThat(vehicleTypeCurrentRide).isEqualTo("STANDARD");
-		
-		boolean babiesPCurrentRide = passengerCurrentRide.getBabies();
-		boolean petsPCurrentRide = passengerCurrentRide.getPets();
-		
-		assertThat(babiesPCurrentRide).isFalse();
-		assertThat(petsPCurrentRide).isTrue();
-		
+		_verifyCurrentRide(passengerCurrentRide, "john@gmail.com", new ArrayList<String>(), "bob@gmail.com", distance, "STANDARD", false, true);
+
 		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
-		List<String> passengers = driverCurrentRide.getPassengers();
-		
-		assertThat(passengers.size()).isEqualTo(1);
-		assertThat(passengers.get(0)).isEqualTo("john@gmail.com");
-		
-		List<String> locations = driverCurrentRide.getLocations();
-		System.out.println(locations);
-		assertThat(locations.size()).isEqualTo(2);
-		assertThat(locations.get(0)).isEqualTo("Novi Sad");
-		assertThat(locations.get(1)).isEqualTo("Beograd");
-		
-		boolean isBabies = driverCurrentRide.getBabiesCheck();
-		boolean isPets = driverCurrentRide.getPetsCheck();
-		
-		assertThat(isBabies).isFalse();
-		assertThat(isPets).isTrue();
+		_verifyDriverCurrentRide(driverCurrentRide, Arrays.asList("john@gmail.com"), "Novi Sad", "Beograd", false, true);
 		
 		driverCurrentRide.openRejectDialog();
 		
@@ -205,6 +164,45 @@ public class DriverAndPassengerTest {
 		rejector.stateReason("I don't like this passenger.");
 		rejector.clickOk();
 		
+		homePassenger.enterDepartureDestination("I can order", "a new ride now.");
+		
+		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
+		toolbarCommonDriver.logOut();
+		
+		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
+		toolbarCommonPassenger.logOut();
+	}
+	
+	@Test
+	@DisplayName("Passenger can cancel a ride.")
+	public void t3() {
+		WebDriver wdDriver = webdriver;
+		WebDriver wdPassenger = webdriver2;
+		
+		LoginPage loginDriver = new LoginPage(wdDriver);
+		LoginPage loginPassenger = new LoginPage(wdPassenger);
+
+		loginDriver.btnToolbarLogin_click();
+		loginDriver.login("bob@gmail.com", "bob123");
+		
+		loginPassenger.btnToolbarLogin_click();
+		loginPassenger.login("john@gmail.com", "john123");
+		
+		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
+		homePassenger.enterFields("Novi Sad", "Beograd", "STANDARD", false, true);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
+		homePassenger.orderRide();
+		
+		PassengerHomeCurrentRide passengerCurrentRide = new PassengerHomeCurrentRide(wdPassenger);
+		_verifyCurrentRide(passengerCurrentRide, "john@gmail.com", new ArrayList<String>(), "bob@gmail.com", distance, "STANDARD", false, true);
+
+		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
+		_verifyDriverCurrentRide(driverCurrentRide, Arrays.asList("john@gmail.com"), "Novi Sad", "Beograd", false, true);
+		
+		driverCurrentRide.acceptRide();
+		assertThat(passengerCurrentRide.getAcceptedText()).isNotBlank();
+		
+		passengerCurrentRide.cancelRide();
 		homePassenger.enterDepartureDestination("I can order", "a new ride now.");
 		
 		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);

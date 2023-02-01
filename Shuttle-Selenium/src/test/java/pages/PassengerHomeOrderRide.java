@@ -48,6 +48,14 @@ public class PassengerHomeOrderRide {
         PageFactory.initElements(driver, this);
 	}
 	
+	public void enterFields(String dep, String dest, String vehicleType, boolean babies, boolean pets) {
+		enterDepartureDestination(dep, dest);
+		clickOnFindRoute();
+		selectVehicle(vehicleType);
+		setBabies(babies);
+		setPets(pets);
+	}
+	
 	public void enterDepartureDestination(String departure, String destination) {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(inputDeparture)).clear();
 		inputDeparture.sendKeys(departure);
