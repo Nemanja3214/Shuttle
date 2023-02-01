@@ -54,4 +54,6 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
     		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
 	public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId);
+
+    public Ride findFirstByDriverOrderByStartTimeDesc(Driver driver);
 }

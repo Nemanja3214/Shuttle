@@ -1,16 +1,14 @@
 package com.shuttle.driver;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.shuttle.driver.dto.DriverStatDTO;
-import com.shuttle.vehicle.VehicleLocationDTO;
+import com.shuttle.vehicle.VehicleAdminHomeDTO;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
 import java.time.Duration;
 
-import com.shuttle.common.exception.InvalidBase64Exception;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.location.dto.LocationDTO;
@@ -28,7 +26,7 @@ public interface IDriverService {
 	 */
 	public Driver setAvailable(Driver driver, boolean available);
 	public List<LocationDTO> getActiveDriversLocations();
-	public List<VehicleLocationDTO> getActiveDriversVehicleLocations();
+	public List<VehicleAdminHomeDTO> getActiveDriversVehicleLocations();
 	public List<Driver> findAllActive();
     /**
      * Get duration of work done in the last 24 hours.

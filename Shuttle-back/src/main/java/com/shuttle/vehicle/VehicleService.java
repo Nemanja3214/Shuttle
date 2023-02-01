@@ -112,32 +112,10 @@ public class VehicleService implements IVehicleService {
 		}
 		List<LocationDTO> response = this.driverService.getActiveDriversLocations();
 		template.convertAndSend("/active/vehicle/location", response);
+		List<VehicleAdminHomeDTO> responseAdmin = this.driverService.getActiveDriversVehicleLocations();
+		template.convertAndSend("/active/vehicle/location/all", responseAdmin);
 	}
 
-	@Scheduled(initialDelay = 2000, fixedDelay = 2000)
-	public void simulateLocationChangeAdminHome() {
-
-		List<Driver> activeDrivers = this.driverService.findAllActive();
-		for(Driver activeDriver : activeDrivers) {
-			Vehicle vehicle = vehicleRepository.findByDriver(activeDriver);
-
-			if (vehicle == null) {
-				continue;
-			}
-
-			Location driverLocation = vehicle.getCurrentLocation();
-			Random r = new Random();
-			double incrementX = r.nextDouble(-0.001, 0.001);
-			double incrementY = r.nextDouble(-0.001, 0.001);
-			driverLocation.setLatitude(driverLocation.getLatitude() + incrementX);
-			driverLocation.setLongitude(driverLocation.getLongitude() + incrementY);
-
-			changeCurrentLocation(activeDriver, LocationDTO.from(driverLocation));
-
-		}
-		List<VehicleLocationDTO> response = this.driverService.getActiveDriversVehicleLocations();
-		template.convertAndSend("/active/vehicle/location", response);
-	}
 
 
 	@Override
