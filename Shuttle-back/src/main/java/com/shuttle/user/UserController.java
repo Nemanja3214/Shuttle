@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -213,7 +214,7 @@ public class UserController {
 
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @GetMapping("/{id}/ride")
-    public ResponseEntity<?> getUserRides(@PathVariable Long id, Pageable pageable, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
+    public ResponseEntity<?> getUserRides(@PathVariable Long id, @PageableDefault(size = Integer.MAX_VALUE) Pageable pageable, @RequestParam(required = false) String from, @RequestParam(required = false) String to) {
         if (id == null) {
             return new ResponseEntity<RESTError>(new RESTError("Field id is required!"), HttpStatus.BAD_REQUEST);
         }
