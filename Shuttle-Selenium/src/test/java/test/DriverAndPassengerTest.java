@@ -16,6 +16,7 @@ import org.openqa.selenium.WebDriver;
 
 import pages.LoginPage;
 import pages.driver.DriverHomeCurrentRide;
+import pages.modal.ModalPanic;
 import pages.modal.ModalRejectRide;
 import pages.modal.ModalReviewRide;
 import pages.passenger.PassengerHomeCurrentRide;
@@ -44,7 +45,7 @@ public class DriverAndPassengerTest {
 	}
 	
 	
-	// This uses assertThat so we can't put it in PassengerHomeCurrentRide because it preaks SRP.
+	// This uses assertThat so we can't put it in PassengerHomeCurrentRide because it breaks SRP.
 	private void _verifyCurrentRide(PassengerHomeCurrentRide p, String me, List<String> others, String driver, String distance, String vehicle, boolean babies, boolean pets) {
 		List<String> otherPassList = p.getOtherPassengers();
 		assertThat(otherPassList.size() == others.size());
@@ -87,7 +88,6 @@ public class DriverAndPassengerTest {
 		assertThat(isPets == pets);
 	}
 	
-
 	@Test
 	@DisplayName("Happy flow - basic test.")
 	public void t1() {
@@ -237,5 +237,204 @@ public class DriverAndPassengerTest {
 		
 		homePassenger.enterDepartureDestination("", "");
 		assertThat(homePassenger.canClickOnFindRoute() == false);
+		
+		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
+		toolbarCommonPassenger.logOut();
+	}
+	
+	@Test
+	@DisplayName("Passenger can panic during the ride which ends the ride")
+	public void t5() {
+		WebDriver wdDriver = webdriver;
+		WebDriver wdPassenger = webdriver2;
+		
+		LoginPage loginDriver = new LoginPage(wdDriver);
+		LoginPage loginPassenger = new LoginPage(wdPassenger);
+
+		loginDriver.btnToolbarLogin_click();
+		loginDriver.login("bob@gmail.com", "bob123");
+		
+		loginPassenger.btnToolbarLogin_click();
+		loginPassenger.login("john@gmail.com", "john123");
+		
+		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
+		homePassenger.enterFields("Veternik", "Zrenjanin", "STANDARD", true, true);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
+		homePassenger.orderRide();
+		
+		PassengerHomeCurrentRide passengerCurrentRide = new PassengerHomeCurrentRide(wdPassenger);
+		_verifyCurrentRide(passengerCurrentRide, "john@gmail.com", new ArrayList<String>(), "bob@gmail.com", distance, "STANDARD", true, true);
+
+		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
+		_verifyDriverCurrentRide(driverCurrentRide, Arrays.asList("john@gmail.com"), "Veternik", "Zrenjanin", true, true);
+		
+		driverCurrentRide.acceptRide();
+		assertThat(passengerCurrentRide.getAcceptedText()).isNotBlank();
+		driverCurrentRide.startRide();
+		
+		passengerCurrentRide.openPanicDialog();
+		ModalPanic passengerPanic = new ModalPanic(wdPassenger);
+		passengerPanic.stateReason("     ");
+		assertThat(passengerPanic.isOkButtonEnabled() == false);
+		passengerPanic.clickCancel();
+		
+		passengerCurrentRide.openPanicDialog();
+		passengerPanic.stateReason("The driver is speeding.");
+		passengerPanic.clickOk();
+		
+		homePassenger.enterDepartureDestination("I can order", "a new ride now.");
+		
+		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
+		toolbarCommonDriver.logOut();
+		
+		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
+		toolbarCommonPassenger.logOut();
+	}
+	
+	@Test
+	@DisplayName("Driver can panic during the ride which ends the ride")
+	public void t6() {
+		WebDriver wdDriver = webdriver;
+		WebDriver wdPassenger = webdriver2;
+		
+		LoginPage loginDriver = new LoginPage(wdDriver);
+		LoginPage loginPassenger = new LoginPage(wdPassenger);
+
+		loginDriver.btnToolbarLogin_click();
+		loginDriver.login("bob@gmail.com", "bob123");
+		
+		loginPassenger.btnToolbarLogin_click();
+		loginPassenger.login("john@gmail.com", "john123");
+		
+		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
+		homePassenger.enterFields("Veternik", "Zrenjanin", "STANDARD", true, true);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
+		homePassenger.orderRide();
+		
+		PassengerHomeCurrentRide passengerCurrentRide = new PassengerHomeCurrentRide(wdPassenger);
+		_verifyCurrentRide(passengerCurrentRide, "john@gmail.com", new ArrayList<String>(), "bob@gmail.com", distance, "STANDARD", true, true);
+
+		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
+		_verifyDriverCurrentRide(driverCurrentRide, Arrays.asList("john@gmail.com"), "Veternik", "Zrenjanin", true, true);
+		
+		driverCurrentRide.acceptRide();
+		assertThat(passengerCurrentRide.getAcceptedText()).isNotBlank();
+		driverCurrentRide.startRide();
+		
+		driverCurrentRide.openPanicDialog();
+		ModalPanic driverPanic = new ModalPanic(wdDriver);
+		driverPanic.stateReason("     ");
+		assertThat(driverPanic.isOkButtonEnabled() == false);
+		driverPanic.stateReason("The passenger has a gun.");
+		driverPanic.clickOk();
+		
+		homePassenger.enterDepartureDestination("I can order", "a new ride now.");
+		
+		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
+		toolbarCommonDriver.logOut();
+		
+		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
+		toolbarCommonPassenger.logOut();
+	}
+	
+	@Test
+	@DisplayName("Multiple users try to panic, subsequent panics don't cause an error.")
+	public void t7() {
+		WebDriver wdDriver = webdriver;
+		WebDriver wdPassenger = webdriver2;
+		
+		LoginPage loginDriver = new LoginPage(wdDriver);
+		LoginPage loginPassenger = new LoginPage(wdPassenger);
+
+		loginDriver.btnToolbarLogin_click();
+		loginDriver.login("bob@gmail.com", "bob123");
+		
+		loginPassenger.btnToolbarLogin_click();
+		loginPassenger.login("john@gmail.com", "john123");
+		
+		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
+		homePassenger.enterFields("Sombor", "Pancevo", "STANDARD", false, false);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
+		homePassenger.orderRide();
+		
+		PassengerHomeCurrentRide passengerCurrentRide = new PassengerHomeCurrentRide(wdPassenger);
+		_verifyCurrentRide(passengerCurrentRide, "john@gmail.com", new ArrayList<String>(), "bob@gmail.com", distance, "STANDARD", false, false);
+
+		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
+		_verifyDriverCurrentRide(driverCurrentRide, Arrays.asList("john@gmail.com"), "Sombor", "Pancevo", false, false);
+		
+		driverCurrentRide.acceptRide();
+		assertThat(passengerCurrentRide.getAcceptedText()).isNotBlank();
+		driverCurrentRide.startRide();
+		
+		driverCurrentRide.openPanicDialog();
+		ModalPanic driverPanic = new ModalPanic(wdDriver);
+		
+		passengerCurrentRide.openPanicDialog();
+		ModalPanic passengerPanic = new ModalPanic(wdPassenger);
+		
+		driverPanic.stateReason("The passenger has a gun.");
+		passengerPanic.stateReason("The driver has a gun.");
+		driverPanic.clickOk();
+		passengerPanic.clickOk();
+		
+		homePassenger.enterDepartureDestination("I can order", "a new ride now.");
+		
+		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
+		toolbarCommonDriver.logOut();
+		
+		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
+		toolbarCommonPassenger.logOut();
+	}
+	
+	@Test
+	@DisplayName("Passenger tries to panic after the ride ends, reviews opens up but the panic stays behind.")
+	public void t8() {
+		WebDriver wdDriver = webdriver;
+		WebDriver wdPassenger = webdriver2;
+		
+		LoginPage loginDriver = new LoginPage(wdDriver);
+		LoginPage loginPassenger = new LoginPage(wdPassenger);
+
+		loginDriver.btnToolbarLogin_click();
+		loginDriver.login("bob@gmail.com", "bob123");
+		
+		loginPassenger.btnToolbarLogin_click();
+		loginPassenger.login("john@gmail.com", "john123");
+		
+		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
+		homePassenger.enterFields("Sombor", "Pancevo", "STANDARD", false, false);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
+		homePassenger.orderRide();
+		
+		PassengerHomeCurrentRide passengerCurrentRide = new PassengerHomeCurrentRide(wdPassenger);
+		_verifyCurrentRide(passengerCurrentRide, "john@gmail.com", new ArrayList<String>(), "bob@gmail.com", distance, "STANDARD", false, false);
+
+		DriverHomeCurrentRide driverCurrentRide = new DriverHomeCurrentRide(wdDriver);
+		_verifyDriverCurrentRide(driverCurrentRide, Arrays.asList("john@gmail.com"), "Sombor", "Pancevo", false, false);
+		
+		driverCurrentRide.acceptRide();
+		assertThat(passengerCurrentRide.getAcceptedText()).isNotBlank();
+		driverCurrentRide.startRide();
+		
+		passengerCurrentRide.openPanicDialog();
+		ModalPanic passengerPanic = new ModalPanic(wdPassenger);
+		
+		driverCurrentRide.finishRide();
+
+		ModalReviewRide passengerReview = new ModalReviewRide(wdPassenger);
+		passengerReview.enterFields("5", "It's ok but I want to panic.", "1", "Please let me panic.");
+		passengerReview.clickOk();
+		
+		passengerPanic.stateReason("I hate this driver.");
+		passengerPanic.clickOk();
+		
+		homePassenger.enterDepartureDestination("I can order", "a new ride now.");
+		
+		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
+		toolbarCommonDriver.logOut();
+		
+		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
+		toolbarCommonPassenger.logOut();
 	}
 }

@@ -108,4 +108,8 @@ public class PassengerHomeCurrentRide {
 	public void cancelRide() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnCancel)).click();
 	}
+	
+	public void openPanicDialog() {
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnPanic)).click();
+	}
 }
