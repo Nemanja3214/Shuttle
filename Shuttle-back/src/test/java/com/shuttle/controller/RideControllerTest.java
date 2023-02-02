@@ -69,6 +69,7 @@ public class RideControllerTest {
 	private String JWT_PASSENGER_1 = "";
 	private String JWT_PASSENGER_5 = "";
 	private String JWT_PASSENGER_6 = "";
+	private String JWT_PASSENGER_8 = "";
 	private String JWT_PASSENGER_9 = "";
 
 	private RideDTO ride1;
@@ -144,6 +145,7 @@ public class RideControllerTest {
 		JWT_PASSENGER_1 = login("p1@gmail.com", "1234");
 		JWT_PASSENGER_5 = login("p5@gmail.com", "1234");
 		JWT_PASSENGER_6 = login("p6@gmail.com", "1234");
+		JWT_PASSENGER_8 = login("p8@gmail.com", "1234");
 		JWT_PASSENGER_9 = login("p9@gmail.com", "1234");
 		JWT_D_2 = login("d2@gmail.com", "1234");
 	}
@@ -1293,6 +1295,15 @@ public class RideControllerTest {
 		assertThat(result.getRide().getEndTime()).isNotNull();
 		assertThat(result.getTime()).isNotNull();
 		assertThat(result.getUser()).usingRecursiveComparison().ignoringFields("profilePicture").isEqualTo(expected.getUser());
+		
+		// Other user tries to panic as well, gets a 400.
+		
+		reason = new CancellationBodyDTO("The passenger is being hit by me.");
+
+		requestBody = new HttpEntity<CancellationBodyDTO>(reason, getHeader(JWT_PASSENGER_8));
+		response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<PanicDTO>() {}, rideId);	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////////////	
