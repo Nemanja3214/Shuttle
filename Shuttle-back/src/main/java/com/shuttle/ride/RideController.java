@@ -522,6 +522,11 @@ public class RideController {
             }
         }
         
+        Ride.Status currentStatus = ride.getStatus();
+        if (currentStatus == Ride.Status.CANCELED || currentStatus == Ride.Status.FINISHED || currentStatus == Ride.Status.REJECTED) {
+        	return new ResponseEntity<RESTError>(new RESTError("Cannot cancel a ride that's not in progress."), HttpStatus.BAD_REQUEST);
+        }
+
         rideService.panicRide(ride);
         driverService.setAvailable(ride.getDriver(), true);
         
