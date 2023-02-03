@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -18,6 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.shuttle.common.exception.FavoriteRideLimitExceeded;
 import com.shuttle.common.exception.NonExistantFavoriteRoute;
@@ -47,6 +49,7 @@ import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
 import jakarta.transaction.Transactional;
+import net.minidev.json.JSONObject;
 
 class NoAvailableDriverException extends Throwable {
 	private static final long serialVersionUID = -2718176046357707329L;
@@ -473,8 +476,15 @@ public class RideService implements IRideService {
             List<Passenger> passengers = new ArrayList<>();
             passengers.add(p);
             
+            Location startLocation = generateLocation();
+            locationRepository.save(startLocation);
+            Location endLocation =  generateLocation();
+            locationRepository.save(endLocation);
+            
             Route route = new Route();
             List<Location> locations = new ArrayList<>();
+            locations.add(startLocation);
+            locations.add(endLocation);
             route.setLocations(locations);
             
             VehicleType vt = vehicleTypeRepository.findVehicleTypeByNameIgnoreCase("standard").get();
@@ -488,7 +498,24 @@ public class RideService implements IRideService {
 		
 	}
     
-    private LocalDateTime generateDateTime(boolean isStart) {
+    private Location generateLocation() {
+    	Random r = new Random();
+		Double longitude = r.nextDouble(18, 21);
+		Double latitude = r.nextDouble(42, 46);
+		final String uri = "https://nominatim.openstreetmap.org/reverse?lat=" + latitude + "&lon=" + longitude + "&format=json";
+		RestTemplate restTemplate = new RestTemplate();
+		JSONObject response = restTemplate.getForObject(uri, JSONObject.class);
+		Location location = new Location();
+		String address = (String) response.get("display_name");
+		location.setAddress(address);
+		location.setLatitude(latitude);
+		location.setLongitude(longitude);
+		return location;
+//		JSONObject address = makeRequest("http://nominatim.openstreetmap.org/search?q="+address+"&format=json&polygon=1&addressdetails=1","get");
+
+	}
+
+	private LocalDateTime generateDateTime(boolean isStart) {
 		Calendar calendar = Calendar.getInstance();
         TimeZone tz = calendar.getTimeZone();
         ZoneId zoneId = tz.toZoneId();     
