@@ -506,10 +506,15 @@ public class RideService implements IRideService {
 		RestTemplate restTemplate = new RestTemplate();
 		JSONObject response = restTemplate.getForObject(uri, JSONObject.class);
 		Location location = new Location();
-		String address = (String) response.get("display_name");
-		location.setAddress(address);
 		location.setLatitude(latitude);
 		location.setLongitude(longitude);
+		String address = (String) response.get("display_name");
+		String[] parts = address.split(",");
+		if(parts.length < 2)
+			return location;
+		address = parts[0] + ", " + parts[1];
+		location.setAddress(address);
+
 		return location;
 //		JSONObject address = makeRequest("http://nominatim.openstreetmap.org/search?q="+address+"&format=json&polygon=1&addressdetails=1","get");
 
