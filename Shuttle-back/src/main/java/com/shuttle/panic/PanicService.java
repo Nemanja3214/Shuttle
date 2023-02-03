@@ -6,6 +6,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.shuttle.ride.Ride;
@@ -32,4 +33,9 @@ public class PanicService implements IPanicService {
 	public List<Panic> getAll() {
 		return panicRepository.findAll();
 	}
+
+    @Override
+    public List<Panic> findAll(Pageable pageable) {
+        return panicRepository.findAll(pageable).getContent();
+    }
 }
