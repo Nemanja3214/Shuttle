@@ -170,7 +170,7 @@ public class UserController {
         try {
             MyValidator.validateRequired(dto.getNewPassword(), "newPassword");
             MyValidator.validateRequired(dto.getCode(), "code");
-
+            
             MyValidator.validatePattern(dto.getNewPassword(), "newPassword", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
             MyValidator.validatePattern(dto.getCode(), "code", "^[0-9]{1,6}$");
         } catch (MyValidatorException e1) {
@@ -199,6 +199,12 @@ public class UserController {
         PasswordResetCode req = requests.stream().filter(r -> r.getCode().equals(dto.getCode())).findFirst().orElse(null);
 
 
+        System.out.println(requests);
+        System.out.println(req);
+        if (req != null) {
+        	System.out.println(!req.getActive());
+        	System.out.println(req.getExpires().isBefore(LocalDateTime.now()));
+        }
         if (req == null || !req.getActive() || req.getExpires().isBefore(LocalDateTime.now())) {
             return new ResponseEntity<RESTError>(new RESTError("Code is expired or not correct!"), HttpStatus.BAD_REQUEST);
         }

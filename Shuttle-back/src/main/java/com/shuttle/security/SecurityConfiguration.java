@@ -79,7 +79,8 @@ public class SecurityConfiguration {
 
         return (web) -> web.ignoring().requestMatchers(HttpMethod.POST, "/api/user/login","/api/unregisteredUser/**", "/api/passenger", "/h2-console/**")
                 .requestMatchers(HttpMethod.GET, "/**","/", "/webjars/**", "/*.html", "favicon.ico",
-                        "/**/*.html", "/**/*.css", "/**/*.js", "/h2-console/**");
+                        "/**/*.html", "/**/*.css", "/**/*.js", "/h2-console/**")
+                .requestMatchers(HttpMethod.PUT, "/api/user/*/resetPassword");
 
     }
 
