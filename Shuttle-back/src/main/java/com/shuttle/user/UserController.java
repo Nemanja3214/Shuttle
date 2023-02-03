@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
+import com.shuttle.user.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -49,10 +50,6 @@ import com.shuttle.ride.Ride;
 import com.shuttle.ride.RideController;
 import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.security.jwt.JwtTokenUtil;
-import com.shuttle.user.dto.BasicUserInfoDTO;
-import com.shuttle.user.dto.PasswordDTO;
-import com.shuttle.user.dto.UserChatDataDTO;
-import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.email.IEmailService;
 import com.shuttle.user.passwordReset.IPasswordResetService;
 import com.shuttle.user.passwordReset.PasswordResetCode;
@@ -258,10 +255,6 @@ public class UserController {
     @PreAuthorize("hasAnyAuthority('admin')")
     @GetMapping
     public ResponseEntity<?> getUsers(Pageable pageable) {
-        final GenericUser user____ = (GenericUser) (SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        if (userService.isAdmin(user____)) {
-        }
-
         List<GenericUser> users = userService.findAll(pageable);
         ListDTO<UserDTONoPassword> usersDTO = new ListDTO<>(users.stream().map(u -> new UserDTONoPassword(u)).toList());
         return new ResponseEntity<>(usersDTO, HttpStatus.OK);
@@ -566,6 +559,14 @@ public class UserController {
             UserChatDataDTO dto = new UserChatDataDTO(p);
             return new ResponseEntity<UserChatDataDTO>(dto, HttpStatus.OK);
         }
+    }
+
+    @PreAuthorize("hasAnyAuthority('admin')")
+    @GetMapping("/roles")
+    public ResponseEntity<?> getUsersRoles(Pageable pageable) {
+        List<GenericUser> users = userService.findAll(pageable);
+        ListDTO<UserRoleDTO> usersDTO = new ListDTO<>(users.stream().map(UserRoleDTO::new).toList());
+        return new ResponseEntity<>(usersDTO, HttpStatus.OK);
     }
 
 }

@@ -50,4 +50,5 @@ public interface IDriverService {
 	public ProfileChangeRequest requestUpdate(Driver driver, DriverUpdateDTO dto);
 	public ProfileChangeRequest getProfileChange(Long id);
 	public Driver applyRequest(ProfileChangeRequest request) throws IOException;
+	List<VehicleAdminHomeDTO> getActiveDriversVehicleLocations();
 }
