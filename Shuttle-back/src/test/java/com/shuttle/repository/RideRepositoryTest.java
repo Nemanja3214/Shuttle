@@ -782,6 +782,256 @@ public class RideRepositoryTest {
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+//		public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId);
+	
+	@Test
+	public void getDriverGraphData_happy() {
+		LocalDateTime queryStart = LocalDateTime.of(2009, 11, 16, 0, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2012, 11, 16, 0, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2011, 11, 16, 0, 0);
+		Driver driver = getDummyDriver();
+		
+//		sums for the day complement eachother to be 50 on all days
+//		length is 100 per ride, 2 rides a day => total 200 per day
+		for(int i = 0; i < 20; ++i) {
+			end = end.plusDays(1);
+//			ride #1
+			Ride ride = new Ride();
+			ride.setStatus(Status.FINISHED);
+			ride.setEndTime(end);
+			ride.setDriver(driver);
+			
+			double cost = 50 - i;
+			ride.setTotalCost(cost);
+			ride.setTotalLength(100D);
+			this.rideRepository.save(ride);
+			
+			end = end.getHour() > 20 ? end.minusHours(1): end.plusHours(1);
+
+//			ride #2
+			Ride ride2 = new Ride();
+			ride2.setEndTime(end);
+			ride2.setStatus(Status.FINISHED);
+			ride2.setDriver(driver);
+			
+			cost = i;
+			ride2.setTotalCost(cost);
+			ride2.setTotalLength(100D);
+			this.rideRepository.save(ride2);
+		}
+		
+		List<GraphEntryDTO> graphData = rideRepository.getDriverGraphData(queryStart, queryEnd, driver.getId());
+		
+		assertEquals(20, graphData.size());
+		for(GraphEntryDTO entry : graphData) {
+			assertEquals(50D, entry.getCostSum());
+			assertEquals(200D, entry.getLength());
+			assertEquals(2, entry.getNumberOfRides());
+		}
+
+	}
+	
+	@Test
+	public void getDriverGraphData_happy_half_interval() {
+		LocalDateTime queryStart = LocalDateTime.of(2009, 11, 16, 0, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2011, 11, 16, 0, 0);
+		Driver driver = getDummyDriver();
+		
+//		sums for the day complement eachother to be 50 on all days
+//		length is 100 per ride, 2 rides a day => total 200 per day
+		for(int i = 0; i < 20; ++i) {
+			end = end.plusDays(1);
+//			ride #1
+			Ride ride = new Ride();
+			ride.setStatus(Status.FINISHED);
+			ride.setEndTime(end);
+			ride.setDriver(driver);
+			
+			double cost = 50 - i;
+			ride.setTotalCost(cost);
+			ride.setTotalLength(100D);
+			this.rideRepository.save(ride);
+			
+			end = end.getHour() > 20 ? end.minusHours(1): end.plusHours(1);
+
+//			ride #2
+			Ride ride2 = new Ride();
+			ride2.setStatus(Status.FINISHED);
+			ride2.setEndTime(end);
+			ride2.setDriver(driver);
+			
+			cost = i;
+			ride2.setTotalCost(cost);
+			ride2.setTotalLength(100D);
+			this.rideRepository.save(ride2);
+		}
+		LocalDateTime queryEnd = end.minusDays(10);
+		
+		List<GraphEntryDTO> graphData = rideRepository.getDriverGraphData(queryStart, queryEnd, driver.getId());
+		
+		assertEquals(10, graphData.size());
+		for(GraphEntryDTO entry : graphData) {
+			assertEquals(50D, entry.getCostSum());
+			assertEquals(200D, entry.getLength());
+			assertEquals(2, entry.getNumberOfRides());
+		}
+	}
+	
+	
+	@Test
+	public void getDriverGraphData_non_existant_user() {
+		LocalDateTime queryStart = LocalDateTime.of(2009, 11, 16, 0, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2012, 11, 16, 0, 0);
+
+		List<GraphEntryDTO> graphData = rideRepository.getDriverGraphData(queryStart, queryEnd, 123123L);
+
+		assertEquals(0, graphData.size());
+	}
+	
+	@Test
+	public void getDriverGraphData_happy_half_are_finished() {
+		LocalDateTime queryStart = LocalDateTime.of(2009, 11, 16, 0, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2022, 11, 16, 0, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2011, 11, 16, 0, 0);
+		Driver driver = getDummyDriver();
+		
+//		sums for the day complement eachother to be 50 on all days
+//		length is 100 per ride, 2 rides a day => total 200 per day
+		for(int i = 0; i < 20; ++i) {
+			end = end.plusDays(1);
+//			ride #1
+			Ride ride = new Ride();
+			ride.setStatus(Status.FINISHED);
+			ride.setEndTime(end);
+			ride.setDriver(driver);
+			
+			double cost = 50 - i;
+			ride.setTotalCost(cost);
+			ride.setTotalLength(100D);
+			this.rideRepository.save(ride);
+			
+			end = end.getHour() > 20 ? end.minusHours(1): end.plusHours(1);
+
+//			ride #2
+			Ride ride2 = new Ride();
+			ride2.setStatus(Status.CANCELED);
+			ride2.setEndTime(end);
+			ride2.setDriver(driver);
+			
+			cost = i;
+			ride2.setTotalCost(cost);
+			ride2.setTotalLength(100D);
+			this.rideRepository.save(ride2);
+		}
+		
+		List<GraphEntryDTO> graphData = rideRepository.getDriverGraphData(queryStart, queryEnd, driver.getId());
+		
+		assertEquals(20, graphData.size());
+		for(int i = 0; i < 20; ++i) {
+			assertEquals(50D - i, graphData.get(i).getCostSum());
+			assertEquals(100D, graphData.get(i).getLength());
+			assertEquals(1, graphData.get(i).getNumberOfRides());
+		}
+	}
+	
+	
+	@Test
+	public void getDriverGraphData_passenger_with_no_rides() {
+		LocalDateTime queryStart = LocalDateTime.of(2009, 11, 16, 0, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2022, 11, 16, 0, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2011, 11, 16, 0, 0);
+		Passenger driver = getDummyPassenger();
+		
+		List<GraphEntryDTO> graphData = rideRepository.getDriverGraphData(queryStart, queryEnd, driver.getId());
+		
+		assertEquals(0, graphData.size());
+	}
+	
+	
+	
+	
+	
+	@Test
+	public void getDriverGraphData_happy_are_sorted() {
+		LocalDateTime queryStart = LocalDateTime.of(2009, 11, 16, 0, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2012, 11, 16, 0, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2011, 11, 16, 0, 0);
+		Driver driver = getDummyDriver();
+		
+//		sums for the day complement eachother to be 50 on all days
+//		length is 100 per ride, 2 rides a day => total 200 per day
+		List<Ride> rides = new ArrayList<>();
+		for(int i = 0; i < 20; ++i) {
+			end = end.plusDays(1);
+//			ride #1
+			Ride ride = new Ride();
+			ride.setStatus(Status.FINISHED);
+			ride.setEndTime(end);
+			ride.setDriver(driver);
+			
+			double cost = 50 - i;
+			ride.setTotalCost(cost);
+			ride.setTotalLength(100D);
+			this.rideRepository.save(ride);
+			rides.add(ride);
+			
+			end = end.getHour() > 20 ? end.minusHours(1): end.plusHours(1);
+
+//			ride #2
+			Ride ride2 = new Ride();
+			ride2.setEndTime(end);
+			ride2.setStatus(Status.FINISHED);
+			ride2.setDriver(driver);
+			
+			cost = i;
+			ride2.setTotalCost(cost);
+			ride2.setTotalLength(100D);
+			this.rideRepository.save(ride2);
+			rides.add(ride2);
+		}
+		
+		List<GraphEntryDTO> graphData = rideRepository.getDriverGraphData(queryStart, queryEnd, driver.getId());
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		Set<String> datesSet = new TreeSet<>(rides.stream().map(ride -> ride.getEndTime().format(formatter)).toList());
+		List<String> dates = new ArrayList<>(datesSet);
+		Collections.sort(dates);
+		
+		assertEquals(20, graphData.size());
+		for(int i = 0; i < 20; ++i) {
+			assertEquals(dates.get(i), graphData.get(i).getTime());
+			assertEquals(50D, graphData.get(i).getCostSum());
+			assertEquals(200D, graphData.get(i).getLength());
+			assertEquals(2, graphData.get(i).getNumberOfRides());
+		}
+
+	}
+	
+	
 	private Passenger getDummyPassenger() {
 		Passenger passenger = new Passenger();
 		passenger.setEmail("dqdqwdqwdqwd@gmail.com");

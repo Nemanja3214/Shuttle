@@ -43,7 +43,7 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     public List<Ride> getAllByPassengerAndBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Passenger passenger, Pageable pageable);
 
     @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
-    		+ " FROM Ride r JOIN r.passengers p"
+    		+ " FROM Ride r LEFT JOIN r.passengers p"
     		+ " WHERE (:passengerId) = p.id"
     		+ " AND r.status = 5 "
     		+ " AND (r.endTime BETWEEN :start AND :end )"
@@ -52,7 +52,7 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
 	public List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId);
     
     @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
-    		+ " FROM Ride r JOIN r.driver d"
+    		+ " FROM Ride r LEFT JOIN r.driver d"
     		+ " WHERE (:driverId) = d.id"
     		+ " AND r.status = 5 "
     		+ " AND (r.endTime BETWEEN :start AND :end )"
@@ -61,7 +61,7 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
 	public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId);
 
     @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
-    		+ " FROM Ride r JOIN r.driver d "
+    		+ " FROM Ride r LEFT JOIN r.driver d "
     		+ " WHERE (r.endTime BETWEEN :start AND :end )"
     		+ " AND r.status = 5 "
     		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
