@@ -381,6 +381,164 @@ public class RideRepositoryTest {
 		assertEquals(0, rides.size());
 	}
 	
+//    public List<Ride> getAllByPassengerAndBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Passenger passenger, Pageable pageable);
+	
+	@Test
+	public void getAllByPassengerAndBetweenDates_happy() {
+		LocalDateTime queryStart = LocalDateTime.of(2015, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2022, 11, 16, 16, 0);
+		
+		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = LocalDateTime.of(2017, 11, 17, 16, 0);
+		
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+		Ride ride = new Ride();
+		ride.setStartTime(start);
+		ride.setEndTime(end);
+		ride.setPassengers(passengers);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(passenger.getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(1, rides.size());
+		assertEquals(ride, rides.get(0));
+	}
+	
+	@Test
+	public void getAllByPassengerAndBetweenDates_date_dont_match() {
+		LocalDateTime queryStart = LocalDateTime.of(2022, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2023, 11, 16, 16, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2017, 11, 17, 16, 0);
+		
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+		Ride ride = new Ride();
+		ride.setEndTime(end);
+		ride.setPassengers(passengers);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(passenger.getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(0, rides.size());
+	}
+	
+	@Test
+	public void getAllByPassengerAndBetweenDates_happy_end_null() {
+		LocalDateTime queryStart = LocalDateTime.of(2016, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2023, 11, 16, 16, 0);
+		
+		LocalDateTime end = null;
+		
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+		Ride ride = new Ride();
+		ride.setEndTime(end);
+		ride.setPassengers(passengers);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(passenger.getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(1, rides.size());
+		assertEquals(ride, rides.get(0));
+	}
+	
+	@Test
+	public void getAllByPassengerAndBetweenDates_happy_with_page_less_size() {
+		LocalDateTime queryStart = LocalDateTime.of(2016, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2023, 11, 16, 16, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 16, 0);
+		
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+//		ride #1
+		Ride ride = new Ride();
+		ride.setEndTime(end);
+		ride.setPassengers(passengers);
+		this.rideRepository.save(ride);
+		
+//		ride #2
+		Ride ride2 = new Ride();
+		ride2.setEndTime(end);
+		ride2.setPassengers(passengers);
+		this.rideRepository.save(ride2);
+		
+		Pageable pageable = PageRequest.of(0, 1);
+		List<Ride> rides = rideRepository.findByUser(passenger.getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(1, rides.size());
+		assertEquals(ride, rides.get(0));
+	}
+	
+	@Test
+	public void getAllByPassengerAndBetweenDates_happy_multiple_rides() {
+		LocalDateTime queryStart = LocalDateTime.of(2016, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2023, 11, 16, 16, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 16, 0);;
+		
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+//		ride #1
+		Ride ride = new Ride();
+		ride.setEndTime(end);
+		ride.setPassengers(passengers);
+		this.rideRepository.save(ride);
+		
+//		ride #2
+		Ride ride2 = new Ride();
+		ride2.setEndTime(end);
+		ride2.setPassengers(passengers);
+		this.rideRepository.save(ride2);
+		
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(passenger.getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(2, rides.size());
+		assertTrue(rides.contains(ride));
+		assertTrue(rides.contains(ride2));
+	}
+	
+	@Test
+	public void getAllByPassengerAndBetweenDates_no_such_passenger() {
+		LocalDateTime queryStart = LocalDateTime.of(2016, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2023, 11, 16, 16, 0);
+		
+		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 16, 0);;
+		
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+//		ride #1
+		Ride ride = new Ride();
+		ride.setEndTime(end);
+		ride.setPassengers(passengers);
+		this.rideRepository.save(ride);
+		
+//		ride #2
+		Ride ride2 = new Ride();
+		ride2.setEndTime(end);
+		ride2.setPassengers(passengers);
+		this.rideRepository.save(ride2);
+		
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(12314L, pageable, queryStart, queryEnd);
+		
+		assertEquals(0, rides.size());
+	}
 	
 	
 	
