@@ -1,6 +1,7 @@
 package com.shuttle.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import com.shuttle.driver.Driver;
+import com.shuttle.driver.IDriverRepository;
 import com.shuttle.location.Route;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.IRideRepository;
@@ -30,6 +32,9 @@ import com.shuttle.vehicle.vehicleType.VehicleType;
 public class RideRepositoryTest {
 	@Autowired
 	private IRideRepository rideRepository;
+	
+	@Autowired
+	private IDriverRepository driverRepository;
 	
 	@Test
 	@DisplayName("Saves a new ride into the database")
@@ -86,4 +91,47 @@ public class RideRepositoryTest {
 		Optional<Ride> ride = rideRepository.findById(1L);
 		assertThat(ride).isNotEmpty();
 	}
+	
+	@Test
+	public void findById_null() {	
+		Optional<Ride> ride = rideRepository.findById(12312312312L);
+		assertThat(ride).isEmpty();
+	}
+	
+	@Test
+	public void findByStatusAndDriver_pending() {
+		Driver d = driverRepository.findById(1L).get();
+		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.PENDING);
+		
+		assertEquals(1, rides.size());
+		assertEquals(Status.PENDING, rides.get(0).getStatus());
+		
+	}
+	
+	@Test
+	public void findByStatusAndDriver_accepted() {
+		Driver d = driverRepository.findById(1L).get();
+		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
+		
+		assertEquals(1, rides.size());
+		assertEquals(Status.ACCEPTED, rides.get(0).getStatus());
+	}
+	
+	@Test
+	public void findByStatusAndDriver_empty_with_that_status() {
+		Driver d = driverRepository.findById(1L).get();
+		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.CANCELED);
+		
+		assertEquals(0, rides.size());
+	}
+	
+	@Test
+	public void findByStatusAndDriver_empty_with_that_driver() {
+		Driver d = driverRepository.findById(5L).get();
+		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.CANCELED);
+		
+		assertEquals(0, rides.size());
+	}
+	
+	
 }
