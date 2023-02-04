@@ -26,6 +26,7 @@ import org.springframework.test.context.jdbc.Sql;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.location.Route;
+import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.Ride;
@@ -41,6 +42,9 @@ public class RideRepositoryTest {
 	
 	@Autowired
 	private IDriverRepository driverRepository;
+	
+	@Autowired 
+	private IPassengerRepository passengerRepository;
 	
 	@Test
 	@DisplayName("Saves a new ride into the database")
@@ -184,7 +188,7 @@ public class RideRepositoryTest {
 //	List<Ride> findStartedAcceptedPendingByPassenger(Long passengerId);
 	
 	@Test
-	public void findStartedAcceptedPendingByPassenger_find_2() {
+	public void findStartedAcceptedPendingByPassenger_find_pending_and_accepted() {
 		List<Ride> rides = this.rideRepository.findStartedAcceptedPendingByPassenger(3L);
 	
 		assertEquals(2, rides.size());
@@ -207,6 +211,87 @@ public class RideRepositoryTest {
 		assertEquals(1, ridesWithNoDriver.size());
 	}
 	
-
+//	  public List<Ride> findPendingInTheFuture();
 	
+	public void findPendingInTheFuture_find_1_of_3() {
+		List<Ride> ridesWithNoDriver = this.rideRepository.findPendingInTheFuture();
+		
+		assertEquals(1, ridesWithNoDriver.size());
+		
+		Ride r = ridesWithNoDriver.get(0);
+		assertEquals(Status.PENDING, r.getStatus());
+		assertTrue(r.getStartTime().isAfter(LocalDateTime.now()));
+	}
+	
+//	    public List<Ride> findByUser(Long userId, Pageable pageable);
+
+	@Test
+	public void findByUser_passenger() {
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+		Ride ride = new Ride();
+		ride.setPassengers(passengers);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(passenger.getId(), pageable);
+		
+		assertEquals(1, rides.size());
+		assertEquals(ride, rides.get(0));
+	}
+	
+	@Test
+	public void findByUser_driver() {
+		Driver driver = getDummyDriver();
+		driver = this.driverRepository.save(driver);
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(ride.getDriver().getId(), pageable);
+		
+		assertEquals(1, rides.size());
+		assertEquals(ride, rides.get(0));
+	}
+	
+	
+	@Test
+	public void findByUser_driver_with_no_rides() {
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(5L, pageable);
+		
+		assertEquals(0, rides.size());
+	}
+	
+	
+	@Test
+	public void findByUser_non_existant_id() {
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(53123123L, pageable);
+		
+		assertEquals(0, rides.size());
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	private Passenger getDummyPassenger() {
+		Passenger passenger = new Passenger();
+		passenger.setEmail("dqdqwdqwdqwd@gmail.com");
+		passenger = this.passengerRepository.save(passenger);
+		return passenger;
+	}
+	
+	private Driver getDummyDriver() {
+		Driver driver = new Driver();
+		driver.setEmail("dqdqwdqwdqwd@gmail.com");
+		driver = this.driverRepository.save(driver);
+		return driver;
+	}
 }

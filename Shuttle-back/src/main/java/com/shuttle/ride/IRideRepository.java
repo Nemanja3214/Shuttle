@@ -30,7 +30,7 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     @Query(value = "from Ride r where r.status = 0 and r.startTime > current_time")
     public List<Ride> findPendingInTheFuture();
     
-    @Query(value = "from Ride r join r.passengers plist where (plist.id = :userId or r.driver.id = :userId)")
+    @Query(value = "from Ride r left join r.passengers plist where (plist.id = :userId or r.driver.id = :userId)")
     public List<Ride> findByUser(Long userId, Pageable pageable);
     
     @Query(value = "from Ride r join r.passengers plist where (plist.id = :userId or r.driver.id = :userId) and (r.startTime = null or r.startTime between :dateFrom and :dateTo) and (r.endTime = null or r.endTime between :dateFrom and :dateTo)")
