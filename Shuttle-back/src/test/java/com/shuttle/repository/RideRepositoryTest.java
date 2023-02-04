@@ -34,6 +34,8 @@ import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
+// TODO testiraj page mozda
+
 @DataJpaTest
 @ActiveProfiles("test")
 public class RideRepositoryTest {
@@ -274,6 +276,110 @@ public class RideRepositoryTest {
 		assertEquals(0, rides.size());
 	}
 	
+	
+//	   public List<Ride> findByUser(Long userId, Pageable pageable, LocalDateTime dateFrom, LocalDateTime dateTo);
+	
+	@Test
+	public void findByUserDate_happy() {
+		LocalDateTime queryStart = LocalDateTime.of(2016, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2023, 11, 16, 16, 0);
+		
+		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 16, 0);
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStartTime(start);
+		ride.setEndTime(end);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(ride.getDriver().getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(1, rides.size());
+		assertEquals(ride, rides.get(0));
+	}
+	
+	@Test
+	public void findByUserDate_driver_but_date_dont_match() {
+		LocalDateTime queryStart = LocalDateTime.of(2016, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2017, 11, 16, 16, 0);
+		
+		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 17, 0);
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStartTime(start);
+		ride.setEndTime(end);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(ride.getDriver().getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(0, rides.size());
+	}
+	
+	@Test
+	public void findByUserDate_date_but_user_dont_match() {
+		LocalDateTime queryStart = LocalDateTime.of(2015, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2022, 11, 16, 16, 0);
+		
+		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 17, 0);
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStartTime(start);
+		ride.setEndTime(end);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(123123L, pageable, queryStart, queryEnd);
+		
+		assertEquals(0, rides.size());
+	}
+	
+	@Test
+	public void findByUserDate_happy_with_end_null() {
+		LocalDateTime queryStart = LocalDateTime.of(2015, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2022, 11, 16, 16, 0);
+		
+		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = null;
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStartTime(start);
+		ride.setEndTime(end);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(driver.getId(), pageable, queryStart, queryEnd);
+		
+		assertEquals(1, rides.size());
+		assertEquals(ride, rides.get(0));
+	}
+	
+	@Test
+	public void findByUserDate_end_null_but_driver_dont_exist() {
+		LocalDateTime queryStart = LocalDateTime.of(2015, 11, 16, 16, 0);
+		LocalDateTime queryEnd = LocalDateTime.of(2022, 11, 16, 16, 0);
+		
+		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = null;
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStartTime(start);
+		ride.setEndTime(end);
+		this.rideRepository.save(ride);
+		Pageable pageable = PageRequest.of(0, 5);
+		List<Ride> rides = rideRepository.findByUser(1231234L, pageable, queryStart, queryEnd);
+		
+		assertEquals(0, rides.size());
+	}
 	
 	
 	
