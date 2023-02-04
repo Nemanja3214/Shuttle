@@ -102,8 +102,10 @@ public class RideRepositoryTest {
 	
 	@Test
 	public void findById_works() {
-		Optional<Ride> ride = rideRepository.findById(1L);
-		assertThat(ride).isNotEmpty();
+		Ride ride = new Ride();
+		ride = rideRepository.save(ride);
+		Optional<Ride> rideO = rideRepository.findById(ride.getId());
+		assertThat(rideO).isNotEmpty();
 	}
 	
 	@Test
@@ -114,8 +116,14 @@ public class RideRepositoryTest {
 	
 	@Test
 	public void findByStatusAndDriver_pending() {
-		Driver d = driverRepository.findById(1L).get();
-		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.PENDING);
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStatus(Status.PENDING);
+		rideRepository.save(ride);
+		
+		List<Ride> rides = rideRepository.findByDriverAndStatus(driver, Status.PENDING);
 		
 		assertEquals(1, rides.size());
 		assertEquals(Status.PENDING, rides.get(0).getStatus());
@@ -124,8 +132,14 @@ public class RideRepositoryTest {
 	
 	@Test
 	public void findByStatusAndDriver_accepted() {
-		Driver d = driverRepository.findById(1L).get();
-		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStatus(Status.ACCEPTED);
+		rideRepository.save(ride);
+		
+		List<Ride> rides = rideRepository.findByDriverAndStatus(driver, Status.ACCEPTED);
 		
 		assertEquals(1, rides.size());
 		assertEquals(Status.ACCEPTED, rides.get(0).getStatus());
@@ -133,16 +147,27 @@ public class RideRepositoryTest {
 	
 	@Test
 	public void findByStatusAndDriver_empty_with_that_status() {
-		Driver d = driverRepository.findById(1L).get();
-		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.CANCELED);
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setDriver(driver);
+		ride.setStatus(Status.ACCEPTED);
+		rideRepository.save(ride);
+		
+		List<Ride> rides = rideRepository.findByDriverAndStatus(driver, Status.CANCELED);
 		
 		assertEquals(0, rides.size());
 	}
 	
 	@Test
 	public void findByStatusAndDriver_empty_with_that_driver() {
-		Driver d = driverRepository.findById(5L).get();
-		List<Ride> rides = rideRepository.findByDriverAndStatus(d, Status.CANCELED);
+		Driver driver = getDummyDriver();
+		
+		Ride ride = new Ride();
+		ride.setStatus(Status.ACCEPTED);
+		rideRepository.save(ride);
+		
+		List<Ride> rides = rideRepository.findByDriverAndStatus(driver, Status.ACCEPTED);
 		
 		assertEquals(0, rides.size());
 	}
@@ -150,41 +175,129 @@ public class RideRepositoryTest {
 //	get all between dates
 	@Test
 	public void getAllBetweenDates_both_times_get_in() {
-		LocalDateTime start = LocalDateTime.of(2016, 11, 15, 14, 0);
-		LocalDateTime end = LocalDateTime.of(2020, 11, 16, 20, 0);
+		Driver driver = getDummyDriver();
+		
+		LocalDateTime startQuery = LocalDateTime.of(2016, 11, 15, 14, 0);
+		LocalDateTime endQuery = LocalDateTime.of(2022, 11, 16, 20, 0);
+		
+//		ride #1
+		LocalDateTime start = LocalDateTime.of(2017, 11, 15, 14, 0);
+		LocalDateTime end = LocalDateTime.of(2018, 11, 16, 20, 0);
+		Ride rideBefore = new Ride();
+		rideBefore.setDriver(driver);
+		rideBefore.setStartTime(start);
+		rideBefore.setEndTime(end);
+		rideRepository.save(rideBefore);
+		
+//		ride #2
+		start = LocalDateTime.of(2019, 11, 15, 14, 0);
+		end = LocalDateTime.of(2020, 11, 16, 20, 0);
+		Ride rideAfter = new Ride();
+		rideAfter.setDriver(driver);
+		rideAfter.setStartTime(start);
+		rideAfter.setEndTime(end);
+		rideRepository.save(rideAfter);
+
 		Pageable pageable = PageRequest.of(0, 5);
-		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		Page page = rideRepository.getAllBetweenDates(startQuery, endQuery, driver.getId(), pageable);
 		
 		assertEquals(2, page.getNumberOfElements());
+		assertThat(page.getContent()).contains(rideBefore);
+		assertThat(page.getContent()).contains(rideAfter);
 	}
 	
 	@Test
 	public void getAllBetweenDates_first_time_gets_in() {
+		Driver driver = getDummyDriver();
+		
+		LocalDateTime startQuery = LocalDateTime.of(2016, 11, 15, 14, 0);
+		LocalDateTime endQuery = LocalDateTime.of(2019, 12, 16, 20, 0);
+		
+//		ride #1
 		LocalDateTime start = LocalDateTime.of(2017, 11, 15, 14, 0);
-		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = LocalDateTime.of(2018, 11, 16, 20, 0);
+		Ride rideBefore = new Ride();
+		rideBefore.setDriver(driver);
+		rideBefore.setStartTime(start);
+		rideBefore.setEndTime(end);
+		rideRepository.save(rideBefore);
+		
+//		ride #2
+		start = LocalDateTime.of(2019, 11, 15, 14, 0);
+		end = LocalDateTime.of(2020, 11, 16, 20, 0);
+		Ride rideAfter = new Ride();
+		rideAfter.setDriver(driver);
+		rideAfter.setStartTime(start);
+		rideAfter.setEndTime(end);
+		rideRepository.save(rideAfter);
+		
 		Pageable pageable = PageRequest.of(0, 5);
-		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		Page page = rideRepository.getAllBetweenDates(startQuery, endQuery, driver.getId(), pageable);
 		
 		
 		assertEquals(1, page.getNumberOfElements());
+		assertThat(page.getContent()).contains(rideBefore);
 	}
 	
 	@Test
 	public void getAllBetweenDates_second_time_gets_in() {
-		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
-		LocalDateTime end = LocalDateTime.of(2022, 11, 16, 16, 0);
+		Driver driver = getDummyDriver();
+		
+		LocalDateTime startQuery = LocalDateTime.of(2019, 11, 15, 14, 0);
+		LocalDateTime endQuery = LocalDateTime.of(2023, 12, 16, 20, 0);
+		
+//		ride #1
+		LocalDateTime start = LocalDateTime.of(2017, 11, 15, 14, 0);
+		LocalDateTime end = LocalDateTime.of(2018, 11, 16, 20, 0);
+		Ride rideBefore = new Ride();
+		rideBefore.setDriver(driver);
+		rideBefore.setStartTime(start);
+		rideBefore.setEndTime(end);
+		rideRepository.save(rideBefore);
+		
+//		ride #2
+		start = LocalDateTime.of(2019, 11, 15, 14, 0);
+		end = LocalDateTime.of(2020, 11, 16, 20, 0);
+		Ride rideAfter = new Ride();
+		rideAfter.setDriver(driver);
+		rideAfter.setStartTime(start);
+		rideAfter.setEndTime(end);
+		rideRepository.save(rideAfter);
+		
 		Pageable pageable = PageRequest.of(0, 5);
-		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		Page page = rideRepository.getAllBetweenDates(startQuery, endQuery, driver.getId(), pageable);
 		
 		assertEquals(1, page.getNumberOfElements());
+		assertThat(page.getContent()).contains(rideAfter);
 	}
 	
 	@Test
 	public void getAllBetweenDates_neither_time_gets_in() {
-		LocalDateTime start = LocalDateTime.of(2016, 11, 16, 16, 0);
-		LocalDateTime end = LocalDateTime.of(2016, 11, 16, 16, 0);
+		Driver driver = getDummyDriver();
+		
+		LocalDateTime startQuery = LocalDateTime.of(2033, 11, 15, 14, 0);
+		LocalDateTime endQuery = LocalDateTime.of(2034, 12, 16, 20, 0);
+		
+//		ride #1
+		LocalDateTime start = LocalDateTime.of(2017, 11, 15, 14, 0);
+		LocalDateTime end = LocalDateTime.of(2018, 11, 16, 20, 0);
+		Ride rideBefore = new Ride();
+		rideBefore.setDriver(driver);
+		rideBefore.setStartTime(start);
+		rideBefore.setEndTime(end);
+		rideRepository.save(rideBefore);
+		
+//		ride #2
+		start = LocalDateTime.of(2019, 11, 15, 14, 0);
+		end = LocalDateTime.of(2020, 11, 16, 20, 0);
+		Ride rideAfter = new Ride();
+		rideAfter.setDriver(driver);
+		rideAfter.setStartTime(start);
+		rideAfter.setEndTime(end);
+		rideRepository.save(rideAfter);
+		
 		Pageable pageable = PageRequest.of(0, 5);
-		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		Page page = rideRepository.getAllBetweenDates(startQuery, endQuery, driver.getId(), pageable);
 		
 		assertEquals(0, page.getNumberOfElements());
 	}
@@ -193,36 +306,102 @@ public class RideRepositoryTest {
 	
 	@Test
 	public void findStartedAcceptedPendingByPassenger_find_pending_and_accepted() {
-		List<Ride> rides = this.rideRepository.findStartedAcceptedPendingByPassenger(3L);
+		Passenger passenger = getDummyPassenger();
+		List<Passenger> passengers = new ArrayList<>();
+		passengers.add(passenger);
+		
+		Ride ridePending = new Ride();
+		ridePending.setPassengers(passengers);
+		ridePending.setStatus(Ride.Status.PENDING);
+		rideRepository.save(ridePending);
+		
+		Ride rideAccepted = new Ride();
+		rideAccepted.setPassengers(passengers);
+		rideAccepted.setStatus(Ride.Status.ACCEPTED);
+		rideRepository.save(rideAccepted);
+		
+		Ride rideFinished = new Ride();
+		rideFinished.setPassengers(passengers);
+		rideFinished.setStatus(Ride.Status.FINISHED);
+		rideRepository.save(rideFinished);
+		
+		Ride rideCanceled = new Ride();
+		rideCanceled.setPassengers(passengers);
+		rideCanceled.setStatus(Ride.Status.CANCELED);
+		rideRepository.save(rideCanceled);
+		List<Ride> rides = this.rideRepository.findStartedAcceptedPendingByPassenger(passenger.getId());
 	
 		assertEquals(2, rides.size());
 	}
 	
 	@Test
 	public void findStartedAcceptedPendingByPassenger_find_0() {
-		List<Ride> rides = this.rideRepository.findStartedAcceptedPendingByPassenger(11L);
+		List<Ride> rides = this.rideRepository.findStartedAcceptedPendingByPassenger(11234234L);
 	
 		assertEquals(0, rides.size());
 	}
 	
-//	findByDriverNull_
+//	findByDriverNull
 	@Test
 	public void findByDriverNull_null() {
+		Driver driver = getDummyDriver();
+		
+		Ride ridePending = new Ride();
+		ridePending.setDriver(driver);
+		ridePending.setStatus(Ride.Status.PENDING);
+		rideRepository.save(ridePending);
+		
+		Ride rideAccepted = new Ride();
+		rideAccepted.setDriver(driver);
+		rideAccepted.setStatus(Ride.Status.ACCEPTED);
+		rideRepository.save(rideAccepted);
+		
+		Ride rideFinished = new Ride();
+		rideFinished.setStatus(Ride.Status.FINISHED);
+		rideRepository.save(rideFinished);
+		
+		Ride rideCanceled = new Ride();
+		rideCanceled.setStatus(Ride.Status.CANCELED);
+		rideRepository.save(rideCanceled);
 		List<Ride> ridesWithNoDriver = this.rideRepository.findByDriverNull();
+		
 		for(Ride ride : ridesWithNoDriver) {
 			assertNull(ride.getDriver());
 		}
-		assertEquals(1, ridesWithNoDriver.size());
+		assertEquals(2, ridesWithNoDriver.size());
+		assertThat(ridesWithNoDriver).contains(rideFinished);
+		assertThat(ridesWithNoDriver).contains(rideCanceled);
 	}
 	
 //	  public List<Ride> findPendingInTheFuture();
 	
 	public void findPendingInTheFuture_find_1_of_3() {
-		List<Ride> ridesWithNoDriver = this.rideRepository.findPendingInTheFuture();
 		
-		assertEquals(1, ridesWithNoDriver.size());
+		Ride ridePendingInPast = new Ride();
+		ridePendingInPast.setStartTime(LocalDateTime.now().minusSeconds(1));
+		ridePendingInPast.setStatus(Ride.Status.PENDING);
+		rideRepository.save(ridePendingInPast);
 		
-		Ride r = ridesWithNoDriver.get(0);
+		Ride ridePendingInFuture = new Ride();
+		ridePendingInFuture.setStartTime(LocalDateTime.now().plusHours(1));
+		ridePendingInFuture.setStatus(Ride.Status.PENDING);
+		rideRepository.save(ridePendingInFuture);
+		
+		Ride rideFinishedInFuture = new Ride();
+		rideFinishedInFuture.setStartTime(LocalDateTime.now().plusHours(1));
+		rideFinishedInFuture.setStatus(Ride.Status.FINISHED);
+		rideRepository.save(rideFinishedInFuture);
+		
+		Ride rideFinishedInPast = new Ride();
+		rideFinishedInPast.setStartTime(LocalDateTime.now().minusSeconds(1));
+		rideFinishedInPast.setStatus(Ride.Status.FINISHED);
+		rideRepository.save(rideFinishedInPast);
+		
+		List<Ride> rides = this.rideRepository.findPendingInTheFuture();
+		
+		assertEquals(1, rides.size());
+		
+		Ride r = rides.get(0);
 		assertEquals(Status.PENDING, r.getStatus());
 		assertTrue(r.getStartTime().isAfter(LocalDateTime.now()));
 	}
