@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -132,6 +136,49 @@ public class RideRepositoryTest {
 		
 		assertEquals(0, rides.size());
 	}
+	
+//	get all between dates
+	@Test
+	public void getAllBetweenDates_both_times_get_in() {
+		LocalDateTime start = LocalDateTime.of(2016, 11, 15, 14, 0);
+		LocalDateTime end = LocalDateTime.of(2020, 11, 16, 20, 0);
+		Pageable pageable = PageRequest.of(0, 5);
+		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		
+		assertEquals(2, page.getNumberOfElements());
+	}
+	
+	@Test
+	public void getAllBetweenDates_first_time_gets_in() {
+		LocalDateTime start = LocalDateTime.of(2017, 11, 15, 14, 0);
+		LocalDateTime end = LocalDateTime.of(2017, 11, 16, 16, 0);
+		Pageable pageable = PageRequest.of(0, 5);
+		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		
+		
+		assertEquals(1, page.getNumberOfElements());
+	}
+	
+	@Test
+	public void getAllBetweenDates_second_time_gets_in() {
+		LocalDateTime start = LocalDateTime.of(2017, 11, 16, 16, 0);
+		LocalDateTime end = LocalDateTime.of(2022, 11, 16, 16, 0);
+		Pageable pageable = PageRequest.of(0, 5);
+		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		
+		assertEquals(1, page.getNumberOfElements());
+	}
+	
+	@Test
+	public void getAllBetweenDates_neither_time_gets_in() {
+		LocalDateTime start = LocalDateTime.of(2016, 11, 16, 16, 0);
+		LocalDateTime end = LocalDateTime.of(2016, 11, 16, 16, 0);
+		Pageable pageable = PageRequest.of(0, 5);
+		Page page = rideRepository.getAllBetweenDates(start, end, 6L, pageable);
+		
+		assertEquals(0, page.getNumberOfElements());
+	}
+	
 	
 	
 }
