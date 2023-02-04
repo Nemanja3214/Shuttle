@@ -3,16 +3,18 @@ package com.shuttle.driver;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.shuttle.driver.dto.DriverStatDTO;
+import com.shuttle.panic.IPanicRepository;
+import com.shuttle.panic.Panic;
 import com.shuttle.ride.IRideRepository;
+import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
-import com.shuttle.ride.RideService;
+import com.shuttle.vehicle.VehicleAdminHomeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,18 +24,12 @@ import com.shuttle.ProfileChangeRequest.IProfileChangeRepository;
 import com.shuttle.ProfileChangeRequest.ProfileChangeRequest;
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.exception.InvalidBase64Exception;
-import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.location.dto.LocationDTO;
-import com.shuttle.passenger.Passenger;
-import com.shuttle.passenger.PassengerDTO;
-import com.shuttle.passenger.PassengerUpdateDTO;
 import com.shuttle.security.Role;
 import com.shuttle.security.RoleService;
-import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
-import com.shuttle.user.dto.UserDTO;
 import com.shuttle.vehicle.IVehicleRepository;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.workhours.IWorkHoursService;
@@ -61,6 +57,9 @@ public class DriverService implements IDriverService {
     @Autowired
     private IRideRepository rideRepository;
 
+    @Autowired
+    IPanicRepository panicRepository;
+
     @Override
     public Driver add(Driver driver) {
         return driverRepository.save(driver);
@@ -84,6 +83,18 @@ public class DriverService implements IDriverService {
         List<Driver> activeDrivers = driverRepository.findAllActive();
         List<Vehicle> driversVehicles = vehicleRepository.findByDriverIn(activeDrivers);
         return driversVehicles.stream().map(vehicle -> LocationDTO.from(vehicle.getCurrentLocation())).toList();
+    }
+
+    @Override
+    public List<VehicleAdminHomeDTO> getActiveDriversVehicleLocations() {
+        List<Driver> activeDrivers = driverRepository.findAllActive();
+        List<Vehicle> driversVehicles = vehicleRepository.findByDriverIn(activeDrivers);
+        return driversVehicles.stream().map(vehicle -> {
+            VehicleAdminHomeDTO vehicleAdminHomeDTO = new VehicleAdminHomeDTO(vehicle);
+            List<Panic> panic = panicRepository.findPanicsByRide(rideRepository.findFirstByDriverOrderByStartTimeDesc(vehicle.getDriver()));
+            vehicleAdminHomeDTO.setPanic(!panic.isEmpty());
+            return vehicleAdminHomeDTO;
+        }).toList();
     }
 
     @Override

@@ -1,14 +1,18 @@
 package com.shuttle.driver;
 
+import java.util.List;
+
+import com.shuttle.driver.dto.DriverStatDTO;
+import com.shuttle.vehicle.VehicleAdminHomeDTO;
+import org.springframework.data.domain.Pageable;
+
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
 import com.shuttle.ProfileChangeRequest.ProfileChangeRequest;
 import com.shuttle.driver.dto.DriverDTO;
-import com.shuttle.driver.dto.DriverStatDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
 import com.shuttle.location.dto.LocationDTO;
 
@@ -46,4 +50,5 @@ public interface IDriverService {
 	public ProfileChangeRequest requestUpdate(Driver driver, DriverUpdateDTO dto);
 	public ProfileChangeRequest getProfileChange(Long id);
 	public Driver applyRequest(ProfileChangeRequest request) throws IOException;
+	List<VehicleAdminHomeDTO> getActiveDriversVehicleLocations();
 }
