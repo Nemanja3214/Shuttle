@@ -179,6 +179,22 @@ public class RideRepositoryTest {
 		assertEquals(0, page.getNumberOfElements());
 	}
 	
+//	List<Ride> findStartedAcceptedPendingByPassenger(Long passengerId);
+	
+	@Test
+	public void findStartedAcceptedPendingByPassenger_find_2() {
+		List<Ride> rides = this.rideRepository.findStartedAcceptedPendingByPassenger(3L);
+	
+		assertEquals(2, rides.size());
+	}
+	
+	@Test
+	public void findStartedAcceptedPendingByPassenger_find_0() {
+		List<Ride> rides = this.rideRepository.findStartedAcceptedPendingByPassenger(11L);
+	
+		assertEquals(0, rides.size());
+	}
+	
 	
 	
 }

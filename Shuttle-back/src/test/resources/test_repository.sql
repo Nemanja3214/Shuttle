@@ -22,6 +22,7 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver5@gmail.com', '$2a$10$ePVkPF/GxUI2V4kSi8qhi.hRlCX/h5CgZtpdOoy05btsgbfaaCNOC', true, false, false, 'DriverName_5');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('driver6@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'DriverName_6');
 
+-- has no rides
 insert into generic_user(email, password, enabled, blocked, active, name) values ('p1@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
 
 insert into generic_user(email, password, enabled, blocked, active, name) values ('p2@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
@@ -135,22 +136,55 @@ insert into route_locations(route_id, locations_id) values(2, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 1, 1, 1, true, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (2, 2);
 
--- Driver #3 rides
--- id #1 status pending
+-- Driver #6 rides
+-- id #3 status pending, passenger #3
 insert into route default values;
 insert into route_locations(route_id, locations_id) values(3, 1);
 insert into route_locations(route_id, locations_id) values(3, 2);
-insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes, end_time)
- values (0, 6, 1, 1, true, false, 123.4, 5.6, 100, '2017-11-16 15:30:14.332');
-insert into ride_passengers(ride_id, passengers_id) values (3, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes)
+ values (0, 6, 1, 1, true, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (3, 3);
 
--- id #2 status accepted
+-- id #4 status accepted, passenger #3
 insert into route default values;
 insert into route_locations(route_id, locations_id) values(4, 1);
 insert into route_locations(route_id, locations_id) values(4, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes)
+ values (1, 6, 1, 1, true, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (4, 3);
+
+-- id #5 first ride with endDate
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(5, 1);
+insert into route_locations(route_id, locations_id) values(5, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes, end_time)
+ values (0, 6, 1, 1, true, false, 123.4, 5.6, 100, '2017-11-16 15:30:14.332');
+insert into ride_passengers(ride_id, passengers_id) values (5, 2);
+
+-- id #6 second ride with endDate
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(6, 1);
+insert into route_locations(route_id, locations_id) values(6, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes, end_time)
  values (1, 6, 1, 1, true, false, 123.4, 5.6, 100, '2017-11-16 17:30:14.332');
-insert into ride_passengers(ride_id, passengers_id) values (4, 2);
+insert into ride_passengers(ride_id, passengers_id) values (6, 2);
+
+
+-- id #7 status canceled, passenger #3
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(7, 1);
+insert into route_locations(route_id, locations_id) values(7, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes)
+ values (4, 6, 1, 1, true, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (7, 3);
+
+-- id #8 status finished, passenger #3
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(8, 1);
+insert into route_locations(route_id, locations_id) values(8, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes)
+ values (5, 6, 1, 1, true, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (8, 3);
 
 --------------- Reports(?)
 
