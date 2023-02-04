@@ -2,6 +2,8 @@ package com.shuttle.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Timestamp;
@@ -195,6 +197,16 @@ public class RideRepositoryTest {
 		assertEquals(0, rides.size());
 	}
 	
+//	findByDriverNull_
+	@Test
+	public void findByDriverNull_null() {
+		List<Ride> ridesWithNoDriver = this.rideRepository.findByDriverNull();
+		for(Ride ride : ridesWithNoDriver) {
+			assertNull(ride.getDriver());
+		}
+		assertEquals(1, ridesWithNoDriver.size());
+	}
 	
+
 	
 }
