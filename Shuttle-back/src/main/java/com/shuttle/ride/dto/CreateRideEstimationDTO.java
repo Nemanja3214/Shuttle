@@ -19,8 +19,9 @@ public class CreateRideEstimationDTO {
 	private Boolean babyTransport;
 	private Boolean petTransport;
 	private long travelTime;
+	private Double routeLength;
 
-	public double calculateLength() {
-		return locations.stream().map(route -> route.getDistance()).collect(Collectors.summingDouble(Double::doubleValue));
-	}
+//	public double calculateLength() {
+//		return locations.stream().map(route -> route.getDistance()).collect(Collectors.summingDouble(Double::doubleValue));
+//	}
 }
