@@ -265,6 +265,17 @@ public class DriverService implements IDriverService {
 //					Nothing just user has default picture
             }
         }
+        profileChangeRepository.delete(request);
 		return driver;
 	}
+
+    @Override
+    public List<ProfileChangeRequest> getAllProfileChangeRequests() {
+        return profileChangeRepository.findAll();
+    }
+
+    @Override
+    public void deleteProfileChangeRequests(ProfileChangeRequest request) {
+        profileChangeRepository.delete(request);
+    }
 }

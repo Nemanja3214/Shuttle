@@ -9,8 +9,6 @@ import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.time.Duration;
 
-import org.springframework.data.domain.Pageable;
-
 import com.shuttle.ProfileChangeRequest.ProfileChangeRequest;
 import com.shuttle.driver.dto.DriverDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
@@ -51,4 +49,6 @@ public interface IDriverService {
 	public ProfileChangeRequest getProfileChange(Long id);
 	public Driver applyRequest(ProfileChangeRequest request) throws IOException;
 	List<VehicleAdminHomeDTO> getActiveDriversVehicleLocations();
+	List<ProfileChangeRequest> getAllProfileChangeRequests();
+	void deleteProfileChangeRequests(ProfileChangeRequest request);
 }
