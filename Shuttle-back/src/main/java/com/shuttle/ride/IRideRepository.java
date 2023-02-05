@@ -30,28 +30,43 @@ public interface IRideRepository extends JpaRepository<Ride, Long> {
     @Query(value = "from Ride r where r.status = 0 and r.startTime > current_time")
     public List<Ride> findPendingInTheFuture();
     
-    @Query(value = "from Ride r join r.passengers plist where (plist.id = :userId or r.driver.id = :userId)")
+    @Query(value = "from Ride r left join r.passengers plist where (plist.id = :userId or r.driver.id = :userId)")
     public List<Ride> findByUser(Long userId, Pageable pageable);
     
-    @Query(value = "from Ride r join r.passengers plist where (plist.id = :userId or r.driver.id = :userId) and (r.startTime = null or r.startTime between :dateFrom and :dateTo) and (r.endTime = null or r.endTime between :dateFrom and :dateTo)")
+    @Query(value = "from Ride r left join r.passengers plist "
+    		+ "where (plist.id = :userId or r.driver.id = :userId) and"
+    		+ " (r.startTime = null or r.startTime between :dateFrom and :dateTo) and"
+    		+ " (r.endTime = null or r.endTime between :dateFrom and :dateTo)")
     public List<Ride> findByUser(Long userId, Pageable pageable, LocalDateTime dateFrom, LocalDateTime dateTo);
     
     @Query(value = "from Ride r where (:passenger) IN elements(r.passengers) and ( r.endTime BETWEEN :startDate AND :endDate )")
     public List<Ride> getAllByPassengerAndBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Passenger passenger, Pageable pageable);
 
     @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
-    		+ " FROM Ride r JOIN r.passengers p"
+    		+ " FROM Ride r LEFT JOIN r.passengers p"
     		+ " WHERE (:passengerId) = p.id"
+    		+ " AND r.status = 5 "
     		+ " AND (r.endTime BETWEEN :start AND :end )"
     		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
     		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
 	public List<GraphEntryDTO> getPassengerGraphData(LocalDateTime start, LocalDateTime end, long passengerId);
     
     @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
-    		+ " FROM Ride r JOIN r.driver d"
+    		+ " FROM Ride r LEFT JOIN r.driver d"
     		+ " WHERE (:driverId) = d.id"
+    		+ " AND r.status = 5 "
     		+ " AND (r.endTime BETWEEN :start AND :end )"
     		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
     		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
 	public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId);
+
+    @Query("SELECT new com.shuttle.ride.dto.GraphEntryDTO(CAST(CAST(r.endTime AS DATE) AS text), COUNT(*), SUM(r.totalCost), SUM(r.totalLength))"
+    		+ " FROM Ride r LEFT JOIN r.driver d "
+    		+ " WHERE (r.endTime BETWEEN :start AND :end )"
+    		+ " AND r.status = 5 "
+    		+ " GROUP BY CAST(CAST(r.endTime AS DATE) AS text)"
+    		+ " ORDER BY CAST(CAST(r.endTime AS DATE) AS text)")
+	public List<GraphEntryDTO> getOverallGraphData(LocalDateTime start, LocalDateTime end);
+
+    public Ride findFirstByDriverOrderByStartTimeDesc(Driver driver);
 }

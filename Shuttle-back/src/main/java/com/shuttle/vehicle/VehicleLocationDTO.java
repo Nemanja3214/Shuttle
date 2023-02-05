@@ -12,4 +12,11 @@ public class VehicleLocationDTO {
     private Boolean available;
     private LocationDTO location;
     private Long vehicleTypeId;
+
+    public VehicleLocationDTO(Vehicle vehicle){
+        id = vehicle.getId();
+        available = vehicle.getDriver().isAvailable();
+        location = LocationDTO.from(vehicle.getCurrentLocation());
+        vehicleTypeId = vehicle.getVehicleType().getId();
+    }
 }

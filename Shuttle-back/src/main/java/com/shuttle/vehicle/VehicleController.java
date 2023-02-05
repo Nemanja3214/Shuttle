@@ -47,7 +47,7 @@ public class VehicleController {
      * Notify users (unregistered user home page + passenger home page) of the drivers' locations
      * and availability.
      */
-    @Scheduled(fixedDelay = 2000)
+    @Scheduled(fixedDelay = 1000)
     public void notifyVehicleLocations() {
         final String dest = "/vehicle/locations";
         template.convertAndSend(dest, getAllActiveVehicleLocationsDTO());
@@ -56,7 +56,7 @@ public class VehicleController {
     /**
      * Notify each driver about his vehicle location and availability.
      */
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 1000)
     public void notifyVehicleLocation() {
         for (Vehicle v : getAllActiveVehicles()) {
             final String dest = "/vehicle/locations/" + v.getDriver().getId();
@@ -157,7 +157,7 @@ public class VehicleController {
 			return new ResponseEntity<>("Vehicle does not exist!", HttpStatus.NOT_FOUND);
 		}
 		
-		this.vehicleService.changeCurrentLocation(id, location);
+		this.vehicleService.changeCurrentLocation(v.getDriver(), location);
 		
 		final GenericUser user = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isDriver(user)) {

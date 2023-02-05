@@ -19,6 +19,7 @@ public class PassengerDTO {
 	public String email;
 	public String address;
 	public String password;
+	public String jwt;
 	
 	public PassengerDTO(Passenger p) {
 		this.id = p.getId();
@@ -29,6 +30,7 @@ public class PassengerDTO {
 		this.email = p.getEmail();
 		this.address = p.getAddress();
 		this.password = p.getPassword();
+		this.jwt = p.getJwt();
 	}
 	
 	public static Passenger from(PassengerDTO dto) {

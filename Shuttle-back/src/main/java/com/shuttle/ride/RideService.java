@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -18,6 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.shuttle.common.exception.FavoriteRideLimitExceeded;
 import com.shuttle.common.exception.NonExistantFavoriteRoute;
@@ -47,6 +49,7 @@ import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
 import com.shuttle.vehicle.vehicleType.VehicleType;
 
 import jakarta.transaction.Transactional;
+import net.minidev.json.JSONObject;
 
 class NoAvailableDriverException extends Throwable {
 	private static final long serialVersionUID = -2718176046357707329L;
@@ -324,6 +327,16 @@ public class RideService implements IRideService {
 		ride = rideRepository.save(ride);
 		return ride;
     }
+    
+
+	@Override
+	public Ride panicRide(Ride ride) {
+		ride.setStatus(Status.CANCELED);
+		ride.setEndTime(LocalDateTime.now());
+		
+		ride = rideRepository.save(ride);
+		return ride;
+	}
 
     @Override
     public List<Ride> findRidesWithNoDriver() {
@@ -393,9 +406,9 @@ public class RideService implements IRideService {
     	favoriteRoute.setLocations(locations);
     	
     	favoriteRoute.setVehicleType(vehicleType.get());
-    	favoriteRoute.setBabyTransport(dto.isBabyTransport());
+    	favoriteRoute.setBabyTransport(dto.getBabyTransport());
     	favoriteRoute.setFavoriteName(dto.getFavoriteName());
-    	favoriteRoute.setPetTransport(dto.isPetTransport());
+    	favoriteRoute.setPetTransport(dto.getPetTransport());
     	favoriteRoute = this.favouriteRouteRepository.save(favoriteRoute);
     	return favoriteRoute;
     }
@@ -445,13 +458,12 @@ public class RideService implements IRideService {
 	}
 	
 	@Override
-	public List<GraphEntryDTO> getDrivertGraphData(LocalDateTime start, LocalDateTime end, long driverId) throws NonExistantUserException {
+	public List<GraphEntryDTO> getDriverGraphData(LocalDateTime start, LocalDateTime end, long driverId) throws NonExistantUserException {
 		if(!this.driverRepository.existsById(driverId)) {
 			throw new NonExistantUserException();
 		}
 		return this.rideRepository.getDriverGraphData(start, end, driverId);
 	}
-
 
 	@Override
 	public void generate(Long driverId, Long passengerId) {
@@ -464,8 +476,15 @@ public class RideService implements IRideService {
             List<Passenger> passengers = new ArrayList<>();
             passengers.add(p);
             
+            Location startLocation = generateLocation();
+            locationRepository.save(startLocation);
+            Location endLocation =  generateLocation();
+            locationRepository.save(endLocation);
+            
             Route route = new Route();
             List<Location> locations = new ArrayList<>();
+            locations.add(startLocation);
+            locations.add(endLocation);
             route.setLocations(locations);
             
             VehicleType vt = vehicleTypeRepository.findVehicleTypeByNameIgnoreCase("standard").get();
@@ -479,22 +498,50 @@ public class RideService implements IRideService {
 		
 	}
     
-    private LocalDateTime generateDateTime(boolean isStart) {
+    private Location generateLocation() {
+    	Random r = new Random();
+		Double longitude = r.nextDouble(18, 21);
+		Double latitude = r.nextDouble(42, 46);
+		final String uri = "https://nominatim.openstreetmap.org/reverse?lat=" + latitude + "&lon=" + longitude + "&format=json";
+		RestTemplate restTemplate = new RestTemplate();
+		JSONObject response = restTemplate.getForObject(uri, JSONObject.class);
+		Location location = new Location();
+		location.setLatitude(latitude);
+		location.setLongitude(longitude);
+		String address = (String) response.get("display_name");
+		String[] parts = address.split(",");
+		if(parts.length < 2)
+			return location;
+		address = parts[0] + ", " + parts[1];
+		location.setAddress(address);
+
+		return location;
+//		JSONObject address = makeRequest("http://nominatim.openstreetmap.org/search?q="+address+"&format=json&polygon=1&addressdetails=1","get");
+
+	}
+
+	private LocalDateTime generateDateTime(boolean isStart) {
 		Calendar calendar = Calendar.getInstance();
         TimeZone tz = calendar.getTimeZone();
         ZoneId zoneId = tz.toZoneId();     
         
-        calendar.add(Calendar.DAY_OF_MONTH, -10);
+        calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -1000);
         LocalDate lowerBound = LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
         
-        calendar.add(Calendar.DAY_OF_MONTH, 20);
+        calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -500);
+        LocalDate middleBound = LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
+        
+        calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, -10);
         LocalDate upperBound= LocalDateTime.ofInstant(calendar.toInstant(), zoneId).toLocalDate();
         
         if(isStart) {
-        	return between(lowerBound, LocalDate.now());
+        	return between(lowerBound, middleBound);
         }
         else {
-        	return between(LocalDate.now(), upperBound);
+        	return between(middleBound, upperBound);
         }
 	}
 
@@ -512,5 +559,15 @@ public class RideService implements IRideService {
 	@Override
 	public List<Ride> findAll() {
 		return this.rideRepository.findAll();
+	}
+
+	@Override
+	public FavoriteRoute findFavoriteRouteById(Long id) {
+		return this.favouriteRouteRepository.findById(id).orElse(null);
+	}
+
+	@Override
+	public List<GraphEntryDTO> getOverallGraphData(LocalDateTime start, LocalDateTime end) {
+		return this.rideRepository.getOverallGraphData(start, end);
 	}
 }

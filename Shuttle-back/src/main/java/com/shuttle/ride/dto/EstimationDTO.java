@@ -26,10 +26,7 @@ public class EstimationDTO {
 	public void setEstimatedCost(double estimatedCost) {
 		this.estimatedCost = estimatedCost;
 	}
-	public static EstimationDTO getMock() {
-		return new EstimationDTO(10, 450);
-	}
-	
+
 	
 
 }

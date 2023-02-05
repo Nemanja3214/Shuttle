@@ -14,26 +14,33 @@ insert into role(name) values('admin');
 
 -- Elementary user data
 
-insert into generic_user(email, password, enabled, blocked, active, name) values ('bob@gmail.com', 'bob123', true, false, true, 'Bob');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', 'john123', true, false, false, 'John');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', 'Troytroy123', true, false, false, 'Troy');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', 'admin', true, false, false, 'Admin');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('expired@gmail.com', 'expired123', false, false, false, 'Exp');
+-- passwords (in the order of insertion):
+-- bob123
+-- john123
+-- Troytroy123
+-- admin
+-- 1234
+-- 1234
+-- 1234
+-- 1234
+-- 1234
+-- 1234
 
-insert into generic_user(email, password, enabled, blocked, active, name) values ('driver1@gmail.com', '1234', true, false, false, 'DriverName_1');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('driver2@gmail.com', '1234', true, false, false, 'DriverName_2');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('driver3@gmail.com', '1234', true, false, false, 'DriverName_3');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('driver4@gmail.com', '1234', true, false, false, 'DriverName_4');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('driver5@gmail.com', '1234', true, false, false, 'DriverName_5');
-insert into generic_user(email, password, enabled, blocked, active, name) values ('driver6@gmail.com', '1234', true, false, false, 'DriverName_6');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('bob@gmail.com', '$2a$10$j2988SIGRINo0s4/F1ivJ.zBcyn39ap3sizeRs38z.zwzx9nxMpmm', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('john@gmail.com', '$2a$10$XrWH9VDQR2aCn9tThclQJOrNwhKYs525HG3X.9zI1MlG21F8mKw/2', true, false, false, 'John');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('troy@gmail.com', '$2a$10$RNBI5BuqlU8iUFoOCdeGc.V.afrcNyQSEs1t43JJ5TdXu9/wz86mi', true, false, false, 'Troy');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('admin@gmail.com', '$2a$10$GxRpGz0dRDEK52.VeoiDA.azoCStgfAZjficcK/El5hxKCDtUWHBm', true, false, false, 'Admin');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver1@gmail.com', '$2a$10$TSGeDlyusssAVvBnr//IpegdbvSHcmWwcjHc9dew1SIsT.3N8Uoda', true, false, false, 'DriverName_1');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver2@gmail.com', '$2a$10$2jxtILDGfYS9lUtuIMHDB.fZIx7JrAV/9ELBnkCTWaIisnuuP2Oo6', true, false, false, 'DriverName_2');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver3@gmail.com', '$2a$10$krk0jTL1y0eFbRqBB1jO9eZv.gSZkZ/vPzXwnZG1W3WDh/xZs8OIC', true, false, false, 'DriverName_3');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver4@gmail.com', '$2a$10$wEK.5n29HkO3NEJxVfPaYODNmRIPCfSHwwv77KrJ5JXKHWGdINPee', true, false, false, 'DriverName_4');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver5@gmail.com', '$2a$10$ePVkPF/GxUI2V4kSi8qhi.hRlCX/h5CgZtpdOoy05btsgbfaaCNOC', true, false, false, 'DriverName_5');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('driver6@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'DriverName_6');
 
 insert into user_role(user_id, role_id) values (1, 2);
 insert into user_role(user_id, role_id) values (2, 1);
 insert into user_role(user_id, role_id) values (3, 1);
 insert into user_role(user_id, role_id) values (4, 3);
-insert into user_role(user_id, role_id) values (5, 1);
-
-
 
 insert into user_role(user_id, role_id) values (5, 2);
 insert into user_role(user_id, role_id) values (6, 2);
@@ -54,7 +61,6 @@ insert into driver(id, available, time_worked_today) values (10, true, 0);
 
 insert into passenger(id) values (2);
 insert into passenger(id) values (3);
-insert into passenger(id) values (5);
 
 -- Vehicle
 
@@ -73,10 +79,6 @@ insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transp
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(8, 5, 2, false, true, 5);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(9, 6, 1, false, false, 6);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(10, 7, 3, false, false, 7);
-
--- Expired token case for testing
-
-insert into verification_token(expire_date_time, token, passenger_id) values('2021-01-17 17:11:49.795',  'asdqwdwegegr', 5);
 
 -- insert into location(address, latitude, longitude) values ('AAAAAAAAAAAAAAAAAA', 24.267136, 39.833549);
 -- insert into location(address, latitude, longitude) values ('BBBBBBBBBBBBBBBBBB', 25.267136, 30.833549);

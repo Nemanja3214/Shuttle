@@ -1,26 +1,39 @@
 package com.shuttle.driver;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.shuttle.ProfileChangeRequest.ProfileChangeRequest;
+import com.shuttle.ProfileChangeRequest.ProfileChangeRequestDTO;
 import com.shuttle.common.FileUploadUtil;
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
 import com.shuttle.common.exception.InvalidBase64Exception;
-import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.document.DriverDocument;
 import com.shuttle.driver.document.DriverDocumentCreateDTO;
 import com.shuttle.driver.document.DriverDocumentDTO;
 import com.shuttle.driver.document.IDriverDocumentService;
 import com.shuttle.driver.dto.DriverDTO;
-import com.shuttle.driver.dto.DriverDataPageDTO;
 import com.shuttle.driver.dto.DriverUpdateDTO;
-import com.shuttle.passenger.Passenger;
-import com.shuttle.passenger.PassengerDTO;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.IRideService;
 import com.shuttle.ride.Ride;
@@ -31,41 +44,12 @@ import com.shuttle.user.UserService;
 import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
-
-import io.jsonwebtoken.ExpiredJwtException;
-import org.springframework.data.domain.Page;
-
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.VehicleDTO;
+import com.shuttle.workhours.IWorkHoursService;
 import com.shuttle.workhours.WorkHours;
-
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.websocket.server.PathParam;
-import com.shuttle.workhours.*;
 import com.shuttle.workhours.dto.WorkHoursNoDriverDTO;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 public class DriverController {
@@ -134,7 +118,7 @@ public class DriverController {
 		return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PreAuthorize("hasAnyAuthority('driver', 'admin', 'passenger')")
     @GetMapping("/api/driver/{id}")
     public ResponseEntity<?> getDriverDetails(@PathVariable("id") Long id) {
     	if (id == null) {
@@ -148,7 +132,7 @@ public class DriverController {
         
 		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 		if (userService.isAdmin(user____)) {	
-		} else {
+		} else if (userService.isDriver(user____)) {
 	    	if (!driver.getId().equals(user____.getId())) {
                 return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
 	    	}
@@ -199,6 +183,79 @@ public class DriverController {
 		}
 		return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
     }
+    
+    @PreAuthorize("hasAnyAuthority('driver', 'admin')")
+    @PostMapping("/api/driver/{id}/request")
+    public ResponseEntity<?> createProfileChangeRequest(@RequestBody DriverUpdateDTO dto, @PathVariable("id") Long id) {
+    	try {
+			MyValidator.validateRequired(dto.getName(), "name");
+			MyValidator.validateRequired(dto.getSurname(), "surname");
+			MyValidator.validateRequired(dto.getAddress(), "address");
+			MyValidator.validateRequired(dto.getTelephoneNumber(), "telephoneNumber");
+			
+			MyValidator.validateLength(dto.getName(), "name", 100);
+			MyValidator.validateLength(dto.getSurname(), "surname", 100);
+			MyValidator.validateLength(dto.getAddress(), "address", 100);
+			MyValidator.validateLength(dto.getTelephoneNumber(), "telephoneNumber", 18);
+		} catch (MyValidatorException e1) {
+			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+    	
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+//    	TODO check picture
+    	Driver driver = driverService.get(id);
+        if (driver == null) {
+            return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+        }
+        
+		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+		if (userService.isAdmin(user____)) {	
+		} else {
+	    	if (!driver.getId().equals(user____.getId())) {
+                return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+	    	}
+	    }
+		
+		ProfileChangeRequest request = this.driverService.requestUpdate(driver, dto);
+		return new ResponseEntity<>(new ProfileChangeRequestDTO(request), HttpStatus.OK);
+    }
+    
+   // @PreAuthorize("hasAnyAuthority('admin')")
+    @PutMapping("/api/driver/request/{id}/approve")
+    public ResponseEntity<?> approveProfileChangeRequest(@PathVariable("id") Long id) {  	
+    	if (id == null) {
+    		return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+    	}
+    	
+    	ProfileChangeRequest request = driverService.getProfileChange(id);
+        if (request == null) {
+            return new ResponseEntity<>("Request does not exist!", HttpStatus.NOT_FOUND);
+        }
+		
+		try {
+			Driver driver = this.driverService.applyRequest(request);
+			return new ResponseEntity<>(new UserDTONoPassword(driver), HttpStatus.OK);
+		} catch (IOException e) {
+			return new ResponseEntity<>("Cannot save picture", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+    }
+
+	@PutMapping("/api/driver/request/{id}/reject")
+	public ResponseEntity<?> rejectProfileChangeRequest(@PathVariable("id") Long id) {
+		if (id == null) {
+			return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+		}
+
+		ProfileChangeRequest request = driverService.getProfileChange(id);
+		if (request == null) {
+			return new ResponseEntity<>("Request does not exist!", HttpStatus.NOT_FOUND);
+		}
+
+		this.driverService.deleteProfileChangeRequests(request);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 
     @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/api/driver/{id}/documents")
@@ -625,4 +682,23 @@ public class DriverController {
 		ListDTO<RideDTO> ridesDTO = new ListDTO<>(rides.stream().map(r -> RideController.to(r)).toList());
         return new ResponseEntity<>(ridesDTO, HttpStatus.OK);
     }
+	@PreAuthorize("hasAnyAuthority('driver', 'admin')")
+	@GetMapping("/api/driver/{id}/stats")
+	public ResponseEntity<?> getDriverStats(@PathVariable Long id,@RequestParam String scope){
+		Driver d = driverService.get(id);
+		if (d == null) {
+			return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(driverService.getDriverStatistics(d,scope),HttpStatus.OK);
+	}
+
+	@PreAuthorize("hasAnyAuthority('admin')")
+	@GetMapping("/api/driver/request")
+	public ResponseEntity<?> getDriverChangeRequests(){
+		List<ProfileChangeRequest> changeRequests = driverService.getAllProfileChangeRequests();
+		System.out.println("changes");
+		if (changeRequests.isEmpty()) return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(changeRequests,HttpStatus.OK);
+	}
+
 }

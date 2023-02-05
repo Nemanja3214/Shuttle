@@ -2,6 +2,7 @@ package com.shuttle.passenger;
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
@@ -9,13 +10,22 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
 
+import com.shuttle.security.jwt.JwtTokenUtil;
+import com.shuttle.security.jwt.TokenBasedAuthentication;
+import com.shuttle.user.dto.UserDTONoPassword;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
+import com.shuttle.common.exception.EmailAlreadyUsedException;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.common.exception.TokenExpiredException;
 import com.shuttle.ride.IRideService;
@@ -37,12 +48,10 @@ import com.shuttle.ride.dto.RideDTO;
 import com.shuttle.ride.dto.RidePassengerDTO;
 import com.shuttle.user.GenericUser;
 import com.shuttle.user.UserService;
-import com.shuttle.user.dto.UserDTONoPassword;
 import com.shuttle.user.email.IEmailService;
 import com.shuttle.util.MyValidator;
 import com.shuttle.util.MyValidatorException;
 
-import jakarta.annotation.security.PermitAll;
 import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
 
@@ -57,6 +66,9 @@ public class PassengerController {
 	IRideService rideService;
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	JwtTokenUtil jwtTokenUtil;
 	
 	@PermitAll
 	@PostMapping
@@ -67,23 +79,23 @@ public class PassengerController {
 			MyValidator.validateRequired(dto.getEmail(), "email");
 			MyValidator.validateRequired(dto.getAddress(), "address");
 			MyValidator.validateRequired(dto.getPassword(), "password");
-			
+
 			MyValidator.validateLength(dto.getName(), "name", 100);
 			MyValidator.validateLength(dto.getSurname(), "surname", 100);
 			MyValidator.validateLength(dto.getTelephoneNumber(), "telephoneNumber", 18);
 			MyValidator.validateLength(dto.getEmail(), "email", 100);
 			MyValidator.validateLength(dto.getAddress(), "address", 100);
-			
+
 			MyValidator.validatePattern(dto.getPassword(), "password", "^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$");
 		} catch (MyValidatorException e1) {
 			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
 		}
-		
+
 		GenericUser userWithThisEmail = userService.findByEmail(dto.getEmail());
 		if (userWithThisEmail != null) {
 			return new ResponseEntity<RESTError>(new RESTError("User with that email already exists!"), HttpStatus.BAD_REQUEST);
 		}
-		
+
 		Passenger p = null;
 		try {
 			p = passengerService.register(dto);
@@ -92,7 +104,7 @@ public class PassengerController {
 		} catch (MessagingException e) {
 			return new ResponseEntity<RESTError>(new RESTError("Failed to send verification e-mail!"), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 		UserDTONoPassword result = new UserDTONoPassword(p);
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
@@ -119,94 +131,101 @@ public class PassengerController {
         }
         
 //		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-//		if (userService.isAdmin(user____) || userService.isDriver(user____)) {	
+//		if (userService.isAdmin(user____) || userService.isDriver(user____)) {
 //		} else {
 //	    	if (!passenger.getId().equals(user____.getId())) {
 //                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
 //	    	}
 //	    }
-		
+
         return new ResponseEntity<>(new UserDTONoPassword(passenger), HttpStatus.OK);
 	}
 
-	@GetMapping("/activate/{activationId}")
-	public ResponseEntity<?> activate(@PathVariable("activationId") Long activationId) {
-		if (activationId == null) {
+    @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+    @GetMapping("/activate/{activationId}")
+    public ResponseEntity<?> activate(@PathVariable("activationId") Long activationId) {
+        if (activationId == null) {
             return new ResponseEntity<RESTError>(new RESTError("Field (activationId) is required!"), HttpStatus.BAD_REQUEST);
         }
-		
+
 		boolean verified = false;
 		try {
 			verified = passengerService.activate(activationId);
 		} catch (TokenExpiredException e) {
-			return new ResponseEntity<>(new RESTError( "Activation expired. Register again!"), HttpStatus.BAD_REQUEST);	
+			return new ResponseEntity<>(new RESTError( "Activation expired. Register again!"), HttpStatus.BAD_REQUEST);
 		} catch (NonExistantUserException e) {
 			return new ResponseEntity<>( "Activation with entered id does not exist!", HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<>(new RESTError( "Successful account activation!"), HttpStatus.OK);
-		
-		
+
+
 //		URI yahoo = null;
 //		HttpHeaders httpHeaders = new HttpHeaders();
-//	    if (verified) {   	
+//	    if (verified) {
 //			try {
 //				yahoo = new URI("http://localhost:4200/login");
 //			} catch (URISyntaxException e) {
 //				e.printStackTrace();
-//			}	    
+//			}
 //		    httpHeaders.setLocation(yahoo);
-//		    return new ResponseEntity<>("Successful account activation!", httpHeaders,  HttpStatus.OK);	    
-//	    } else {    	
+//		    return new ResponseEntity<>("Successful account activation!", httpHeaders,  HttpStatus.OK);
+//	    } else {
 //			try {
 //				yahoo = new URI("http://localhost:4200/bad-request");
 //			} catch (URISyntaxException e) {
 //				e.printStackTrace();
-//			}		
+//			}
 //		    httpHeaders.setLocation(yahoo);
 //		    return new ResponseEntity<>(httpHeaders, HttpStatus.OK);
 //	    }
 	}
 
-	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
-	@PutMapping("/{id}")
-	public ResponseEntity<?> update(@RequestBody PassengerUpdateDTO newData, @PathVariable("id") Long id) {
-		try {
-			MyValidator.validateRequired(newData.getName(), "name");
-			MyValidator.validateRequired(newData.getSurname(), "surname");
-			MyValidator.validateRequired(newData.getEmail(), "email");
-			MyValidator.validateRequired(newData.getAddress(), "address");
-			
-			MyValidator.validateLength(newData.getName(), "name", 100);
-			MyValidator.validateLength(newData.getSurname(), "surname", 100);
-			MyValidator.validateLength(newData.getTelephoneNumber(), "telephoneNumber", 18);
-			MyValidator.validateLength(newData.getEmail(), "email", 100);
-			MyValidator.validateLength(newData.getAddress(), "address", 100);
-		} catch (MyValidatorException e1) {
-			return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
-		}
-		
-		Passenger updatedPassenger = passengerService.findById(id);
-		if (updatedPassenger == null) {
-			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
-		}
-		
-		final GenericUser user____ = (GenericUser)(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-		if (userService.isAdmin(user____)) {	
-		} else {
-	    	if (!updatedPassenger.getId().equals(user____.getId())) {
-                return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
-	    	}
-	    }
+    @PreAuthorize("hasAnyAuthority('passenger', 'admin')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@RequestBody PassengerUpdateDTO newData, @PathVariable("id") Long id) {
+        try {
+            MyValidator.validateRequired(newData.getName(), "name");
+            MyValidator.validateRequired(newData.getSurname(), "surname");
+            MyValidator.validateRequired(newData.getEmail(), "email");
+            MyValidator.validateRequired(newData.getAddress(), "address");
 
-		try {
-			updatedPassenger = this.passengerService.updatePassenger(id, newData);
-		} catch (NonExistantUserException e) {
-			return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
-		} catch (IOException e) {
-			return new ResponseEntity<>("Cannot save picture", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return new ResponseEntity<>(new PassengerDTO(updatedPassenger), HttpStatus.OK);
-	}
+            MyValidator.validateLength(newData.getName(), "name", 100);
+            MyValidator.validateLength(newData.getSurname(), "surname", 100);
+            MyValidator.validateLength(newData.getTelephoneNumber(), "telephoneNumber", 18);
+            MyValidator.validateLength(newData.getEmail(), "email", 100);
+            MyValidator.validateLength(newData.getAddress(), "address", 100);
+        } catch (MyValidatorException e1) {
+            return new ResponseEntity<RESTError>(new RESTError(e1.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+
+        Passenger updatedPassenger = passengerService.findById(id);
+        SecurityContext sc = SecurityContextHolder.getContext();
+
+        if (updatedPassenger == null) {
+            return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
+        }
+
+        final GenericUser user____ = (GenericUser) (SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        if (userService.isAdmin(user____)) {
+        } else {
+            if (!updatedPassenger.getId().equals(user____.getId())) {
+                return new ResponseEntity<>("User does not exist!", HttpStatus.NOT_FOUND);
+            }
+        }
+
+        try {
+            updatedPassenger = this.passengerService.updatePassenger(id, newData);
+            TokenBasedAuthentication authentication = new TokenBasedAuthentication(updatedPassenger);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String token = jwtTokenUtil.generateToken(id, updatedPassenger.getEmail(), authentication.getAuthorities());
+            updatedPassenger.setJwt(token);
+        } catch (NonExistantUserException e) {
+            return new ResponseEntity<>("Passenger does not exist!", HttpStatus.NOT_FOUND);
+        } catch (IOException e) {
+            return new ResponseEntity<>("Cannot save picture", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(new PassengerDTO(updatedPassenger), HttpStatus.OK);
+    }
 
 	@PreAuthorize("hasAnyAuthority('passenger', 'admin')")
 	@GetMapping("/{id}/ride")

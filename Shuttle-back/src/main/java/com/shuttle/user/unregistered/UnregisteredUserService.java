@@ -24,7 +24,7 @@ public class UnregisteredUserService implements IUnregisteredUserService{
 			throw new NonExistantVehicleType();
 		}
 		
-		double price = vehicleType.get().getPricePerKM() * dto.calculateLength();
+		double price = vehicleType.get().getPricePerKM() + 120 * dto.getRouteLength();
 		long time = dto.getTravelTime();
 		
 		return new EstimationDTO(time, price);

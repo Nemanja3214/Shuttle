@@ -80,16 +80,10 @@ public class VehicleService implements IVehicleService {
 
 
 	@Override
-	public boolean changeCurrentLocation(long vehicleId, LocationDTO location) {
-		Optional<Vehicle> vehicle = this.vehicleRepository.findById(vehicleId);
-		if(vehicle.isPresent()) {
-			vehicle.get().setCurrentLocation(location.to());
-			this.vehicleRepository.save(vehicle.get());
-			return true;
-		}
-		else {
-			return false;
-		}		
+	public void changeCurrentLocation(Driver driver, LocationDTO location) {
+		Vehicle vehicle = this.vehicleRepository.findByDriver(driver);
+		vehicle.setCurrentLocation(location.to());
+		this.vehicleRepository.save(vehicle);
 	}
 	@Autowired
 	private SimpMessagingTemplate template;
@@ -113,12 +107,16 @@ public class VehicleService implements IVehicleService {
 			driverLocation.setLatitude(driverLocation.getLatitude() + incrementX);
 			driverLocation.setLongitude(driverLocation.getLongitude() + incrementY);
 			
-			changeCurrentLocation(activeDriver.getId(), LocationDTO.from(driverLocation)); 
+			changeCurrentLocation(activeDriver, LocationDTO.from(driverLocation)); 
 			
 		}
 		List<LocationDTO> response = this.driverService.getActiveDriversLocations();
 		template.convertAndSend("/active/vehicle/location", response);
+		List<VehicleAdminHomeDTO> responseAdmin = this.driverService.getActiveDriversVehicleLocations();
+		template.convertAndSend("/active/vehicle/location/all", responseAdmin);
 	}
+
+
 
 	@Override
 	public Vehicle findById(Long id) {

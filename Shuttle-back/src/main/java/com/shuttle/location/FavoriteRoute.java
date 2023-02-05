@@ -41,7 +41,7 @@ public class FavoriteRoute {
 	@ManyToOne
     private VehicleType vehicleType;
 	
-    private boolean babyTransport;
-    private boolean petTransport;
+    private Boolean babyTransport;
+    private Boolean petTransport;
     private LocalDateTime scheduledTime;
 }
