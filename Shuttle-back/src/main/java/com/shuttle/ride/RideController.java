@@ -109,7 +109,7 @@ public class RideController {
         final VehicleType vehicleType = vehicleTypeRepository
                 .findVehicleTypeByNameIgnoreCase(rideDTO.getVehicleType())
                 .orElseThrow();
-        final Double cost = (vehicleType.getPricePerKM() + 120) * Math.round(rideDTO.getDistance() / 1000.0);
+        final Double cost = vehicleType.getPricePerKM() + 120 * Math.round(rideDTO.getDistance() / 1000.0);
 
         final List<Passenger> passengers = rideDTO.getPassengers()
                 .stream()

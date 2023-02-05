@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -279,6 +280,8 @@ public class UserController {
             auth = authenticationManager.authenticate(authReq);
         } catch (BadCredentialsException e) {
             return new ResponseEntity<RESTError>(new RESTError("Wrong username or password!"), HttpStatus.BAD_REQUEST);
+        }catch (DisabledException e) {
+            return new ResponseEntity<RESTError>(new RESTError("User is disabled!"), HttpStatus.BAD_REQUEST);
         }
 
         SecurityContext sc = SecurityContextHolder.getContext();
