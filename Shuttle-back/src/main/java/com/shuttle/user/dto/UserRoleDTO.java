@@ -13,9 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserRoleDTO extends UserDTONoPassword {
     String role;
+    Boolean blocked;
 
     public UserRoleDTO(GenericUser user) {
         super(user);
         role = user.getRoles().get(0).getName();
+        blocked = user.getBlocked();
     }
 }

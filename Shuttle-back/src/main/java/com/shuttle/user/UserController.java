@@ -23,14 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.shuttle.common.ListDTO;
 import com.shuttle.common.RESTError;
@@ -62,6 +55,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.mail.MessagingException;
 import jakarta.websocket.server.PathParam;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/user")
 public class UserController {

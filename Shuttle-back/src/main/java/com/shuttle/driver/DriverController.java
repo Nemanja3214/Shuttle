@@ -242,6 +242,21 @@ public class DriverController {
 		}
     }
 
+	@PutMapping("/api/driver/request/{id}/reject")
+	public ResponseEntity<?> rejectProfileChangeRequest(@PathVariable("id") Long id) {
+		if (id == null) {
+			return new ResponseEntity<>(new RESTError("Bad ID format!"), HttpStatus.BAD_REQUEST);
+		}
+
+		ProfileChangeRequest request = driverService.getProfileChange(id);
+		if (request == null) {
+			return new ResponseEntity<>("Request does not exist!", HttpStatus.NOT_FOUND);
+		}
+
+		this.driverService.deleteProfileChangeRequests(request);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
     @PreAuthorize("hasAnyAuthority('driver', 'admin')")
     @GetMapping("/api/driver/{id}/documents")
     public ResponseEntity<?> getDriverDocs(@PathVariable("id") Long id) {
@@ -676,4 +691,14 @@ public class DriverController {
 		}
 		return new ResponseEntity<>(driverService.getDriverStatistics(d,scope),HttpStatus.OK);
 	}
+
+	@PreAuthorize("hasAnyAuthority('admin')")
+	@GetMapping("/api/driver/request")
+	public ResponseEntity<?> getDriverChangeRequests(){
+		List<ProfileChangeRequest> changeRequests = driverService.getAllProfileChangeRequests();
+		System.out.println("changes");
+		if (changeRequests.isEmpty()) return new ResponseEntity<>("Driver does not exist!", HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(changeRequests,HttpStatus.OK);
+	}
+
 }
