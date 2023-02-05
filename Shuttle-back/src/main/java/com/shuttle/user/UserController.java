@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -75,6 +76,9 @@ public class UserController {
     private INoteService noteService;
     @Autowired
     private IEmailService emailService;
+
+    @Autowired
+    private SimpMessagingTemplate template;
 
     @PreAuthorize("hasAnyAuthority('admin', 'passenger', 'driver')")
     @PutMapping("/{id}/changePassword")
@@ -401,7 +405,8 @@ public class UserController {
                 messageDTO.getType()
         );
         m = messageService.save(m);
-
+        MessageDTO forSocket = new MessageDTO(m);
+        template.convertAndSend("/message/" + forSocket.getReceiverId(),forSocket );
         return new ResponseEntity<MessageDTO>(new MessageDTO(m), HttpStatus.OK);
     }
 
