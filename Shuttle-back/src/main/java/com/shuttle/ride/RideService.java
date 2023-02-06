@@ -157,7 +157,7 @@ public class RideService implements IRideService {
             final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
             final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.STARTED);
 
-            if (pending.size() == 0 && accepted.size() == 0 && accepted.size() == 0)
+            if (pending.size() == 0 && accepted.size() == 0 && started.size() == 0)
             drivers.add(d);
         }	
     	return drivers;        

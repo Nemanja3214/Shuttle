@@ -19,53 +19,55 @@ public class ShouldCreateDriverArgumentProvider implements ArgumentsProvider {
     @Override
     public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
         List<BasicUserInfoDTO> passengers = new ArrayList<>();
-        passengers.add(new BasicUserInfoDTO(2,"john@gmail.com"));
+        passengers.add(new BasicUserInfoDTO(2, "john@gmail.com"));
         List<RouteDTO> route = new ArrayList<>();
-        LocationDTO locationDTO = new LocationDTO("Bulevar oslobodjenja 46",45.267136,19.833549);
-        route.add(new RouteDTO(locationDTO,locationDTO));
+        LocationDTO locationDTO = new LocationDTO("Bulevar oslobodjenja 46", 45.267136, 19.833549);
+        route.add(new RouteDTO(locationDTO, locationDTO));
         List<List<CreateRideDTO>> notScheduled = new ArrayList<>();
         List<List<CreateRideDTO>> scheduled = new ArrayList<>();
 
-        notScheduled.add(getNoScheduleRideDtos(passengers, route,"STANDARD"));
-        notScheduled.add(getNoScheduleRideDtos(passengers, route,"VAN"));
-        notScheduled.add(getNoScheduleRideDtos(passengers, route,"LUXURY"));
-        notScheduled.add(getScheduleRideDtos(passengers, route,"STANDARD"));
-        notScheduled.add(getScheduleRideDtos(passengers, route,"VAN"));
-        notScheduled.add(getScheduleRideDtos(passengers, route,"LUXURY"));
-        passengers.add(new BasicUserInfoDTO(3,"troy@gmail.com"));
-        passengers.add(new BasicUserInfoDTO(11,"p1@mgail.com"));
-        passengers.add(new BasicUserInfoDTO(12,"p2@mgail.com"));
-        scheduled.add(getNoScheduleRideDtos(passengers, route,"STANDARD"));
-        scheduled.add( getNoScheduleRideDtos(passengers, route,"VAN"));
-        scheduled.add( getNoScheduleRideDtos(passengers, route,"LUXURY"));
-        scheduled.add( getScheduleRideDtos(passengers, route,"STANDARD"));
-        scheduled.add( getScheduleRideDtos(passengers, route,"VAN"));
-        scheduled.add( getScheduleRideDtos(passengers, route,"LUXURY"));
+        notScheduled.add(getNoScheduleRideDtos(passengers, route, "STANDARD"));
+        notScheduled.add(getNoScheduleRideDtos(passengers, route, "VAN"));
+        notScheduled.add(getNoScheduleRideDtos(passengers, route, "LUXURY"));
+        notScheduled.add(getScheduleRideDtos(passengers, route, "STANDARD"));
+        notScheduled.add(getScheduleRideDtos(passengers, route, "VAN"));
+        notScheduled.add(getScheduleRideDtos(passengers, route, "LUXURY"));
+        passengers.add(new BasicUserInfoDTO(3, "troy@gmail.com"));
+        passengers.add(new BasicUserInfoDTO(11, "p1@mgail.com"));
+        passengers.add(new BasicUserInfoDTO(12, "p2@mgail.com"));
+        scheduled.add(getNoScheduleRideDtos(passengers, route, "STANDARD"));
+        scheduled.add(getNoScheduleRideDtos(passengers, route, "VAN"));
+        scheduled.add(getNoScheduleRideDtos(passengers, route, "LUXURY"));
+        scheduled.add(getScheduleRideDtos(passengers, route, "STANDARD"));
+        scheduled.add(getScheduleRideDtos(passengers, route, "VAN"));
+        scheduled.add(getScheduleRideDtos(passengers, route, "LUXURY"));
         List<Arguments> argumentsList = new ArrayList<>();
 
-        notScheduled.forEach(value ->{
-            value.forEach(value1 ->{
-                argumentsList.add(Arguments.of(value1,false,false,false,false,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,false,true,false,false,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,false,true, true,false,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,false,true,false, true,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,false,true,false,false, true,false,false,false));
-                argumentsList.add(Arguments.of(value1,false,true,false,false,false, true,false,false));
-                argumentsList.add(Arguments.of(value1,false,true,false,false,false,false, true,false));
-                argumentsList.add(Arguments.of(value1,false,true,false,false,false,false,false, true));
+        notScheduled.forEach(value -> {
+            value.forEach(value1 -> {
+                argumentsList.add(Arguments.of(value1, false, false, false, false, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, false, true, false, true, false, false, true, false));
+                argumentsList.add(Arguments.of(value1, false, true, false, false, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, false, true, true, false, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, false, true, false, true, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, false, true, false, false, true, false, false, false));
+                argumentsList.add(Arguments.of(value1, false, true, false, false, false, true, false, false));
+                argumentsList.add(Arguments.of(value1, false, true, false, false, false, false, true, false));
+                argumentsList.add(Arguments.of(value1, false, true, false, false, false, false, false, true));
 
             });
         });
-        scheduled.forEach(value ->{
-            value.forEach(value1 ->{
-                argumentsList.add(Arguments.of(value1,true,false,false,false,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,true,true,false,false,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,true,true, true,false,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,true,true,false, true,false,false,false,false));
-                argumentsList.add(Arguments.of(value1,true,true,false,false, true,false,false,false));
-                argumentsList.add(Arguments.of(value1,true,true,false,false,false, true,false,false));
-                argumentsList.add(Arguments.of(value1,true,true,false,false,false,false, true,false));
-                argumentsList.add(Arguments.of(value1,true,true,false,false,false,false,false, true));
+        scheduled.forEach(value -> {
+            value.forEach(value1 -> {
+                argumentsList.add(Arguments.of(value1, true, false, false, false, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, true, true, false, true, false, false, true, false));
+                argumentsList.add(Arguments.of(value1, true, true, false, false, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, true, true, true, false, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, true, true, false, true, false, false, false, false));
+                argumentsList.add(Arguments.of(value1, true, true, false, false, true, false, false, false));
+                argumentsList.add(Arguments.of(value1, true, true, false, false, false, true, false, false));
+                argumentsList.add(Arguments.of(value1, true, true, false, false, false, false, true, false));
+                argumentsList.add(Arguments.of(value1, true, true, false, false, false, false, false, true));
             });
 
         });
