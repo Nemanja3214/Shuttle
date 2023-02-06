@@ -71,6 +71,8 @@ public class RideControllerTest {
 	private String JWT_PASSENGER_6 = "";
 	private String JWT_PASSENGER_8 = "";
 	private String JWT_PASSENGER_9 = "";
+	private String JWT_PASSENGER_12 = "";
+	private String JWT_PASSENGER_13 = "";
 
 	private RideDTO ride1;
 	private RideDTO ride2;
@@ -147,6 +149,8 @@ public class RideControllerTest {
 		JWT_PASSENGER_6 = login("p6@gmail.com", "1234");
 		JWT_PASSENGER_8 = login("p8@gmail.com", "1234");
 		JWT_PASSENGER_9 = login("p9@gmail.com", "1234");
+		JWT_PASSENGER_12 = login("p12@gmail.com", "1234");
+		JWT_PASSENGER_13 = login("p13@gmail.com", "1234");
 		JWT_D_2 = login("d2@gmail.com", "1234");
 	}
 	
@@ -368,7 +372,7 @@ public class RideControllerTest {
 				Arrays.asList(route),
 				"VAN", true, true, null, 123.0); // There is no van with babies and pets.
 		
-		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_9));
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_13));
 		ResponseEntity<RESTError> response = restTemplate.exchange(
 				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
 		);
@@ -383,11 +387,11 @@ public class RideControllerTest {
 
 		RouteDTO route = new RouteDTO(new LocationDTO("ABC", 45.21, 19.8), new LocationDTO("DEF", 45.22, 19.79));
 		CreateRideDTO dto = new CreateRideDTO(
-				Arrays.asList(new BasicUserInfoDTO(11, "p1@gmail.com")), 
+				Arrays.asList(new BasicUserInfoDTO(19, "p9@gmail.com"), new BasicUserInfoDTO(20, "p10@gmail.com"), new BasicUserInfoDTO(21, "p11@gmail.com")), 
 				Arrays.asList(route),
-				"STANDARD", true, false, null, 123.0); // Standard vehicle - bob - busy
+				"VAN", false, false, null, 123.0); // Van, 3 passengers, only 1 driver is capable of this yet he's busy.
 		
-		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_9));
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_12));
 		ResponseEntity<RESTError> response = restTemplate.exchange(
 				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
 		);
@@ -447,7 +451,7 @@ public class RideControllerTest {
 	@Test
 	public void getActiveRideByDriver_noRide() {
 		final String URL = "/api/ride/driver/{id}/active";
-		Long driverId = 10L;
+		Long driverId = 25L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, driverId);
