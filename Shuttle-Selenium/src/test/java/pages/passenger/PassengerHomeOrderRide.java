@@ -50,6 +50,9 @@ public class PassengerHomeOrderRide {
 	
 	@FindBy(how = How.CSS, using = "#passenger-order-submit")
 	private WebElement btnOrder;
+	
+	@FindBy(how = How.CSS, using = "matsnacklabel")
+	private WebElement snack;
 
 	public PassengerHomeOrderRide(WebDriver webdriver) {
 		this.driver = webdriver;
@@ -67,10 +70,19 @@ public class PassengerHomeOrderRide {
 	
 	public void scheduleLater(String hour, String minute) {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(selectHours)).click();
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-vehicle-" + hour))).click();
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("passenger-order-select-hour-"+ hour)));
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-select-hour-"+ hour))).click();
 		
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(selectMinutes)).click();
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-vehicle-" + minute))).click();
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("passenger-order-select-minute-" + minute)));
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-select-minute-" + minute))).click();
+	}
+	
+	public void setSchedule(boolean checked) {
+		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbScheduleLater)).findElement(By.cssSelector("input")).isSelected();
+		if (curr != checked) {
+			cbScheduleLater.click();
+		}
 	}
 	
 	public void enterDepartureDestination(String departure, String destination) {
@@ -108,8 +120,16 @@ public class PassengerHomeOrderRide {
 		}
 	}
 	
+	public boolean hasSnackbarshown(String snackText) {
+		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(snack)).isDisplayed();
+	}
+	
 	public String getPriceFromOrderPanel() {
 		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(spanPrice)).getText();
+	}
+	
+	public boolean isOrderDisabled() {
+		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(btnOrder)).isDisplayed();
 	}
 	
 	public void orderRide() {
