@@ -2,6 +2,7 @@ package test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.time.LocalDateTime;
@@ -440,6 +441,30 @@ public class DriverAndPassengerChrome {
 		
 		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
 		toolbarCommonDriver.logOut();
+		
+		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
+		toolbarCommonPassenger.logOut();
+		
+	}
+	
+	@Test
+	@DisplayName("Should not let passenger order ride because no driver is available")
+	public void t7() {
+		WebDriver wdPassenger = webdriver2;
+		
+		LoginPage loginPassenger = new LoginPage(wdPassenger);
+	
+		loginPassenger.btnToolbarLogin_click();
+		loginPassenger.login("john@gmail.com", "john123");
+		
+		PassengerHomeOrderRide homePassenger = new PassengerHomeOrderRide(wdPassenger);
+		homePassenger.enterFields("Novi Sad", "Beograd", "STANDARD", false, true);	
+		String distance = homePassenger.getDistanceFromOrderPanel();
+		
+		homePassenger.orderRide();
+		
+		String snackMessage = homePassenger.getSnackMessage().strip();
+		assertEquals("No driver available!", snackMessage);
 		
 		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
 		toolbarCommonPassenger.logOut();

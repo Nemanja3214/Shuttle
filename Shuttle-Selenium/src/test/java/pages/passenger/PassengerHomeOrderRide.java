@@ -51,9 +51,6 @@ public class PassengerHomeOrderRide {
 	@FindBy(how = How.CSS, using = "#passenger-order-submit")
 	private WebElement btnOrder;
 	
-	@FindBy(how = How.CSS, using = "matsnacklabel")
-	private WebElement snack;
-
 	public PassengerHomeOrderRide(WebDriver webdriver) {
 		this.driver = webdriver;
 		//driver.get(Util.ShuttleURL + "passenger/home); // don't do this, let angular take care of it. otherwise it'll do it before we log in and move us to /login again.
@@ -120,9 +117,11 @@ public class PassengerHomeOrderRide {
 		}
 	}
 	
-	public boolean hasSnackbarshown(String snackText) {
-		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(snack)).isDisplayed();
+	public String getSnackMessage() {
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div[matsnackbarlabel]:first-of-type")));
+		return driver.findElement(By.cssSelector("div[matsnackbarlabel]:first-of-type")).getText();
 	}
+	
 	
 	public String getPriceFromOrderPanel() {
 		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(spanPrice)).getText();
