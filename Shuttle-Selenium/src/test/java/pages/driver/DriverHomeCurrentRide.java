@@ -94,6 +94,11 @@ public class DriverHomeCurrentRide {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnPanic));
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnFinish)).click();
 	}
+	
+	public boolean isShown() {
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.invisibilityOfElementLocated(By.id("driver-current-passenger-list-container")));
+		return driver.findElements(By.id("driver-current-passenger-list-container")).size() != 0;
+	}
 
 	public boolean isAcceptRide(){
 		try {

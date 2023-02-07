@@ -30,6 +30,15 @@ public class PassengerHomeOrderRide {
 	@FindBy(how = How.CSS, using = "#passenger-order-vehicle-selectbox")
 	private WebElement selectVehicleType;
 	
+//	
+	@FindBy(how = How.CSS, using = "#passenger-order-schedule-later")
+	private WebElement cbScheduleLater;
+	@FindBy(how = How.CSS, using = "#passenger-order-select-hour")
+	private WebElement selectHours;
+	@FindBy(how = How.CSS, using = "#passenger-order-select-minute")
+	private WebElement selectMinutes;
+	
+	
 	@FindBy(how = How.CSS, using = "#passenger-order-babies")
 	private WebElement cbBabies;
 	
@@ -41,6 +50,7 @@ public class PassengerHomeOrderRide {
 	
 	@FindBy(how = How.CSS, using = "#passenger-order-submit")
 	private WebElement btnOrder;
+	
 
 	@FindBy(how = How.CSS,using = "#mat-input-6")
 	private WebElement inputInvite;
@@ -60,6 +70,23 @@ public class PassengerHomeOrderRide {
 		selectVehicle(vehicleType);
 		setBabies(babies);
 		setPets(pets);
+	}
+	
+	public void scheduleLater(String hour, String minute) {
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(selectHours)).click();
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("passenger-order-select-hour-"+ hour)));
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-select-hour-"+ hour))).click();
+		
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(selectMinutes)).click();
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("passenger-order-select-minute-" + minute)));
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-select-minute-" + minute))).click();
+	}
+	
+	public void setSchedule(boolean checked) {
+		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbScheduleLater)).findElement(By.cssSelector("input")).isSelected();
+		if (curr != checked) {
+			cbScheduleLater.click();
+		}
 	}
 	
 	public void enterDepartureDestination(String departure, String destination) {
@@ -97,8 +124,18 @@ public class PassengerHomeOrderRide {
 		}
 	}
 	
+	public String getSnackMessage() {
+		(new WebDriverWait(driver, 10)).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("div[matsnackbarlabel]:first-of-type")));
+		return driver.findElement(By.cssSelector("div[matsnackbarlabel]:first-of-type")).getText();
+	}
+	
+	
 	public String getPriceFromOrderPanel() {
 		return (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(spanPrice)).getText();
+	}
+	
+	public boolean isOrderDisabled() {
+		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(btnOrder)).isDisplayed();
 	}
 	
 	public void orderRide() {
