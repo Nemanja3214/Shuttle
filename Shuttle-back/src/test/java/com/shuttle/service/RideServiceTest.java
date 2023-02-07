@@ -1,7 +1,9 @@
 package com.shuttle.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,6 +17,7 @@ import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +54,9 @@ import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.IRideRepository;
 import com.shuttle.ride.NoAvailableDriverException;
 import com.shuttle.ride.Ride;
+import com.shuttle.ride.Ride.Status;
 import com.shuttle.ride.RideService;
+import com.shuttle.ride.cancellation.Cancellation;
 import com.shuttle.ride.dto.CreateRideDTO;
 import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.service.providers.FindCurrentRideByPassengerArgumentProvider;
@@ -794,7 +799,184 @@ public class RideServiceTest {
         assertEquals(graphEntryDTOS,rideService.getDriverGraphData(start,end,id));
     }
 
-
+    
+    @Test
+    @DisplayName("rejectRide changes state and rejection is non-null")
+    public void rejectRide() {
+    	Ride ride = new Ride();
+    	Cancellation c = new Cancellation();
+    	Passenger passenger = new Passenger();
+    	c.setReason("ABC");
+    	c.setUser(passenger);
+    	c.setTime(LocalDateTime.now());
+    		
+        Mockito.when(this.rideRepository.save(ride)).thenReturn(ride);
+        
+        Ride r = rideService.rejectRide(ride, c);
+        assertTrue(r.getStatus().compareTo(Status.REJECTED) == 0);
+        assertTrue(r.getRejection().getReason().equals(c.getReason()));
+    }
+    
+    @Test
+    @DisplayName("acceptRide changes state")
+    public void acceptRide() {
+    	Ride ride = new Ride();
+        Mockito.when(this.rideRepository.save(ride)).thenReturn(ride);
+        
+        Ride r = rideService.acceptRide(ride);
+        assertTrue(r.getStatus().equals(Status.ACCEPTED));
+    }
+    
+    @Test
+    @DisplayName("startRide changes state and sets start time")
+    public void startRide() {
+    	Ride ride = new Ride();
+        Mockito.when(this.rideRepository.save(ride)).thenReturn(ride);
+        
+        Ride r = rideService.startRide(ride);
+        assertTrue(r.getStatus().equals(Status.STARTED));
+        assertNotNull(r.getStartTime());
+    }
+    
+    @Test
+    @DisplayName("finishRide changes state and sets end time")
+    public void finishRide() {
+    	Ride ride = new Ride();
+        Mockito.when(this.rideRepository.save(ride)).thenReturn(ride);
+        
+        Ride r = rideService.finishRide(ride);
+        assertTrue(r.getStatus().equals(Status.FINISHED));
+        assertNotNull(r.getEndTime());
+    }
+    
+    @Test
+    @DisplayName("cancelRide changes state")
+    public void cancelRide() {
+    	Ride ride = new Ride();
+        Mockito.when(this.rideRepository.save(ride)).thenReturn(ride);
+        
+        Ride r = rideService.cancelRide(ride);
+        assertTrue(r.getStatus().equals(Status.CANCELED));
+    }
+    
+    @Test
+    @DisplayName("panicRide changes state")
+    public void panicRide() {
+    	Ride ride = new Ride();
+        Mockito.when(this.rideRepository.save(ride)).thenReturn(ride);
+        
+        Ride r = rideService.panicRide(ride);
+        assertTrue(r.getStatus().equals(Status.CANCELED));
+    }
+    
+    @Test
+    public void save() {
+    	Ride r = new Ride();
+    	r.setStatus(Status.PENDING);
+    	
+    	Mockito.when(this.rideRepository.save(r)).thenReturn(r);
+    	
+    	this.rideService.save(r);
+    	verify(rideRepository, times(1)).save(r);
+    }
+    
+    @Test
+    public void findRidesWithNoDriver() {
+    	Ride r = new Ride();
+    	r.setId(1L);
+    	
+    	List<Ride> results = Arrays.asList(r);
+    	Mockito.when(rideRepository.findByDriverNull()).thenReturn(results);
+    	
+    	List<Ride> found = rideService.findRidesWithNoDriver();
+    	
+    	assertThat(found.size() == results.size());
+    	assertThat(found.get(0).getId().equals(results.get(0).getId()));
+    }
+    
+    @Test
+    public void findAllPendingInFuture() {
+    	Ride r = new Ride();
+    	r.setId(1L);
+    	r.setScheduledTime(LocalDateTime.now().plusHours(5));
+    	r.setStatus(Status.PENDING);
+    	
+    	List<Ride> results = Arrays.asList(r);
+    	Mockito.when(rideRepository.findPendingInTheFuture()).thenReturn(results);
+    	
+    	List<Ride> found = rideService.findAllPendingInFuture();
+    	
+    	assertThat(found.size() == results.size());
+    	assertThat(found.get(0).getId().equals(results.get(0).getId()));
+    	assertThat(found.get(0).getScheduledTime().equals(results.get(0).getScheduledTime()));
+    	assertThat(found.get(0).getStatus().equals(results.get(0).getStatus()));
+    }
+    
+    @Test
+    public void findAll() {
+    	Ride r = new Ride();
+    	r.setId(1L);
+    	
+    	List<Ride> results = Arrays.asList(r);
+    	Mockito.when(rideRepository.findAll()).thenReturn(results);
+    	
+    	List<Ride> found = rideService.findAll();
+    	
+    	assertThat(found.size() == results.size());
+    	assertThat(found.get(0).getId().equals(results.get(0).getId()));
+    }
+    
+    @Test
+    public void getFavouriteRoutes() {
+    	FavoriteRoute f = new FavoriteRoute();
+    	f.setId(1L);
+    	List<FavoriteRoute> results = Arrays.asList(f);
+    	Mockito.when(favouriteRouteRepository.findAll()).thenReturn(results);
+    	
+    	List<FavoriteRoute> found = rideService.getFavouriteRoutes();
+    	
+    	assertThat(found.size() == results.size());
+    	assertThat(found.get(0).getId().equals(results.get(0).getId()));
+    }
+    
+    @Test
+    public void findFavoriteRouteById() {
+    	FavoriteRoute f = new FavoriteRoute();
+    	f.setId(1L);
+    	Mockito.when(favouriteRouteRepository.findById(1L)).thenReturn(Optional.of(f));
+    	
+    	FavoriteRoute found = rideService.findFavoriteRouteById(1L);
+    	
+    	assertThat(found != null);
+    	assertThat(found.getId().equals(f.getId()));
+    }
+    
+    @Test
+    public void findFavoriteRouteById_null() {
+    	Mockito.when(favouriteRouteRepository.findById(1L)).thenReturn(Optional.empty());
+    	
+    	FavoriteRoute found = rideService.findFavoriteRouteById(1L);
+    	
+    	assertThat(found == null);
+    }
+    
+    @Test
+    public void getOverallGraphData() {
+    	GraphEntryDTO dto = new GraphEntryDTO("07.02.2023. 23:33", 2L, 123.0, 32.0);
+    	List<GraphEntryDTO> results = Arrays.asList(dto);
+    	
+    	LocalDateTime start = LocalDateTime.now();
+    	LocalDateTime end = LocalDateTime.now().plusDays(10);
+    	Mockito.when(rideRepository.getOverallGraphData(start, end)).thenReturn(results);
+    	
+    	List<GraphEntryDTO> found = rideService.getOverallGraphData(start, end);
+    	
+    	assertThat(found.size() == results.size());
+    	assertThat(found.get(0).getCostSum().equals(results.get(0).getCostSum()));
+    	assertThat(found.get(0).getLength().equals(results.get(0).getLength()));
+    	assertThat(found.get(0).getNumberOfRides().equals(results.get(0).getNumberOfRides()));
+    	assertThat(found.get(0).getTime().equals(results.get(0).getTime()));
+    }
 
     private static Vehicle getVehicle2(CreateRideDTO createRideDTO, Driver d1, VehicleType vt) {
         Vehicle vehicle2 = new Vehicle();

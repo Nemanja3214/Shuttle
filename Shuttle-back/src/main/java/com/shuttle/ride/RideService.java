@@ -410,11 +410,7 @@ public class RideService implements IRideService {
     	favoriteRoute = this.favouriteRouteRepository.save(favoriteRoute);
     	return favoriteRoute;
     }
-    
-    private static List<Location> convertToLocation(List<RouteDTO> routes){
-    	return routes.stream().map(route -> route.destination.to()).toList();
-    }
-
+	
 	@Override
 	public List<FavoriteRoute> getFavouriteRoutes() {
 		return this.favouriteRouteRepository.findAll();
