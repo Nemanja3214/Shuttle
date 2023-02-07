@@ -376,6 +376,44 @@ public class RideServiceTest {
 
     }
 
+    @Test
+    @DisplayName("shouldFindCurrentRideByDriverStartedAcceptedStarted [positive] (returns ride)")
+    public void findCurrentRideByDriverStartedAcceptedStarted(){
+        Driver driver = new Driver();
+        Ride ride = new Ride();
+        List<Ride> rideList = new ArrayList<>();
+        rideList.add(ride);
+        Mockito.when(rideRepository.findByDriverAndStatus(driver, Ride.Status.STARTED)).thenReturn(rideList);
+        assertEquals(ride,rideService.findCurrentRideByDriver(driver));
+
+    }
+
+    @Test
+    @DisplayName("shouldFindCurrentRideByDriverStartedAcceptedAccepted [positive] (returns ride)")
+    public void findCurrentRideByDriverStartedAcceptedAccepted(){
+        Driver driver = new Driver();
+        Ride ride = new Ride();
+        List<Ride> rideList = new ArrayList<>();
+        rideList.add(ride);
+        Mockito.when(rideRepository.findByDriverAndStatus(driver, Ride.Status.STARTED)).thenReturn(new ArrayList<>());
+        Mockito.when(rideRepository.findByDriverAndStatus(driver, Ride.Status.ACCEPTED)).thenReturn(rideList);
+        assertEquals(ride,rideService.findCurrentRideByDriver(driver));
+
+    }
+
+    @Test
+    @DisplayName("shouldFindCurrentRideByDriverStartedAccepted [negative] (returns null)")
+    public void findCurrentRideByDriverStartedAccepted(){
+        Driver driver = new Driver();
+        Ride ride = new Ride();
+        List<Ride> rideList = new ArrayList<>();
+        rideList.add(ride);
+        Mockito.when(rideRepository.findByDriverAndStatus(driver, Ride.Status.STARTED)).thenReturn(new ArrayList<>());
+        Mockito.when(rideRepository.findByDriverAndStatus(driver, Ride.Status.ACCEPTED)).thenReturn(new ArrayList<>());
+        assertNull(rideService.findCurrentRideByDriver(driver));
+
+    }
+
 
     private static Vehicle getVehicle2(CreateRideDTO createRideDTO, Driver d1, VehicleType vt) {
         Vehicle vehicle2 = new Vehicle();
