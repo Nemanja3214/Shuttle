@@ -238,6 +238,9 @@ public class DriverAndPassengerTest {
 		homePassenger.enterDepartureDestination("", "");
 		assertThat(homePassenger.canClickOnFindRoute() == false);
 		
+		ToolbarCommon toolbarCommonDriver = new ToolbarCommon(wdDriver);
+		toolbarCommonDriver.logOut();
+		
 		ToolbarCommon toolbarCommonPassenger = new ToolbarCommon(wdPassenger);
 		toolbarCommonPassenger.logOut();
 	}
