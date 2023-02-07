@@ -1,6 +1,7 @@
 package pages.driver;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -92,5 +93,15 @@ public class DriverHomeCurrentRide {
 	public void finishRide() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnPanic));
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnFinish)).click();
+	}
+
+	public boolean isAcceptRide(){
+		try {
+			btnAccept.isDisplayed();
+			return true;
+		}
+		catch (Exception e){
+			return false;
+		}
 	}
 }

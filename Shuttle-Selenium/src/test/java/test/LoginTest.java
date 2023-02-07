@@ -18,7 +18,7 @@ public class LoginTest {
 	private static WebDriver webdriver;
 	@BeforeAll
 	public void init() {
-		webdriver = DriverSetup.useEdge();
+		webdriver = DriverSetup.useFirefox();
 		webdriver.manage().window().maximize();
 	}
 	

@@ -15,10 +15,10 @@ public class BasicTest {
 	
 	@BeforeAll
 	public void init() {
-		webdriver = DriverSetup.useEdge();
+		webdriver = DriverSetup.useFirefox();
 		webdriver.manage().window().maximize();
 		
-		webdriver2 = DriverSetup.useEdge();
+		webdriver2 = DriverSetup.useFirefox();
 		webdriver2.manage().window().maximize();
 	}
 	

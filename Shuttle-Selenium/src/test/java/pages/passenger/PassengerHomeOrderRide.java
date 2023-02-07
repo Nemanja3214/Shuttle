@@ -42,6 +42,12 @@ public class PassengerHomeOrderRide {
 	@FindBy(how = How.CSS, using = "#passenger-order-submit")
 	private WebElement btnOrder;
 
+	@FindBy(how = How.CSS,using = "#mat-input-6")
+	private WebElement inputInvite;
+
+	@FindBy(how = How.CSS,using = ".mdc-fab")
+	private WebElement btnInvite;
+
 	public PassengerHomeOrderRide(WebDriver webdriver) {
 		this.driver = webdriver;
 		//driver.get(Util.ShuttleURL + "passenger/home); // don't do this, let angular take care of it. otherwise it'll do it before we log in and move us to /login again.
@@ -57,49 +63,58 @@ public class PassengerHomeOrderRide {
 	}
 	
 	public void enterDepartureDestination(String departure, String destination) {
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(inputDeparture)).clear();
+		(new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(inputDeparture)).clear();
 		inputDeparture.sendKeys(departure);
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(inputDestination)).clear();
+		(new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(inputDestination)).clear();
 		inputDestination.sendKeys(destination);
 	}
 	
 	public void clickOnFindRoute() {
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnFindRoute)).click();
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(spinnerLoadingRoute));
+		(new WebDriverWait(driver, 20)).until(ExpectedConditions.elementToBeClickable(btnFindRoute)).click();
+		(new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(spinnerLoadingRoute));
 	}
 	
 	public String getDistanceFromOrderPanel() {
-		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(spanDistanceValue)).getText();
+		return (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(spanDistanceValue)).getText();
 	}
 	
 	public void selectVehicle(String type) {
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(selectVehicleType)).click();
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-vehicle-" + type))).click();
+		(new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(selectVehicleType)).click();
+		(new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOfElementLocated(By.id("passenger-order-vehicle-" + type))).click();
 	}
 	
 	public void setBabies(boolean b) {
-		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbBabies)).findElement(By.cssSelector("input")).isSelected();
+		boolean curr = (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(cbBabies)).findElement(By.cssSelector("input")).isSelected();
 		if (curr != b) {
 			cbBabies.click();
 		}
 	}
 	
 	public void setPets(boolean b) {
-		boolean curr = (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(cbPets)).findElement(By.cssSelector("input")).isSelected();
+		boolean curr = (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(cbPets)).findElement(By.cssSelector("input")).isSelected();
 		if (curr != b) {
 			cbPets.click();
 		}
 	}
 	
 	public String getPriceFromOrderPanel() {
-		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(spanPrice)).getText();
+		return (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(spanPrice)).getText();
 	}
 	
 	public void orderRide() {
-		(new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(btnOrder)).click();
+		(new WebDriverWait(driver, 20)).until(ExpectedConditions.elementToBeClickable(btnOrder)).click();
 	}
 	
 	public boolean canClickOnFindRoute() {
-		return (new WebDriverWait(driver, 10)).until(ExpectedConditions.visibilityOf(btnFindRoute)).isEnabled();
+		return (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(btnFindRoute)).isEnabled();
+	}
+
+	public void invitePassenger(String passenger) {
+		boolean inviteBtnEnabled = (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(btnInvite)).isEnabled();
+		boolean inviteInputEnabled = (new WebDriverWait(driver, 20)).until(ExpectedConditions.visibilityOf(inputInvite)).isEnabled();
+		if (inviteInputEnabled&&inviteBtnEnabled){
+			inputInvite.sendKeys(passenger);
+			btnInvite.click();
+		}
 	}
 }
