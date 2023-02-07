@@ -1,4 +1,4 @@
-package com.shuttle.service;
+package com.shuttle.service.providers;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.location.Location;

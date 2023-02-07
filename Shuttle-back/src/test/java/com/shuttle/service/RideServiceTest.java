@@ -1,10 +1,13 @@
 package com.shuttle.service;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
@@ -15,6 +18,9 @@ import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.*;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.service.providers.FindCurrentRideByPassengerArgumentProvider;
+import com.shuttle.service.providers.RequestParamsMatchArgumentProvider;
+import com.shuttle.service.providers.ShouldCreateDriverArgumentProvider;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
@@ -30,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -429,38 +436,38 @@ public class RideServiceTest {
             int i = 0;
             Ride ride = null;
             for (i = 0; i < rides.size(); i++) {
-                if (rides.get(i).getStatus() == Ride.Status.STARTED){
+                if (rides.get(i).getStatus() == Ride.Status.STARTED) {
                     ride = rides.get(i);
                 }
             }
-            if (ride==null){
+            if (ride == null) {
                 for (i = 0; i < rides.size(); i++) {
-                    if (rides.get(i).getStatus() == Ride.Status.FINISHED){
+                    if (rides.get(i).getStatus() == Ride.Status.FINISHED) {
                         ride = rides.get(i);
                     }
                 }
             }
-            if (ride==null) ride = rides.get(0);
+            if (ride == null) ride = rides.get(0);
 
-            assertEquals(ride,rideService.findCurrentRideByPassenger(passenger));
-        }else {
+            assertEquals(ride, rideService.findCurrentRideByPassenger(passenger));
+        } else {
             int i = 0;
             Ride ride = null;
             for (i = 0; i < rides.size(); i++) {
-                if (rides.get(i).getStatus() == Ride.Status.STARTED){
+                if (rides.get(i).getStatus() == Ride.Status.STARTED) {
                     ride = rides.get(i);
                 }
             }
-            if (ride==null){
+            if (ride == null) {
                 for (i = 0; i < rides.size(); i++) {
-                    if (rides.get(i).getStatus() == Ride.Status.FINISHED){
+                    if (rides.get(i).getStatus() == Ride.Status.FINISHED) {
                         ride = rides.get(i);
                     }
                 }
             }
-            if (ride==null) ride = rides.get(0);
+            if (ride == null) ride = rides.get(0);
 
-            assertEquals(ride,rideService.findCurrentRideByPassenger(passenger));
+            assertEquals(ride, rideService.findCurrentRideByPassenger(passenger));
         }
 
     }
@@ -474,6 +481,52 @@ public class RideServiceTest {
         Mockito.when(rideRepository.findStartedAcceptedPendingByPassenger(passenger.getId())).thenReturn(new ArrayList<>());
         assertNull(rideService.findCurrentRideByPassenger(passenger));
     }
+
+    @Test
+    @DisplayName("shouldFindRidesByPassengerInDateRange [positive] (returns list<ride>)")
+    public void findRidesByPassengerInDateRange() throws NonExistantUserException {
+        Passenger passenger = new Passenger();
+        passenger.setId(1L);
+        Mockito.when(this.passengerRepository.findById(passenger.getId())).thenReturn(Optional.of(passenger));
+        Pageable pageable = Pageable.unpaged();
+        List<Ride> rides = new ArrayList<>();
+        rides.add(new Ride());
+        ZonedDateTime zdt;
+
+        zdt = ZonedDateTime.parse("2023-01-11T17:45:00Z");
+        LocalDateTime fromTime = zdt.toLocalDateTime();
+
+        zdt = ZonedDateTime.parse("2023-01-11T17:45:00Z");
+        LocalDateTime toTime = zdt.toLocalDateTime();
+
+        Mockito.when(this.rideRepository.getAllByPassengerAndBetweenDates(fromTime, toTime, passenger, pageable)).thenReturn(rides);
+
+        assertEquals(rides,rideService.findRidesByPassengerInDateRange(passenger.getId(),"2023-01-11T17:45:00Z","2023-01-11T17:45:00Z",pageable));
+
+    }
+
+    @Test
+    @DisplayName("shouldFindRidesByPassengerInDateRangeNoUser [negative] (throws NonExistantUserException)")
+    public void findRidesByPassengerInDateRangeNoUser() {
+        Mockito.when(this.passengerRepository.findById(1L)).thenReturn(Optional.empty());
+        Pageable pageable = Pageable.unpaged();
+        assertThrows(NonExistantUserException.class,()->{
+            rideService.findRidesByPassengerInDateRange(1L,"2023-01-11T17:45:00Z","2023-01-11T17:45:00Z",pageable);
+        });
+    }
+
+    @Test
+    @DisplayName("shouldFindRidesByPassengerInDateRangeBadDate [negative] (throws NonExistantUserException)")
+    public void findRidesByPassengerInDateRangeBadDate() {
+        Passenger passenger = new Passenger();
+        passenger.setId(1L);
+        Mockito.when(this.passengerRepository.findById(passenger.getId())).thenReturn(Optional.of(passenger));
+        Pageable pageable = Pageable.unpaged();
+        assertThrows(DateTimeException.class,()->{
+            rideService.findRidesByPassengerInDateRange(passenger.getId(),"123","2023-01-11T17:45:00Z",pageable);
+        });
+    }
+
 
     private static Vehicle getVehicle2(CreateRideDTO createRideDTO, Driver d1, VehicleType vt) {
         Vehicle vehicle2 = new Vehicle();

@@ -1,4 +1,4 @@
-package com.shuttle.service;
+package com.shuttle.service.providers;
 
 import com.shuttle.ride.Ride;
 import org.junit.jupiter.api.extension.ExtensionContext;
