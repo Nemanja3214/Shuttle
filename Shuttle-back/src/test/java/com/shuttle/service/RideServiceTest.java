@@ -7,10 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.shuttle.common.exception.NonExistantFavoriteRoute;
 import com.shuttle.common.exception.NonExistantUserException;
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
 import com.shuttle.driver.IDriverService;
+import com.shuttle.location.FavoriteRoute;
 import com.shuttle.location.IFavouriteRouteRepository;
 import com.shuttle.location.ILocationRepository;
 import com.shuttle.location.Location;
@@ -18,6 +20,7 @@ import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.passenger.Passenger;
 import com.shuttle.ride.*;
 import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
 import com.shuttle.service.providers.FindCurrentRideByPassengerArgumentProvider;
 import com.shuttle.service.providers.RequestParamsMatchArgumentProvider;
 import com.shuttle.service.providers.ShouldCreateDriverArgumentProvider;
@@ -39,6 +42,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class RideServiceTest {
@@ -501,7 +507,7 @@ public class RideServiceTest {
 
         Mockito.when(this.rideRepository.getAllByPassengerAndBetweenDates(fromTime, toTime, passenger, pageable)).thenReturn(rides);
 
-        assertEquals(rides,rideService.findRidesByPassengerInDateRange(passenger.getId(),"2023-01-11T17:45:00Z","2023-01-11T17:45:00Z",pageable));
+        assertEquals(rides, rideService.findRidesByPassengerInDateRange(passenger.getId(), "2023-01-11T17:45:00Z", "2023-01-11T17:45:00Z", pageable));
 
     }
 
@@ -510,8 +516,8 @@ public class RideServiceTest {
     public void findRidesByPassengerInDateRangeNoUser() {
         Mockito.when(this.passengerRepository.findById(1L)).thenReturn(Optional.empty());
         Pageable pageable = Pageable.unpaged();
-        assertThrows(NonExistantUserException.class,()->{
-            rideService.findRidesByPassengerInDateRange(1L,"2023-01-11T17:45:00Z","2023-01-11T17:45:00Z",pageable);
+        assertThrows(NonExistantUserException.class, () -> {
+            rideService.findRidesByPassengerInDateRange(1L, "2023-01-11T17:45:00Z", "2023-01-11T17:45:00Z", pageable);
         });
     }
 
@@ -522,10 +528,144 @@ public class RideServiceTest {
         passenger.setId(1L);
         Mockito.when(this.passengerRepository.findById(passenger.getId())).thenReturn(Optional.of(passenger));
         Pageable pageable = Pageable.unpaged();
-        assertThrows(DateTimeException.class,()->{
-            rideService.findRidesByPassengerInDateRange(passenger.getId(),"123","2023-01-11T17:45:00Z",pageable);
+        assertThrows(DateTimeException.class, () -> {
+            rideService.findRidesByPassengerInDateRange(passenger.getId(), "123", "2023-01-11T17:45:00Z", pageable);
         });
     }
+
+    @Test
+    @DisplayName("shouldDeleteFavouriteRouteNonExistentId [negative] (throws NonExistantFavoriteRoute)")
+    public void deleteFavouriteRouteNonExistentId() {
+        long id = 1L;
+        Mockito.when(this.favouriteRouteRepository.existsById(id)).thenReturn(false);
+        assertThrows(NonExistantFavoriteRoute.class, () -> {
+            rideService.delete(id);
+        });
+
+    }
+
+    @Test
+    @DisplayName("shouldDeleteFavouriteRoute [positive] ()")
+    public void deleteFavouriteRoute() throws NonExistantFavoriteRoute {
+        long id = 1L;
+        Mockito.when(this.favouriteRouteRepository.existsById(id)).thenReturn(true);
+        rideService.delete(id);
+        verify(this.favouriteRouteRepository, times(1)).deleteById(id);
+
+    }
+
+    @Test
+    @DisplayName("shouldDeleteFavouriteRoutesByIds0Exists [negative] (throws NonExistantFavoriteRoute)")
+    public void deleteFavouriteRoutesByIds0Exists() {
+        Mockito.when(this.favouriteRouteRepository.existsById(anyLong())).thenReturn(false);
+        List<Long> longs = new ArrayList<>();
+        for (long i = 0; i < 5; i++)
+            longs.add(i);
+        assertThrows(NonExistantFavoriteRoute.class, () -> {
+            rideService.delete(longs);
+        });
+
+    }
+
+    @Test
+    @DisplayName("shouldDeleteFavouriteRoutesByIds1NonExistent [negative] (throws NonExistantFavoriteRoute)")
+    public void deleteFavouriteRoutesByIds1NonExistent() {
+        Mockito.when(this.favouriteRouteRepository.existsById(anyLong())).thenReturn(true);
+        List<Long> longs = new ArrayList<>();
+        for (long i = 0; i < 5; i++)
+            longs.add(i);
+        Mockito.when(this.favouriteRouteRepository.existsById(longs.get(longs.size() - 1))).thenReturn(false);
+        assertThrows(NonExistantFavoriteRoute.class, () -> {
+            rideService.delete(longs);
+        });
+    }
+
+    @Test
+    @DisplayName("shouldDeleteFavouriteRoutesByIds [positive] ()")
+    public void deleteFavouriteRoutesByIds() throws NonExistantFavoriteRoute {
+        Mockito.when(this.favouriteRouteRepository.existsById(anyLong())).thenReturn(true);
+        List<Long> longs = new ArrayList<>();
+        for (long i = 0; i < 5; i++)
+            longs.add(i);
+        rideService.delete(longs);
+        verify(this.favouriteRouteRepository, times(1)).deleteAllById(longs);
+    }
+
+    @Test
+    @DisplayName("shouldGetFavouriteRoutesByPassengerId [negative] (throws NonExistantFavoriteRoute)")
+    public void getFavouriteRoutesByPassengerIdNoUser() {
+        long id =1L;
+        Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(NonExistantFavoriteRoute.class, () -> {
+            rideService.getFavouriteRoutesByPassengerId(id);
+        });
+    }
+
+    @Test
+    @DisplayName("shouldGetFavouriteRoutesByPassengerId [positive] (returns List<FavoriteRoute>)")
+    public void getFavouriteRoutesByPassengerId() throws NonExistantUserException {
+        long id =1L;
+        Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(true);
+        List<FavoriteRoute> routes = new ArrayList<>();
+        FavoriteRoute favoriteRoute = new FavoriteRoute();
+        routes.add(favoriteRoute);
+        Mockito.when(this.favouriteRouteRepository.findByPassengerId(id)).thenReturn(routes);
+        assertEquals(routes,rideService.getFavouriteRoutesByPassengerId(id));
+    }
+
+
+    @Test
+    @DisplayName("shouldGetPassengerGraphData [negative] (throws NonExistantUserException)")
+    public void getPassengerGraphDataNoUser() {
+        long id =1L;
+        Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(NonExistantUserException.class, () -> {
+            rideService.getPassengerGraphData(LocalDateTime.now(),LocalDateTime.now(),id);
+        });
+    }
+
+    @Test
+    @DisplayName("shouldGetPassengerGraphData [positive] (returns List<GraphEntryDTO>)")
+    public void getPassengerGraphData() throws NonExistantUserException {
+        long id =1L;
+        Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(true);
+        List<GraphEntryDTO> graphEntryDTOS = new ArrayList<>();
+        GraphEntryDTO graphEntryDTO = new GraphEntryDTO();
+        graphEntryDTOS.add(graphEntryDTO);
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDateTime.now();
+        Mockito.when(this.rideRepository.getPassengerGraphData(start, end, id)).thenReturn(graphEntryDTOS);
+        assertEquals(graphEntryDTOS,rideService.getPassengerGraphData(start,end,id));
+    }
+
+
+    @Test
+    @DisplayName("shouldGetDriverGraphData [negative] (throws NonExistantUserException)")
+    public void getDriverGraphDataNoUser() {
+        long id =1L;
+        Mockito.when(this.driverRepository.existsById(anyLong())).thenReturn(false);
+
+        assertThrows(NonExistantUserException.class, () -> {
+            rideService.getDriverGraphData(LocalDateTime.now(),LocalDateTime.now(),id);
+        });
+    }
+
+    @Test
+    @DisplayName("shouldGetDriverGraphData [positive] (returns List<GraphEntryDTO>)")
+    public void getDriverGraphData() throws NonExistantUserException {
+        long id =1L;
+        Mockito.when(this.driverRepository.existsById(anyLong())).thenReturn(true);
+        List<GraphEntryDTO> graphEntryDTOS = new ArrayList<>();
+        GraphEntryDTO graphEntryDTO = new GraphEntryDTO();
+        graphEntryDTOS.add(graphEntryDTO);
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = LocalDateTime.now();
+        Mockito.when(this.rideRepository.getDriverGraphData(start, end, id)).thenReturn(graphEntryDTOS);
+        assertEquals(graphEntryDTOS,rideService.getDriverGraphData(start,end,id));
+    }
+
 
 
     private static Vehicle getVehicle2(CreateRideDTO createRideDTO, Driver d1, VehicleType vt) {
