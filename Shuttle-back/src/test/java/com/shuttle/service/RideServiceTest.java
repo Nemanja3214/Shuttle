@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.shuttle.driver.Driver;
 import com.shuttle.driver.IDriverRepository;
@@ -12,12 +11,9 @@ import com.shuttle.driver.IDriverService;
 import com.shuttle.location.IFavouriteRouteRepository;
 import com.shuttle.location.ILocationRepository;
 import com.shuttle.location.Location;
-import com.shuttle.location.dto.LocationDTO;
-import com.shuttle.location.dto.RouteDTO;
 import com.shuttle.passenger.IPassengerRepository;
 import com.shuttle.ride.*;
 import com.shuttle.ride.dto.CreateRideDTO;
-import com.shuttle.user.dto.BasicUserInfoDTO;
 import com.shuttle.vehicle.IVehicleService;
 import com.shuttle.vehicle.Vehicle;
 import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
@@ -26,9 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -102,12 +96,13 @@ public class RideServiceTest {
         });
 
     }
+
     @ParameterizedTest
     @DisplayName("shouldScheduleRideWorked8hHrs [negative] (returns null)")
     @ArgumentsSource(ShouldCreateDriverArgumentProvider.class)
     public void shouldScheduleRideWorked8hHrs(CreateRideDTO createRideDTO, boolean forFuture, boolean multipleDrivers,
-                                            boolean closerPending, boolean closerAccepted, boolean closerStarted,
-                                            boolean furtherPending, boolean furtherAccepted, boolean furtherStarted) throws NoAvailableDriverException {
+                                              boolean closerPending, boolean closerAccepted, boolean closerStarted,
+                                              boolean furtherPending, boolean furtherAccepted, boolean furtherStarted) throws NoAvailableDriverException {
         Driver d1 = getDriver1();
 
         VehicleType vt = new VehicleType(1L, createRideDTO.getVehicleType(), 100);
@@ -308,6 +303,27 @@ public class RideServiceTest {
 
     }
 
+    @ParameterizedTest
+    @DisplayName("checkRequestParamsMatch [positive] (returns boolean)")
+    @ArgumentsSource(RequestParamsMatchArgumentProvider.class)
+    public void checkParamsChangeMatch(Driver d, boolean baby, boolean pet, int seatsNeeded, VehicleType vehicleType, Vehicle v) {
+        Mockito.when(vehicleService.findByDriver(d)).thenReturn(v);
+        boolean result = rideService.requestParamsMatch(d, baby, pet, seatsNeeded, vehicleType);
+        if (v == null) {
+            assertFalse(result);
+        } else if (!v.getBabyTransport() && baby) {
+            assertFalse(result);
+        } else if (!v.getPetTransport() && pet) {
+            assertFalse(result);
+        } else if (v.getPassengerSeats() < seatsNeeded) {
+            assertFalse(result);
+        } else if (!v.getVehicleType().equals(vehicleType)) {
+            assertFalse(result);
+        } else
+            assertTrue(result);
+    }
+
+
     private static Vehicle getVehicle2(CreateRideDTO createRideDTO, Driver d1, VehicleType vt) {
         Vehicle vehicle2 = new Vehicle();
         vehicle2.setModel("Golf 6");
@@ -385,5 +401,6 @@ public class RideServiceTest {
         }
         Mockito.when(rideRepository.findByDriverAndStatus(d, status)).thenReturn(rides);
     }
+
 
 }
