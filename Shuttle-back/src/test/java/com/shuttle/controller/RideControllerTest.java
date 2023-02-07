@@ -541,7 +541,7 @@ public class RideControllerTest {
 	@Test
 	public void getActiveRideByPassenger_noRide() {
 		final String URL = "/api/ride/passenger/{id}/active";
-		Long passengerId = 3L;
+		Long passengerId = 11L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, passengerId);
@@ -1137,7 +1137,7 @@ public class RideControllerTest {
 	@Test
 	public void withdrawRide_passengerCannotWithdrawRideThatIsNotHis() {
 		final String URL = "/api/ride/{id}/withdraw";
-		Long rideId = 0L;
+		Long rideId = 7L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
@@ -1400,6 +1400,44 @@ public class RideControllerTest {
 		
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("Number of favorite rides cannot exceed 10!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createFavouriteRoute_badDataFormat() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName(null);
+		dto.setVehicleType("STANDARD");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(108, "faaakeeee@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Field (favoriteName) is required!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createFavouriteRoute_nonExistingPassenger() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName("My fav");
+		dto.setVehicleType("STANDARD");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(108, "faaakeeee@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("User doesn't exist!", response.getBody().getMessage());
 	}
 	
 	@Test
