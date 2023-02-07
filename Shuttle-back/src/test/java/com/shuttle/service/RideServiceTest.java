@@ -1,5 +1,16 @@
 package com.shuttle.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -7,27 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.shuttle.common.exception.NonExistantFavoriteRoute;
-import com.shuttle.common.exception.NonExistantUserException;
-import com.shuttle.driver.Driver;
-import com.shuttle.driver.IDriverRepository;
-import com.shuttle.driver.IDriverService;
-import com.shuttle.location.FavoriteRoute;
-import com.shuttle.location.IFavouriteRouteRepository;
-import com.shuttle.location.ILocationRepository;
-import com.shuttle.location.Location;
-import com.shuttle.passenger.IPassengerRepository;
-import com.shuttle.passenger.Passenger;
-import com.shuttle.ride.*;
-import com.shuttle.ride.dto.CreateRideDTO;
-import com.shuttle.ride.dto.GraphEntryDTO;
-import com.shuttle.service.providers.FindCurrentRideByPassengerArgumentProvider;
-import com.shuttle.service.providers.RequestParamsMatchArgumentProvider;
-import com.shuttle.service.providers.ShouldCreateDriverArgumentProvider;
-import com.shuttle.vehicle.IVehicleService;
-import com.shuttle.vehicle.Vehicle;
-import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
-import com.shuttle.vehicle.vehicleType.VehicleType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,15 +26,42 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import com.shuttle.common.exception.FavoriteRideLimitExceeded;
+import com.shuttle.common.exception.NonExistantFavoriteRoute;
+import com.shuttle.common.exception.NonExistantUserException;
+import com.shuttle.common.exception.NonExistantVehicleType;
+import com.shuttle.driver.Driver;
+import com.shuttle.driver.IDriverRepository;
+import com.shuttle.driver.IDriverService;
+import com.shuttle.location.FavoriteRoute;
+import com.shuttle.location.IFavouriteRouteRepository;
+import com.shuttle.location.ILocationRepository;
+import com.shuttle.location.Location;
+import com.shuttle.location.dto.FavoriteRouteDTO;
+import com.shuttle.location.dto.LocationDTO;
+import com.shuttle.location.dto.RouteDTO;
+import com.shuttle.passenger.IPassengerRepository;
+import com.shuttle.passenger.Passenger;
+import com.shuttle.ride.IRideRepository;
+import com.shuttle.ride.NoAvailableDriverException;
+import com.shuttle.ride.Ride;
+import com.shuttle.ride.RideService;
+import com.shuttle.ride.dto.CreateRideDTO;
+import com.shuttle.ride.dto.GraphEntryDTO;
+import com.shuttle.service.providers.FindCurrentRideByPassengerArgumentProvider;
+import com.shuttle.service.providers.RequestParamsMatchArgumentProvider;
+import com.shuttle.service.providers.ShouldCreateDriverArgumentProvider;
+import com.shuttle.user.dto.BasicUserInfoDTO;
+import com.shuttle.vehicle.IVehicleService;
+import com.shuttle.vehicle.Vehicle;
+import com.shuttle.vehicle.vehicleType.IVehicleTypeRepository;
+import com.shuttle.vehicle.vehicleType.VehicleType;
 
 @ExtendWith(MockitoExtension.class)
 public class RideServiceTest {
@@ -639,6 +656,117 @@ public class RideServiceTest {
         Mockito.when(this.rideRepository.getPassengerGraphData(start, end, id)).thenReturn(graphEntryDTOS);
         assertEquals(graphEntryDTOS,rideService.getPassengerGraphData(start,end,id));
     }
+    
+//    @Test
+//    @DisplayName("shouldCreateFavoriteRoute [positive] (returns List<FavoriteRoute>)")
+//    public void createFavoriteRoute() {
+//        long id =1L;
+//        Mockito.when(this.vehicleTypeRepository.existsById(anyLong())).thenReturn(true);
+//        List<GraphEntryDTO> graphEntryDTOS = new ArrayList<>();
+//        GraphEntryDTO graphEntryDTO = new GraphEntryDTO();
+//        graphEntryDTOS.add(graphEntryDTO);
+//        LocalDateTime start = LocalDateTime.now();
+//        LocalDateTime end = LocalDateTime.now();
+//        Mockito.when(this.rideRepository.getPassengerGraphData(start, end, id)).thenReturn(graphEntryDTOS);
+//        assertEquals(graphEntryDTOS,rideService.getPassengerGraphData(start,end,id));
+//    }
+    
+    @Test
+    @DisplayName("shouldCreateFavoriteRoute [negative] (throws NonExistantVehicleType)")
+    public void invalidVehicleType() {
+        long id =1L;
+        FavoriteRouteDTO dto = new FavoriteRouteDTO();
+        dto.setVehicleType("asd");
+        Mockito.when(this.vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(anyString())).thenReturn(Optional.empty());
+        assertThrows(NonExistantVehicleType.class, () -> {
+            rideService.createFavoriteRoute(dto, id);
+        });
+    }
+    
+    @Test
+    @DisplayName("shouldCreateFavoriteRoute [negative] (throws NonExistantUserException)")
+    public void invalidPassengerId() {
+        Mockito.when(this.vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(anyString())).thenReturn(Optional.of(new VehicleType()));
+        
+       
+        FavoriteRouteDTO dto =  new FavoriteRouteDTO();
+        
+        dto.setVehicleType("asda");
+        
+        BasicUserInfoDTO p = Mockito.mock(BasicUserInfoDTO.class);
+        Mockito.when(p.getId()).thenReturn(1L);
+        
+        Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(false);
+        
+        List<BasicUserInfoDTO> passengers = new ArrayList<>();
+        passengers.add(p);
+        dto.setPassengers(passengers);
+        
+        assertThrows(NonExistantUserException.class, () -> {
+            rideService.createFavoriteRoute(dto, 0);
+        });
+    }
+    
+    @Test
+    @DisplayName("shouldCreateFavoriteRoute [negative] (throws FavoriteRideLimitExceeded)")
+    public void exceededLimit() {
+        FavoriteRouteDTO dto =  new FavoriteRouteDTO();
+        Mockito.when(this.vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(anyString())).thenReturn(Optional.of(new VehicleType()));
+        dto.setVehicleType("asda");  
+        
+        BasicUserInfoDTO p = Mockito.mock(BasicUserInfoDTO.class);
+        Mockito.when(p.getId()).thenReturn(1L);
+        
+        Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(true);
+        
+        List<BasicUserInfoDTO> passengers = new ArrayList<>();
+        passengers.add(p);
+        dto.setPassengers(passengers);
+        
+        Mockito.when(this.favouriteRouteRepository.anyPassengerExceededLimit(any(), anyLong())).thenReturn(Boolean.TRUE);
+        
+        assertThrows(FavoriteRideLimitExceeded.class, () -> {
+            rideService.createFavoriteRoute(dto, 5L);
+        });
+    }
+   
+    
+    
+    @Test
+    @DisplayName("shouldCreateFavoriteRoute [positive] (returns FavoriteRide)")
+    public void happyFavoriteRoute() throws NonExistantVehicleType, NonExistantUserException, FavoriteRideLimitExceeded {
+        FavoriteRouteDTO dto =  new FavoriteRouteDTO();
+        Mockito.when(this.vehicleTypeRepository.findVehicleTypeByNameIgnoreCase(anyString())).thenReturn(Optional.of(new VehicleType()));
+        dto.setVehicleType("asda");  
+        
+        BasicUserInfoDTO p = Mockito.mock(BasicUserInfoDTO.class);
+        Mockito.when(p.getId()).thenReturn(1L);
+        
+        Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(true);
+        
+        List<BasicUserInfoDTO> passengers = new ArrayList<>();
+        passengers.add(p);
+        dto.setPassengers(passengers);
+        
+        Mockito.when(this.favouriteRouteRepository.anyPassengerExceededLimit(any(), anyLong())).thenReturn(Boolean.FALSE);
+
+        
+        RouteDTO route = new RouteDTO();
+        LocationDTO departure = new LocationDTO();
+        LocationDTO destination = new LocationDTO();
+        route.setDeparture(departure);
+        route.setDestination(destination);
+        
+        List<RouteDTO> routes = new ArrayList<>();
+        routes.add(route);
+        dto.setLocations(routes);
+        FavoriteRoute f = new FavoriteRoute();
+        Mockito.when(this.favouriteRouteRepository.save(any())).thenReturn(f);
+        FavoriteRoute favRoute = rideService.createFavoriteRoute(dto, 5L);
+
+        assertEquals(favRoute, f);
+    }
+    
 
 
     @Test
