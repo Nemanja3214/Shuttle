@@ -592,12 +592,12 @@ public class RideServiceTest {
     }
 
     @Test
-    @DisplayName("shouldGetFavouriteRoutesByPassengerId [negative] (throws NonExistantFavoriteRoute)")
+    @DisplayName("shouldGetFavouriteRoutesByPassengerId [negative] (throws NonExistantUserException)")
     public void getFavouriteRoutesByPassengerIdNoUser() {
         long id =1L;
         Mockito.when(this.passengerRepository.existsById(anyLong())).thenReturn(false);
 
-        assertThrows(NonExistantFavoriteRoute.class, () -> {
+        assertThrows(NonExistantUserException.class, () -> {
             rideService.getFavouriteRoutesByPassengerId(id);
         });
     }
