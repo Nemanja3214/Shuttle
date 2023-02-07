@@ -51,9 +51,7 @@ import com.shuttle.vehicle.vehicleType.VehicleType;
 import jakarta.transaction.Transactional;
 import net.minidev.json.JSONObject;
 
-class NoAvailableDriverException extends Throwable {
-	private static final long serialVersionUID = -2718176046357707329L;
-}
+
 
 @Service
 public class RideService implements IRideService {
@@ -111,11 +109,11 @@ public class RideService implements IRideService {
 
         final List<Driver> noPendingNoAcceptedNoStarted = findDriversWithNoPendingNoAcceptedNoStarted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
-            .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
+            .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getPetTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
         final List<Driver> noPendingYesAcceptedOrStarted = findDriversWithNoPendingYesAcceptedOrStarted().stream()
             .filter(d -> !driverService.workedMoreThan8Hours(d))
-            .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getBabyTransport(), createRideDTO.getPassengers().size(), vt))
+            .filter(d -> requestParamsMatch(d, createRideDTO.getBabyTransport(), createRideDTO.getPetTransport(), createRideDTO.getPassengers().size(), vt))
             .toList();
 
         if (noPendingNoAcceptedNoStarted.size() > 0) {
@@ -159,7 +157,7 @@ public class RideService implements IRideService {
             final List<Ride> accepted = rideRepository.findByDriverAndStatus(d, Status.ACCEPTED);
             final List<Ride> started = rideRepository.findByDriverAndStatus(d, Status.STARTED);
 
-            if (pending.size() == 0 && accepted.size() == 0 && accepted.size() == 0)
+            if (pending.size() == 0 && accepted.size() == 0 && started.size() == 0)
             drivers.add(d);
         }	
     	return drivers;        
