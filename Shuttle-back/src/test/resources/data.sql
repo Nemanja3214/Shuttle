@@ -32,12 +32,16 @@ insert into generic_user(email, password, enabled, blocked, active, name) values
 insert into generic_user(email, password, enabled, blocked, active, name) values ('p9@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('p10@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
 
+
 insert into generic_user(email, password, enabled, blocked, active, name) values ('d1@gmail.com', '$2a$10$krk0jTL1y0eFbRqBB1jO9eZv.gSZkZ/vPzXwnZG1W3WDh/xZs8OIC', true, false, false, 'D1');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('d2@gmail.com', '$2a$10$wEK.5n29HkO3NEJxVfPaYODNmRIPCfSHwwv77KrJ5JXKHWGdINPee', true, false, false, 'D2');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('d3@gmail.com', '$2a$10$ePVkPF/GxUI2V4kSi8qhi.hRlCX/h5CgZtpdOoy05btsgbfaaCNOC', true, false, false, 'D3');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('d4@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'D4');
 insert into generic_user(email, password, enabled, blocked, active, name) values ('d5@gmail.com', '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'D5');
 
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p11@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p12@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
+insert into generic_user(email, password, enabled, blocked, active, name) values ('p13@gmail.com',      '$2a$10$OBmqrkeGcidferI6rWbrG.umlSCyM6CFJ/APVBazwDEQiVuFguRse', true, false, false, 'Bob');
 
 
 insert into user_role(user_id, role_id) values (1, 2);
@@ -63,6 +67,9 @@ insert into user_role(user_id, role_id) values (17, 1);
 insert into user_role(user_id, role_id) values (18, 1);
 insert into user_role(user_id, role_id) values (19, 1);
 insert into user_role(user_id, role_id) values (20, 1);
+insert into user_role(user_id, role_id) values (26, 1);
+insert into user_role(user_id, role_id) values (27, 1);
+insert into user_role(user_id, role_id) values (28, 1);
 
 insert into user_role(user_id, role_id) values (21, 2);
 insert into user_role(user_id, role_id) values (22, 2);
@@ -95,6 +102,9 @@ insert into passenger(id) values (17);
 insert into passenger(id) values (18);
 insert into passenger(id) values (19);
 insert into passenger(id) values (20);
+insert into passenger(id) values (26);
+insert into passenger(id) values (27);
+insert into passenger(id) values (28);
 
 insert into location(latitude, longitude, address) values (45.235820, 19.803677, 'Novi Sad 1');
 insert into location(latitude, longitude, address) values (45.233752, 19.816665, 'Novi Sad 2');
@@ -106,17 +116,17 @@ insert into location(latitude, longitude, address) values (45.236354, 19.715382,
 
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(1, 1, 1, true, true, 1);
 insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(5, 2, 2, true, true, 2);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(6, 3, 1, true, false, 3);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(7, 4, 1, false, true, 4);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(8, 5, 2, false, true, 5);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(9, 6, 1, false, false, 6);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(10, 7, 3, false, false, 7);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(6, 3, 1, true, false, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(7, 4, 1, false, true, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(8, 5, 2, false, true, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(9, 6, 1, false, false, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(10, 7, 3, false, false, 3);
 
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(21, 1, 1, true, true, 3);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(22, 1, 1, true, true, 3);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(23, 1, 1, true, true, 3);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(24, 1, 1, true, true, 3);
-insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(25, 1, 1, true, true, 3);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(21, 1, 1, true, true, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(22, 1, 1, true, true, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(23, 1, 1, true, true, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(24, 1, 1, true, true, 2);
+insert into vehicle(driver_id, current_location_id, vehicle_type_id, baby_transport, pet_transport, passenger_seats) values(25, 1, 1, true, true, 2);
 
 --------------- Ride, location, etc.
 
@@ -185,6 +195,15 @@ insert into route_locations(route_id, locations_id) values(8, 2);
 insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 22, 1, 1, false, false, 123.4, 5.6, 100);
 insert into ride_passengers(ride_id, passengers_id) values (8, 18);
 
+-- Ride 9: Used for order with specific attributes where the only capable driver is busy
+
+insert into route default values;
+insert into route_locations(route_id, locations_id) values(9, 1);
+insert into route_locations(route_id, locations_id) values(9, 2);
+insert into ride(status, driver_id, route_id, vehicle_type_id, pet_transport, baby_transport, total_cost, total_length, estimated_time_in_minutes) values (1, 10, 1, 3, false, false, 123.4, 5.6, 100);
+insert into ride_passengers(ride_id, passengers_id) values (9, 19);
+insert into ride_passengers(ride_id, passengers_id) values (9, 20);
+insert into ride_passengers(ride_id, passengers_id) values (9, 26);
 
 --------------- Favorite rides - 10 for John, 9 for Troy
 
