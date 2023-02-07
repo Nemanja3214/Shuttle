@@ -1,6 +1,7 @@
 package pages.driver;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -97,5 +98,15 @@ public class DriverHomeCurrentRide {
 	public boolean isShown() {
 		(new WebDriverWait(driver, 10)).until(ExpectedConditions.invisibilityOfElementLocated(By.id("driver-current-passenger-list-container")));
 		return driver.findElements(By.id("driver-current-passenger-list-container")).size() != 0;
+	}
+
+	public boolean isAcceptRide(){
+		try {
+			btnAccept.isDisplayed();
+			return true;
+		}
+		catch (Exception e){
+			return false;
+		}
 	}
 }
