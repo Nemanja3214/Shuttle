@@ -71,6 +71,8 @@ public class RideControllerTest {
 	private String JWT_PASSENGER_6 = "";
 	private String JWT_PASSENGER_8 = "";
 	private String JWT_PASSENGER_9 = "";
+	private String JWT_PASSENGER_12 = "";
+	private String JWT_PASSENGER_13 = "";
 
 	private RideDTO ride1;
 	private RideDTO ride2;
@@ -147,6 +149,8 @@ public class RideControllerTest {
 		JWT_PASSENGER_6 = login("p6@gmail.com", "1234");
 		JWT_PASSENGER_8 = login("p8@gmail.com", "1234");
 		JWT_PASSENGER_9 = login("p9@gmail.com", "1234");
+		JWT_PASSENGER_12 = login("p12@gmail.com", "1234");
+		JWT_PASSENGER_13 = login("p13@gmail.com", "1234");
 		JWT_D_2 = login("d2@gmail.com", "1234");
 	}
 	
@@ -368,7 +372,7 @@ public class RideControllerTest {
 				Arrays.asList(route),
 				"VAN", true, true, null, 123.0); // There is no van with babies and pets.
 		
-		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_9));
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_13));
 		ResponseEntity<RESTError> response = restTemplate.exchange(
 				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
 		);
@@ -383,11 +387,11 @@ public class RideControllerTest {
 
 		RouteDTO route = new RouteDTO(new LocationDTO("ABC", 45.21, 19.8), new LocationDTO("DEF", 45.22, 19.79));
 		CreateRideDTO dto = new CreateRideDTO(
-				Arrays.asList(new BasicUserInfoDTO(11, "p1@gmail.com")), 
+				Arrays.asList(new BasicUserInfoDTO(19, "p9@gmail.com"), new BasicUserInfoDTO(20, "p10@gmail.com"), new BasicUserInfoDTO(21, "p11@gmail.com")), 
 				Arrays.asList(route),
-				"STANDARD", true, false, null, 123.0); // Standard vehicle - bob - busy
+				"VAN", false, false, null, 123.0); // Van, 3 passengers, only 1 driver is capable of this yet he's busy.
 		
-		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_9));
+		HttpEntity<CreateRideDTO> requestBody = new HttpEntity<CreateRideDTO>(dto, getHeader(JWT_PASSENGER_12));
 		ResponseEntity<RESTError> response = restTemplate.exchange(
 				URL, HttpMethod.POST,requestBody,new ParameterizedTypeReference<RESTError>() {}
 		);
@@ -447,7 +451,7 @@ public class RideControllerTest {
 	@Test
 	public void getActiveRideByDriver_noRide() {
 		final String URL = "/api/ride/driver/{id}/active";
-		Long driverId = 10L;
+		Long driverId = 25L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_ADMIN));
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, driverId);
@@ -537,7 +541,7 @@ public class RideControllerTest {
 	@Test
 	public void getActiveRideByPassenger_noRide() {
 		final String URL = "/api/ride/passenger/{id}/active";
-		Long passengerId = 3L;
+		Long passengerId = 11L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.GET, requestBody, new ParameterizedTypeReference<String>() {}, passengerId);
@@ -1133,7 +1137,7 @@ public class RideControllerTest {
 	@Test
 	public void withdrawRide_passengerCannotWithdrawRideThatIsNotHis() {
 		final String URL = "/api/ride/{id}/withdraw";
-		Long rideId = 0L;
+		Long rideId = 7L;
 
 		HttpEntity<Void> requestBody = new HttpEntity<Void>(null, getHeader(JWT_PASSENGER_1));
 		ResponseEntity<String> response = restTemplate.exchange(URL, HttpMethod.PUT, requestBody, new ParameterizedTypeReference<String>() {}, rideId);	
@@ -1396,6 +1400,44 @@ public class RideControllerTest {
 		
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertEquals("Number of favorite rides cannot exceed 10!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createFavouriteRoute_badDataFormat() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName(null);
+		dto.setVehicleType("STANDARD");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(108, "faaakeeee@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("Field (favoriteName) is required!", response.getBody().getMessage());
+	}
+	
+	@Test
+	public void createFavouriteRoute_nonExistingPassenger() {
+		final String URL = "/api/ride/favorites";
+		FavoriteRouteDTO dto = new FavoriteRouteDTO();
+		dto.setBabyTransport(true);
+		dto.setPetTransport(false);
+		dto.setFavoriteName("My fav");
+		dto.setVehicleType("STANDARD");
+		dto.setScheduledTime(null);
+		dto.setPassengers(Arrays.asList(new BasicUserInfoDTO(108, "faaakeeee@gmail.com")));
+		dto.setLocations(Arrays.asList(new RouteDTO(new LocationDTO("ABC", 80.0, 70.0), new LocationDTO("DEF", 78.0, 12.0))));
+		
+		HttpEntity<FavoriteRouteDTO> requestBody = new HttpEntity<FavoriteRouteDTO>(dto, getHeader(JWT_PASSENGER_JOHN));
+		ResponseEntity<RESTError> response = restTemplate.exchange(URL, HttpMethod.POST, requestBody, new ParameterizedTypeReference<RESTError>() {});	
+		
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertEquals("User doesn't exist!", response.getBody().getMessage());
 	}
 	
 	@Test
