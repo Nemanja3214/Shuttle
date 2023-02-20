@@ -1,0 +1,13 @@
+<div id="mat-dialog-box">
+    <h1 mat-dialog-title>Specify a reason</h1>
+
+    <form [formGroup]="rejectFormGroup">
+        <mat-form-field>
+            <mat-label>Reason</mat-label>
+            <input id="modal-reject-reason" matInput formControlName="rejectionReason" />
+        </mat-form-field>
+        <br/>
+        <button id="modal-reject-ok" mat-button mat-raised-button color="primary" (click)="onOk()" [disabled]="!rejectFormGroup.valid">OK</button>
+        <button id="modal-reject-cancel" mat-button mat-raised-button color="secondary" (click)="onCancel()">CANCEL</button>
+    </form>
+</div>

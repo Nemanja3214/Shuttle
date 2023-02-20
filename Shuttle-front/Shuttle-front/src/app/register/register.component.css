@@ -1,0 +1,47 @@
+mat-form-field{
+    display: block;
+}
+
+#legend{
+    margin: 0;
+    background-color: #279386;
+    padding: 15px;
+}
+#legend>h2{
+    font-size:xx-large;
+    color: white;
+}
+
+.register-dialog{
+    min-width: 400px;
+    max-width: 500px;
+    margin: auto;
+    background-color: #ECECEC;
+
+
+}
+.container{
+    padding: 40px;
+    background: linear-gradient(311deg, rgba(14,67,115,1) 0%, rgba(0,254,255,1) 100%);
+}
+
+form{
+    padding: 40px;
+    text-align: center;
+}
+
+button{
+    background-color: #279386 !important;
+    border-radius: 20%;
+    color: white !important;
+}
+
+.rounded-top{
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+.rounded-bottom{
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}

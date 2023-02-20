@@ -1,0 +1,35 @@
+<mat-toolbar class="driver">
+    <img class="logo" src="assets/logo.png" />
+    <a href="driver/home">
+        shuttle
+    </a>
+    <div id="buttons">
+        <button mat-icon-button (click)="home()">
+            <mat-icon matBadge="1" matBadgeColor="warn" [matBadgeHidden]="!shouldShowRideBadge()">home</mat-icon>
+        </button>
+        <button mat-icon-button (click)="history()">
+            <mat-icon>history</mat-icon>
+        </button>
+        <button mat-icon-button>
+            <mat-icon>map</mat-icon>
+        </button>
+        <button mat-icon-button>
+            <mat-icon>chat</mat-icon>
+        </button>
+        <button mat-icon-button>
+            <mat-icon>notifications</mat-icon>
+        </button>
+        <button mat-icon-button (click)="info()">
+            <mat-icon>account_circle</mat-icon>
+        </button>
+        <button mat-icon-button (click)="graph()">
+            <mat-icon> insert_chart</mat-icon>
+        </button>
+        
+        <form class="isActiveForm" [formGroup]="formGroupIsActive">
+            <mat-slide-toggle formControlName="isActive" (change)="onToggleIsActive()"><span>Active</span></mat-slide-toggle>
+        </form>
+
+        <button mat-flat-button class="button" id="sign-out" (click)="logout()">Sign out</button>
+    </div>
+</mat-toolbar>
