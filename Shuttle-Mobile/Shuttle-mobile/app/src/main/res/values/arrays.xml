@@ -1,0 +1,34 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="reply_entries">
+        <item>Reply</item>
+        <item>Reply to all</item>
+    </string-array>
+
+    <string-array name="reply_values">
+        <item>reply</item>
+        <item>reply_all</item>
+    </string-array>
+
+    <string-array name="sync_message_values">
+        <item>never</item>
+        <item>1min</item>
+        <item>15min</item>
+        <item>30min</item>
+    </string-array>
+
+    <string-array name="sync_message_entries">
+        <item>Never</item>
+        <item>Every minute</item>
+        <item>Every 15 minutes</item>
+        <item>Every 30 minutes</item>
+    </string-array>
+
+    <array name="order_steps">
+        <item>Route</item>
+        <item>Properties</item>
+        <item>Invites</item>
+        <item>Scheduling</item>
+        <item>Confirmation</item>
+    </array>
+</resources>

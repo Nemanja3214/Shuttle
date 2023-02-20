@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/p_f_history_details"
+    tools:context=".passenger.fragments.PassengerHistoryDetails">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/scroll_p_history_details"
+        app:layout_constraintVertical_bias="0.0">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <com.mapbox.maps.MapView
+                android:id="@+id/p_details_map"
+                android:layout_width="match_parent"
+
+                mapbox:layout_constraintBottom_toTopOf="@id/txt_p_ride_routeA"
+                mapbox:layout_constraintStart_toStartOf="parent"
+                mapbox:layout_constraintTop_toTopOf="parent"
+                android:layout_height="200dp"
+                mapbox:mapbox_cameraTargetLat="45.256930"
+                mapbox:mapbox_cameraTargetLng="19.810578"
+                mapbox:mapbox_cameraZoom="9.0">
+            </com.mapbox.maps.MapView>
+
+            <TextView
+                android:id="@+id/txt_p_ride_routeA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="123 Street Street"
+                app:layout_constraintStart_toEndOf="@+id/txt_p_ride_from"
+                app:layout_constraintTop_toTopOf="@+id/txt_p_ride_from" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_from"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-light"
+                android:text="From"
+                app:layout_constraintEnd_toEndOf="@id/p_details_map"
+                app:layout_constraintHorizontal_bias="0.31"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/p_details_map" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_to"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="To"
+                app:layout_constraintEnd_toEndOf="@id/txt_p_ride_from"
+                app:layout_constraintStart_toStartOf="@id/txt_p_ride_from"
+                app:layout_constraintTop_toBottomOf="@id/txt_p_ride_from" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_routeB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="456 Avenue Avenue"
+                app:layout_constraintStart_toStartOf="@id/txt_p_ride_routeA"
+                app:layout_constraintTop_toTopOf="@id/txt_p_ride_to" />
+
+            <ImageView
+                android:id="@+id/img_p_ride_dpfp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                app:layout_constraintHorizontal_bias="0.31"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="32dp"
+                android:background="#FF9800"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/bnt_p_ride_again"
+                app:srcCompat="@drawable/ic_baseline_account_box_24" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_dname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="Drive Driveson"
+                android:textSize="16sp"
+                app:layout_constraintStart_toEndOf="@id/img_p_ride_dpfp"
+                app:layout_constraintTop_toTopOf="@id/img_p_ride_dpfp" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_dcar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:text="Car X Model 123"
+                app:layout_constraintStart_toStartOf="@id/txt_p_ride_dname"
+                app:layout_constraintTop_toBottomOf="@id/txt_p_ride_dname" />
+
+            <Button
+                android:id="@+id/btn_p_ride_dchat"
+                android:layout_width="56dp"
+                android:layout_height="51dp"
+                android:layout_marginStart="24dp"
+                app:icon="@drawable/ic_baseline_chat_24"
+                app:iconPadding="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/img_p_ride_dpfp"
+                app:layout_constraintStart_toEndOf="@id/txt_p_ride_dname"
+                app:layout_constraintTop_toTopOf="@id/img_p_ride_dpfp"
+                app:layout_constraintVertical_bias="0.363" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="26/11/2022"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txt_p_ride_price" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_tinterval"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-light"
+                android:text="20.50 — 21.49"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="@id/txt_p_ride_date"
+                app:layout_constraintStart_toStartOf="@id/txt_p_ride_date"
+                app:layout_constraintTop_toBottomOf="@id/txt_p_ride_date" />
+
+
+            <TextView
+                android:id="@+id/txt_p_ride_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-black"
+                android:text="230 RSD"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="@id/txt_p_ride_distance"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.13"
+                app:layout_constraintStart_toEndOf="@id/txt_p_ride_distance"
+                app:layout_constraintTop_toTopOf="@id/txt_p_ride_distance" />
+
+            <TextView
+                android:id="@+id/txt_p_ride_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-light"
+                android:text="15km"
+                android:textSize="16sp"
+                app:layout_constraintHorizontal_bias="0.25"
+                app:layout_constraintStart_toEndOf="@id/img_p_ride_dpfp"
+                app:layout_constraintTop_toBottomOf="@id/img_p_ride_dpfp" />
+
+            <ScrollView
+                android:id="@+id/scrollView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lbl_p_ride_passengers">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <ListView
+                        android:id="@+id/li_p_ride_passengers"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:listitem="@layout/list_p_history_passengers" />
+                </LinearLayout>
+            </ScrollView>
+
+            <TextView
+                android:id="@+id/lbl_p_ride_passengers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-light"
+                android:text="Passengers"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="@id/scrollView3"
+                app:layout_constraintTop_toBottomOf="@id/txt_p_ride_tinterval" />
+
+            <Button
+                android:id="@+id/bnt_p_ride_again"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Order Again"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.29"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txt_p_ride_routeB" />
+
+            <ImageButton
+                android:id="@+id/btn_p_ride_favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="@id/bnt_p_ride_again"
+                app:layout_constraintEnd_toEndOf="@id/btn_p_ride_dchat"
+                app:layout_constraintStart_toEndOf="@id/bnt_p_ride_again"
+                app:layout_constraintTop_toTopOf="@id/bnt_p_ride_again"
+                android:background="?selectableItemBackgroundBorderless"
+                app:srcCompat="@drawable/heart_active" />
+
+
+            <include
+                layout="@layout/rating"
+                android:id="@+id/p_history_driver_rating"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@id/scrollView3"
+                app:layout_constraintBottom_toTopOf="@id/p_history_vehicle_rating"
+                android:layout_margin="15dp"
+                />
+
+            <include
+                layout="@layout/rating"
+                android:id="@+id/p_history_vehicle_rating"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@id/p_history_driver_rating"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_margin="15dp"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

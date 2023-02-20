@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container_rating"
+    android:layout_margin="15dp"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/lbl_p_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Rating title"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/container_rating" />
+
+    <RatingBar
+        android:id="@+id/rating_p_ride_rating"
+        style="@style/Widget.AppCompat.RatingBar.Indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:indeterminate="false"
+        android:max="5"
+        android:numStars="5"
+        android:rating="4"
+        android:stepSize="1"
+        android:isIndicator="false"
+        app:layout_constraintHorizontal_bias="0.35"
+        app:layout_constraintStart_toStartOf="@id/container_rating"
+        app:layout_constraintTop_toTopOf="@id/lbl_p_rating" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="match_parent"
+        android:layout_height="128dp"
+        app:layout_constraintEnd_toEndOf="@id/container_rating"
+        app:layout_constraintStart_toStartOf="@id/rating_p_ride_rating"
+        app:layout_constraintTop_toBottomOf="@id/rating_p_ride_rating">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/txt_p_ride_comment"
+                android:layout_width="match_parent"
+                android:layout_height="96dp"
+                android:ems="10"
+                android:gravity="start|top"
+                android:hint="Enter your comment here..."
+                android:inputType="textMultiLine"
+                android:singleLine="false"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toBottomOf="@id/linearLayout"
+                app:layout_constraintEnd_toEndOf="@id/linearLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@id/linearLayout"
+                app:layout_constraintTop_toTopOf="@id/linearLayout"
+                app:layout_constraintVertical_bias="0.0" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_p_ride_leave_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:text="Leave rating"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scrollView2" />
+</androidx.constraintlayout.widget.ConstraintLayout>

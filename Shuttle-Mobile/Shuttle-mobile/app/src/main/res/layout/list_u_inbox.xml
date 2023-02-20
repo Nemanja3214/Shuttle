@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".common.InboxFragment"
+    android:paddingVertical="16dp">
+
+    <ImageView
+        android:id="@+id/img_u_inbox_pfp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="#F44336"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_baseline_account_box_24" />
+
+    <TextView
+        android:id="@+id/txt_u_inbox_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-black"
+
+        android:text="Bob Jones"
+        android:textSize="20sp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintStart_toEndOf="@+id/txt_u_inbox_role_bullet"
+        app:layout_constraintTop_toTopOf="@+id/img_u_inbox_pfp" />
+
+    <TextView
+        android:id="@+id/txt_u_inbox_msg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Last message from me. This text is too large though"
+        app:layout_constraintEnd_toStartOf="@+id/txt_u_inbox_time"
+        app:layout_constraintStart_toStartOf="@+id/txt_u_inbox_role_bullet"
+        app:layout_constraintTop_toBottomOf="@+id/txt_u_inbox_name" />
+
+    <TextView
+        android:id="@+id/txt_u_inbox_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="2/12/22"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txt_u_inbox_name" />
+
+    <TextView
+        android:id="@+id/txt_u_inbox_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="17:11"
+        app:layout_constraintEnd_toEndOf="@+id/txt_u_inbox_date"
+        app:layout_constraintTop_toBottomOf="@+id/txt_u_inbox_date" />
+
+    <TextView
+        android:id="@+id/txt_u_inbox_role_bullet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="⬤"
+        app:layout_constraintBottom_toTopOf="@+id/txt_u_inbox_msg"
+        app:layout_constraintStart_toEndOf="@+id/img_u_inbox_pfp"
+        app:layout_constraintTop_toTopOf="@+id/img_u_inbox_pfp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

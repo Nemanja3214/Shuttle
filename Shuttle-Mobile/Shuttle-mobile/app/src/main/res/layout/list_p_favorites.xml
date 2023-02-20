@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:textAlignment="center"
+    android:gravity="center"
+    android:padding="20sp">
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:button="@drawable/star"
+        android:layout_weight="1"
+        android:id="@+id/cb_p_fav_star"
+        android:checked="true"
+        android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+        android:background="@android:color/transparent"
+        style="?android:attr/borderlessButtonStyle"
+        android:contentDescription="@string/star" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Name"
+        android:textAlignment="center"
+        android:layout_weight="2"
+        android:id="@+id/tv_p_fav_name"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="3"
+        android:textAlignment="center"
+        android:padding="5sp">
+        <TextView
+            android:id="@+id/list_p_favorites_route_A"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-black"
+            android:text="123 Street Street"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/list_p_favorites_route_B"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="sans-serif-black"
+            android:text="456 Avenue Avenue"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+
+</LinearLayout>

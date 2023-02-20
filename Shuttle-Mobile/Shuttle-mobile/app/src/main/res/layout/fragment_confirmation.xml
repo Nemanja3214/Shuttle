@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".passenger.orderride.fragments.ConfirmationFragment">
+
+        <TextView
+            android:id="@+id/lbl_order_stepper_passenger_cnt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-light"
+            android:text="Passengers (including you):"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/txt_order_stepper_vehicle"
+            app:layout_constraintTop_toBottomOf="@+id/txt_order_stepper_vehicle" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_pets"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/lbl_order_stepper_destination"
+            app:layout_constraintTop_toBottomOf="@+id/lbl_order_stepper_destination"
+            tools:text="No pets" />
+
+        <Button
+            android:id="@+id/confirm_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="32dp"
+            android:text="Order Ride"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lbl_order_stepper_cost" />
+
+        <TextView
+            android:id="@+id/lbl_order_stepper_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Looks good?"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lbl_order_stepper_departure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="64dp"
+            android:fontFamily="sans-serif-light"
+            android:text="Departure:"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lbl_order_stepper_4" />
+
+        <TextView
+            android:id="@+id/lbl_order_stepper_destination"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-light"
+            android:text="Destination:"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lbl_order_stepper_departure" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_departure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@+id/lbl_order_stepper_departure"
+            app:layout_constraintTop_toTopOf="@+id/lbl_order_stepper_departure"
+            tools:text="Location A" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_destination"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="Location B"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@+id/lbl_order_stepper_destination"
+            app:layout_constraintTop_toTopOf="@+id/lbl_order_stepper_destination" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_babies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/txt_order_stepper_pets"
+            app:layout_constraintTop_toBottomOf="@+id/txt_order_stepper_pets"
+            tools:text="No babies" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_vehicle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/txt_order_stepper_babies"
+            app:layout_constraintTop_toBottomOf="@+id/txt_order_stepper_babies"
+            tools:text="Standard vehicle" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_passenger_cnt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@+id/lbl_order_stepper_passenger_cnt"
+            app:layout_constraintTop_toTopOf="@+id/lbl_order_stepper_passenger_cnt"
+            tools:text="2" />
+
+        <TextView
+            android:id="@+id/lbl_order_stepper_scheduled_for"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif-light"
+            android:text="Scheduled for:"
+            android:textSize="16dp"
+            app:layout_constraintStart_toStartOf="@+id/lbl_order_stepper_passenger_cnt"
+            app:layout_constraintTop_toBottomOf="@+id/lbl_order_stepper_passenger_cnt" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_scheduled_for"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/lbl_order_stepper_scheduled_for"
+            app:layout_constraintStart_toEndOf="@+id/lbl_order_stepper_scheduled_for"
+            app:layout_constraintTop_toTopOf="@+id/lbl_order_stepper_scheduled_for"
+            tools:text="16:00" />
+
+        <TextView
+            android:id="@+id/lbl_order_stepper_cost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:fontFamily="sans-serif-light"
+            android:text="Price:"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/txt_order_stepper_cost"
+            app:layout_constraintTop_toBottomOf="@+id/lbl_order_stepper_scheduled_for" />
+
+        <TextView
+            android:id="@+id/txt_order_stepper_cost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/lbl_order_stepper_cost"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/lbl_order_stepper_cost"
+            tools:text="1234 RSD" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

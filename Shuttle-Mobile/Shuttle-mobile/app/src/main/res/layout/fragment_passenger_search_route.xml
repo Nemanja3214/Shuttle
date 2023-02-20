@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout6"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".passenger.fragments.home.PassengerSearchRoute">
+
+    <EditText
+        android:id="@+id/txt_p_home_departure"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="?colorOnPrimary"
+        android:ems="10"
+        android:hint="Enter departure location"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        android:paddingHorizontal="8dp"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        mapbox:layout_constraintBottom_toBottomOf="parent"
+        mapbox:layout_constraintEnd_toEndOf="parent"
+        mapbox:layout_constraintStart_toStartOf="parent"
+        mapbox:layout_constraintTop_toTopOf="parent"
+        mapbox:layout_constraintVertical_bias="0.0" />
+
+    <EditText
+        android:id="@+id/txt_p_home_destination"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:paddingHorizontal="8dp"
+        android:background="?colorOnPrimary"
+        android:ems="10"
+        android:hint="Enter destination location"
+        android:inputType="textPersonName"
+        android:minHeight="48dp"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        mapbox:layout_constraintBottom_toBottomOf="parent"
+        mapbox:layout_constraintEnd_toEndOf="parent"
+        mapbox:layout_constraintHorizontal_bias="0.0"
+        mapbox:layout_constraintStart_toStartOf="parent"
+        mapbox:layout_constraintTop_toBottomOf="@+id/txt_p_home_departure"
+        mapbox:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/btn_p_home_makeRoute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Go"
+        mapbox:layout_constraintEnd_toEndOf="parent"
+        mapbox:layout_constraintHorizontal_bias="0.33"
+        mapbox:layout_constraintStart_toStartOf="parent"
+        mapbox:layout_constraintTop_toBottomOf="@+id/txt_p_home_destination" />
+
+    <Button
+        android:id="@+id/btn_p_home_order"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="39dp"
+        android:text="Order"
+        mapbox:layout_constraintEnd_toEndOf="parent"
+        mapbox:layout_constraintStart_toEndOf="@+id/btn_p_home_makeRoute"
+        mapbox:layout_constraintStart_toStartOf="@+id/btn_p_home_makeRoute"
+        mapbox:layout_constraintTop_toTopOf="@+id/btn_p_home_makeRoute" />
+
+    <ProgressBar
+        android:id="@+id/progress_p_home"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateTint="#3949AB"
+        android:progressTint="#003949AB"
+        mapbox:layout_constraintEnd_toStartOf="@+id/btn_p_home_makeRoute"
+        mapbox:layout_constraintStart_toStartOf="parent"
+        mapbox:layout_constraintTop_toTopOf="@+id/btn_p_home_makeRoute" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout3"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".driver.fragments.DriverAccountInfo">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/txt_d_info_surname_lbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Surname"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_name"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_name" />
+
+            <EditText
+                android:id="@+id/txt_d_info_surname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:singleLine="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.168"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_surname_lbl"
+                tools:text="Jones" />
+
+            <ImageButton
+                android:id="@+id/img_d_info_pfp"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_marginTop="24dp"
+                android:background="#64B5F6"
+                android:scaleType="fitStart"
+                android:src="@drawable/ic_baseline_account_box_24"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btn_driver_logout" />
+
+            <TextView
+                android:id="@+id/txt_d_info_name_lbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Name"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_name"
+                app:layout_constraintTop_toBottomOf="@+id/img_d_info_pfp" />
+
+            <EditText
+                android:id="@+id/txt_d_info_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:singleLine="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.168"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_name_lbl"
+                tools:text="Bob" />
+
+            <TextView
+                android:id="@+id/txt_d_info_address_lbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Address"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_surname"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_surname" />
+
+            <EditText
+                android:id="@+id/txt_d_info_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                app:layout_constraintEnd_toEndOf="@+id/txt_d_info_surname"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_surname"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_address_lbl"
+                tools:text="123 Grove Street" />
+
+            <TextView
+                android:id="@+id/txt_d_info_phone_lbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Phone Number"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_address"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_address" />
+
+            <EditText
+                android:id="@+id/txt_d_info_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="phone"
+                app:layout_constraintEnd_toEndOf="@+id/txt_d_info_address"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_address"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_phone_lbl"
+                tools:text="0 123 456789" />
+
+            <TextView
+                android:id="@+id/txt_d_info_vehicle_model_lbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Vehicle model"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_phone"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_phone" />
+
+            <EditText
+                android:id="@+id/txt_d_info_vehicle_model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="@+id/txt_d_info_phone"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_phone"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_vehicle_model_lbl"
+                tools:text="La Ferrari" />
+
+            <TextView
+                android:id="@+id/txt_d_info_vehicle_plate_lbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="LicencePlate"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_vehicle_model"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_vehicle_model" />
+
+            <EditText
+                android:id="@+id/txt_d_info_vehicle_plate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="text"
+                app:layout_constraintEnd_toEndOf="@+id/txt_d_info_vehicle_model"
+                app:layout_constraintStart_toStartOf="@+id/txt_d_info_vehicle_model"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_vehicle_plate_lbl"
+                tools:text="La Ferrari" />
+
+
+            <Switch
+                android:id="@+id/info_d_pet_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="34dp"
+                android:minHeight="48dp"
+                android:text="Pet"
+                app:layout_constraintBottom_toTopOf="@+id/info_d_vehicle_type_spinner"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.55"
+                app:layout_constraintStart_toEndOf="@+id/txt_d_info_vehicle_plate"
+                app:layout_constraintTop_toBottomOf="@+id/info_d_baby_switch" />
+
+
+            <Switch
+                android:id="@+id/info_d_baby_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Child"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.494"
+                app:layout_constraintStart_toEndOf="@+id/txt_d_info_vehicle_model"
+                app:layout_constraintTop_toTopOf="@+id/txt_d_info_vehicle_model" />
+
+            <Spinner
+                android:id="@+id/info_d_vehicle_type_spinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@android:drawable/btn_dropdown"
+                android:spinnerMode="dropdown"
+                app:layout_constraintBottom_toTopOf="@+id/info_d_seat_count_spinner"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_vehicle_plate"
+                app:layout_constraintVertical_bias="0.963" />
+
+            <Spinner
+                android:id="@+id/info_d_seat_count_spinner"
+                android:layout_width="411dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="84dp"
+                android:background="@android:drawable/btn_dropdown"
+                android:spinnerMode="dropdown"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/txt_d_info_vehicle_plate" />
+
+            <Button
+                android:id="@+id/btn_d_info_info_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="?colorSecondary"
+                android:text="Submit"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/info_d_seat_count_spinner"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <Button
+                android:id="@+id/btn_driver_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Logout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

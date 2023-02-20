@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/txt_dhdp_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Bob Jones" />
+
+    <TextView
+        android:id="@+id/lbl_dhdp_driver_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Driver Rating:"
+        app:layout_constraintStart_toStartOf="@+id/txt_dhdp_name"
+        app:layout_constraintTop_toBottomOf="@+id/txt_dhdp_name" />
+
+    <RatingBar
+        android:id="@+id/rating_dhdp_driver"
+        style="@style/Widget.AppCompat.RatingBar.Indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:numStars="5"
+        android:rating="3"
+        android:stepSize="1"
+        app:layout_constraintBottom_toBottomOf="@+id/lbl_dhdp_driver_rating"
+        app:layout_constraintStart_toEndOf="@+id/lbl_dhdp_driver_rating"
+        app:layout_constraintTop_toTopOf="@+id/lbl_dhdp_driver_rating" />
+
+    <TextView
+        android:id="@+id/lbl_dhdp_diver_comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Comment:"
+        app:layout_constraintStart_toStartOf="@+id/lbl_dhdp_driver_rating"
+        app:layout_constraintTop_toBottomOf="@+id/rating_dhdp_driver" />
+
+    <TextView
+        android:id="@+id/txt_dhdp_driver_comment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lbl_dhdp_diver_comment"
+        app:layout_constraintTop_toTopOf="@+id/lbl_dhdp_diver_comment"
+        tools:text="hf dk  jfhekjf ehw  ewfjkehfjskfnejkfnewj   kfeh fjkdhfj kfhjkfhew jkfhdsk " />
+
+    <TextView
+        android:id="@+id/lbl_dhdp_vehicle_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Vehicle Rating:"
+        app:layout_constraintBottom_toBottomOf="@+id/rating_dhdp_vehicle"
+        app:layout_constraintStart_toStartOf="@+id/lbl_dhdp_diver_comment"
+        app:layout_constraintTop_toBottomOf="@+id/txt_dhdp_driver_comment" />
+
+    <RatingBar
+        android:id="@+id/rating_dhdp_vehicle"
+        style="@style/Widget.AppCompat.RatingBar.Indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:numStars="5"
+        android:rating="3"
+        app:layout_constraintStart_toEndOf="@+id/lbl_dhdp_vehicle_rating"
+        app:layout_constraintTop_toBottomOf="@+id/txt_dhdp_driver_comment" />
+
+    <TextView
+        android:id="@+id/lbl_dhdp_vehicle_comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Comment:"
+        app:layout_constraintStart_toStartOf="@+id/lbl_dhdp_vehicle_rating"
+        app:layout_constraintTop_toBottomOf="@+id/rating_dhdp_vehicle" />
+
+    <TextView
+        android:id="@+id/txt_dhdp_vehicle_comment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/lbl_dhdp_vehicle_comment"
+        app:layout_constraintTop_toTopOf="@+id/lbl_dhdp_vehicle_comment"
+        tools:text="dsh fjk es hfejkf  f jk hf sdkj hd  s khsdkh f dsdsh fjk es hfejkf  f jk hf sdkj hd  s khsdkh f dsk hfds ks dkj fdh kk hfds ks dkj fdh k" />
+
+    <Button
+        android:id="@+id/btn_dhdp_inbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Open Chat"
+        app:layout_constraintEnd_toEndOf="@+id/txt_dhdp_vehicle_comment"
+        app:layout_constraintTop_toBottomOf="@+id/txt_dhdp_vehicle_comment" />
+</androidx.constraintlayout.widget.ConstraintLayout>

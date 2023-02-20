@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".driver.fragments.DriverAccountReports">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/driver_report_start_date"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:cursorVisible="false"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:inputType="textPersonName"
+            android:text="Select Start Date"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/driver_report_end_date"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:cursorVisible="false"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:inputType="textPersonName"
+            android:text="Select End Date"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/driver_report_start_date" />
+
+        <Button
+            android:id="@+id/driver_report_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/driver_stats_chart"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/legend_d_chart"
+            app:layout_constraintTop_toBottomOf="@+id/driver_report_end_date" />
+
+        <TableLayout
+            android:id="@+id/legend_d_chart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            app:layout_constraintBottom_toTopOf="@+id/driver_report_submit">
+
+            <TableRow>
+
+                <Space
+                    android:layout_width="30dp"
+                    android:layout_column="0"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_column="1"
+                    android:layout_weight="1"
+                    android:text="@string/sum"></TextView>
+
+                <TextView
+                    android:layout_width="30dp"
+                    android:layout_column="2"
+                    android:layout_weight="1"
+                    android:text="@string/average"></TextView>
+            </TableRow>
+        </TableLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

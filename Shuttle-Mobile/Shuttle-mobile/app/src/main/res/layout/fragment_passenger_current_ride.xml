@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout7"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E8F5E9"
+    android:padding="8dp"
+    tools:context=".passenger.fragments.home.PassengerCurrentRide"
+    tools:layout_editor_absoluteX="0dp"
+    tools:layout_editor_absoluteY="0dp">
+
+
+    <TextView
+        android:id="@+id/lbl_p_cur_ride_departure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Departure:"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txt_p_cur_ride_departure"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/lbl_p_cur_ride_departure"
+        app:layout_constraintTop_toTopOf="@+id/lbl_p_cur_ride_departure"
+        tools:text="123 Street" />
+
+    <TextView
+        android:id="@+id/lbl_p_cur_ride_destination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Destination:"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lbl_p_cur_ride_departure" />
+
+    <TextView
+        android:id="@+id/txt_p_cur_ride_destination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/lbl_p_cur_ride_destination"
+        app:layout_constraintTop_toTopOf="@+id/lbl_p_cur_ride_destination"
+        tools:text="123 Street" />
+
+    <TextView
+        android:id="@+id/lbl_p_cur_ride_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Total distance:"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lbl_p_cur_ride_destination" />
+
+    <TextView
+        android:id="@+id/txt_p_cur_ride_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="1,3km"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/lbl_p_cur_ride_distance"
+        app:layout_constraintTop_toTopOf="@+id/lbl_p_cur_ride_distance" />
+
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="391dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lbl_p_cur_ride_distance" />
+
+    <TextView
+        android:id="@+id/lbl_p_cur_ride_timer"
+        android:layout_width="97dp"
+        android:layout_height="19dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Elapsed time:"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_p_cur_ride_note" />
+
+    <TextView
+        android:id="@+id/txt_p_cur_ride_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/lbl_p_cur_ride_timer"
+        app:layout_constraintTop_toTopOf="@+id/lbl_p_cur_ride_timer"
+        tools:text="00:12:10" />
+
+    <View
+        android:id="@+id/divider4"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/img_p_cur_ride_baby" />
+
+    <View
+        android:id="@+id/divider5"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_p_cur_ride_driver" />
+
+    <ImageView
+        android:id="@+id/img_p_cur_ride_baby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:background="#66BB6A"
+        android:foregroundTintMode="add"
+        android:src="@drawable/ic_baseline_child_care_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+    <ImageView
+        android:id="@+id/img_p_cur_ride_pet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:background="#66BB6A"
+        android:src="@drawable/ic_baseline_pets_24"
+        app:layout_constraintStart_toEndOf="@+id/img_p_cur_ride_baby"
+        app:layout_constraintTop_toTopOf="@+id/img_p_cur_ride_baby" />
+
+    <TextView
+        android:id="@+id/lbl_p_cur_ride_driver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Driver:"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/txt_p_cur_ride_driver"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txt_p_cur_ride_driver" />
+
+    <TextView
+        android:id="@+id/txt_p_cur_ride_driver"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="342dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:textAlignment="viewStart"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/lbl_p_cur_ride_driver"
+        app:layout_constraintTop_toBottomOf="@+id/divider4"
+        tools:text="bob@gmail.com" />
+
+    <Button
+        android:id="@+id/btn_p_cur_ride_note"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="#F06292"
+        android:text="Note"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider5" />
+
+    <Button
+        android:id="@+id/btn_p_cur_ride_panic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:backgroundTint="#C62828"
+        android:text="Panic"
+        app:layout_constraintStart_toEndOf="@+id/btn_p_cur_ride_note"
+        app:layout_constraintTop_toTopOf="@+id/btn_p_cur_ride_note" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/lay_p_cur_ride_when_started"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:constraint_referenced_ids="lbl_p_cur_ride_timer, txt_p_cur_ride_timer, btn_p_cur_ride_note, btn_p_cur_ride_panic"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_p_cur_ride_driver"
+        tools:visibility="gone"></androidx.constraintlayout.widget.Group>
+
+    <TextView
+        android:id="@+id/lbl_p_cur_ride_scheduled_for"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Scheduled for:"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider5" />
+
+    <TextView
+        android:id="@+id/txt_p_cur_ride_scheduled_for"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/lbl_p_cur_ride_scheduled_for"
+        app:layout_constraintStart_toEndOf="@+id/lbl_p_cur_ride_scheduled_for"
+        app:layout_constraintTop_toTopOf="@+id/lbl_p_cur_ride_scheduled_for"
+        tools:text="21:00" />
+
+    <TextView
+        android:id="@+id/lbl_p_cur_ride_est_arrival"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Driver arrival:"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="@+id/lbl_p_cur_ride_scheduled_for"
+        app:layout_constraintTop_toBottomOf="@+id/lbl_p_cur_ride_scheduled_for" />
+
+    <TextView
+        android:id="@+id/txt_p_cur_ride_est_arrival"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/lbl_p_cur_ride_est_arrival"
+        app:layout_constraintStart_toEndOf="@+id/lbl_p_cur_ride_est_arrival"
+        app:layout_constraintTop_toTopOf="@+id/lbl_p_cur_ride_est_arrival" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/lay_p_cur_ride_when_pending"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:constraint_referenced_ids="lbl_p_cur_ride_scheduled_for, txt_p_cur_ride_scheduled_for, lbl_p_cur_ride_est_arrival, txt_p_cur_ride_est_arrival"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_p_cur_ride_driver"
+        tools:visibility="visible"></androidx.constraintlayout.widget.Group>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

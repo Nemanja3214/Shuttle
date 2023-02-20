@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:weightSum="3">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_column="0"
+        android:layout_marginStart="4dp">
+
+        <View android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHeight_percent=".5"
+            app:layout_constraintVertical_bias="0.5"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/yellow"
+            android:id="@+id/color_p_chart"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toEndOf="@id/color_p_chart"
+            app:layout_constraintHeight_percent=".5"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="3dip"
+            android:id="@+id/lbl_p_chart_data"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:padding="3dip"
+        android:layout_weight="1"
+        android:layout_column="1"
+        android:id="@+id/lbl_p_chart_sum"/>
+    <TextView
+        android:padding="3dip"
+        android:layout_weight="1"
+        android:textAlignment="viewStart"
+        android:layout_column="2"
+        android:id="@+id/lbl_p_chart_avg"/>
+</TableRow>

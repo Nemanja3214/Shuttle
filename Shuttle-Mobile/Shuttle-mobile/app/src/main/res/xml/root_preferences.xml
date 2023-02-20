@@ -1,0 +1,11 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory app:title="Sync">
+        <ListPreference
+            app:defaultValue="1min"
+            app:entries="@array/sync_message_entries"
+            app:entryValues="@array/sync_message_values"
+            app:key="sync_msg"
+            app:title="Sync my messages"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+</PreferenceScreen>
